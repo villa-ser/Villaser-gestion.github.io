@@ -1,0 +1,167 @@
+* { box-sizing: border-box; }
+
+/* =========================================
+   CONFIGURACIÓN DE TEMAS (OSCURO / CLARO)
+   ========================================= */
+:root {
+    --ngc-primary: #00d4ff;
+    --ngc-success: #28a745;
+    --ngc-text: #ffffff;
+    --ngc-text-dim: rgba(255, 255, 255, 0.6);
+    --ngc-glass: rgba(0, 0, 0, 0.08);
+    --ngc-input-bg: rgba(26, 26, 26, 0.95);
+    --bg-main: #121212;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --btn-bg: rgba(255, 255, 255, 0.05);
+    --ngc-radius: 8px;
+}
+
+body.light-mode {
+    --ngc-text: #1a1a1a;
+    --ngc-text-dim: rgba(0, 0, 0, 0.6);
+    --ngc-glass: rgba(0, 0, 0, 0.04);
+    --ngc-input-bg: rgba(255, 255, 255, 0.9);
+    --bg-main: #f0f2f5;
+    --border-color: rgba(0, 0, 0, 0.15);
+    --btn-bg: rgba(0, 0, 0, 0.03);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    background-color: var(--bg-main) !important;
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--ngc-text);
+    display: flex;
+    justify-content: center;
+    overscroll-behavior-y: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Contenedor Principal Adaptado */
+.ngc-form-container {
+    width: 100%;
+    max-width: 500px; 
+    margin: 0 auto;
+    padding: 15px;
+    background: transparent;
+}
+
+/* Botón Volver */
+.top-nav { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 20px; }
+.btn-back { background: transparent; border: 1px solid var(--border-color); color: var(--ngc-text); padding: 8px 15px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+.btn-back:active { background: var(--btn-bg); }
+
+.field-group { margin-bottom: 20px; }
+
+.label-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--ngc-primary);
+    letter-spacing: 1.2px;
+}
+
+.btn-group-mini {
+    display: flex; gap: 8px;
+}
+
+.btn-ngc-mini {
+    background: var(--btn-bg);
+    color: var(--ngc-text);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 5px 12px;
+    font-size: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-ngc-mini:active {
+    border-color: var(--ngc-primary);
+    color: var(--ngc-primary);
+}
+
+input, textarea {
+    width: 100%; 
+    padding: 14px;
+    background: var(--ngc-input-bg) !important;
+    border: 1px solid var(--border-color);
+    border-radius: var(--ngc-radius);
+    color: var(--ngc-text) !important;
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus {
+    border-color: var(--ngc-primary);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+input { height: 50px; }
+textarea { height: 150px; resize: none; line-height: 1.5; }
+
+#btnSubmit {
+    width: 100%;
+    height: 55px;
+    background: rgba(0, 212, 255, 0.1);
+    color: var(--ngc-primary);
+    border: 2px solid var(--ngc-primary);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 10px;
+}
+
+#btnSubmit:active {
+    background: var(--ngc-primary);
+    color: #000;
+    transform: scale(0.98);
+}
+
+#success-message {
+    display: none;
+    text-align: center;
+    background: var(--btn-bg);
+    padding: 50px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--ngc-success);
+    backdrop-filter: blur(10px);
+}
+
+.success-icon { font-size: 50px; margin-bottom: 15px; color: var(--ngc-success); }
+.success-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; color: var(--ngc-success); letter-spacing: 1px; }
+.success-text { color: var(--ngc-text-dim); font-size: 0.9rem; margin-bottom: 20px; }
+
+.btn-reset {
+    background: transparent;
+    border: 1px solid var(--ngc-success);
+    margin-top: 25px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: var(--ngc-success);
+    padding: 14px 40px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+.btn-reset:active {
+    background: rgba(40, 167, 69, 0.1);
+  }
