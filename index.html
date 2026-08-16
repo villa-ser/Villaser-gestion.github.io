@@ -17,9 +17,20 @@
 </head>
 <body>
 
-    <!-- Botón para alternar Modo Día / Noche -->
-<button id="themeToggleBtn" class="icon-btn" onclick="toggleTheme()" title="Cambiar Tema" style="position: absolute; top: 20px; right: 80px;">☀️</button>
-    
+    <!-- BARRA SUPERIOR FIJA (Contiene Modo Tema y Usuario) -->
+    <div class="global-top-bar">
+        <!-- Botón para alternar Modo Día / Noche -->
+        <button id="themeToggleBtn" class="icon-btn" onclick="toggleTheme()" title="Cambiar Tema">☀️</button>
+        
+        <!-- Menú de Usuario (Solo visible si ya inició sesión o integrado) -->
+        <div class="user-menu-container" id="userMenuWrapper" style="display: none;">
+            <button id="userBtn" class="icon-btn" onclick="toggleUserMenu()">👤</button>
+            <div id="userDropdown" class="dropdown hidden">
+                <button onclick="cerrarSesion()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CABECERA PRINCIPAL -->
     <div class="gnc-card" id="mainHeader">
         <p class="gnc-label">Plataforma Oficial</p>
@@ -29,6 +40,7 @@
             <span class="status-text">Sistema Activo</span>
         </div>
     </div>
+
 
     <!-- PANTALLA DE LOGIN -->
     <div id="loginScreen" class="glass-container">
