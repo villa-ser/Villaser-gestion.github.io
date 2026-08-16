@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
+    
+    <title>Visor GNC Pro - Villaser</title>
+    
+    <!-- Conexión con el archivo de estilos -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="ngc-container">
+    
+    <!-- BOTÓN VOLVER AL MENÚ -->
+    <div class="top-nav">
+        <button class="btn-back" onclick="window.location.href='../index.html'">
+            <span>⬅</span> Volver al Menú
+        </button>
+    </div>
+
+    <div id="status-load">📡 SINCRONIZANDO...</div>
+    <h4>Directorio Clientes</h4>
+
+    <label>Seleccionar Cliente</label>
+    
+    <div class="custom-select">
+        <div class="select-selected" id="display-selCliente" onclick="toggleDropdown('list-selCliente', 'display-selCliente')">Cargando datos...</div>
+        <div class="select-items" id="list-selCliente"></div>
+    </div>
+    <input type="hidden" id="listaNombres" value="">
+
+    <label>Contacto</label>
+    <div class="row-inline">
+        <input type="text" id="campoTel" readonly>
+        <a id="btnCall" class="btn-ngc-side">Llamar</a>
+        <a id="btnWts" class="btn-ngc-side" style="color:var(--ngc-success); border-color:var(--ngc-success);" target="_blank">WSP</a>
+    </div>
+
+    <label>Ubicación</label>
+    <div class="row-inline">
+        <input type="text" id="campoDir" readonly>
+        <a id="btnMap" class="btn-ngc-side" target="_blank">Maps</a>
+    </div>
+
+    <label>Observaciones</label>
+    <textarea id="campoObs" rows="5" readonly></textarea>
+
+    <button class="btn-ngc-main" onclick="prepararFicha()">⚡ Generar Ficha de Texto</button>
+
+    <div id="editor-section">
+        <label>Texto para Copiar (Editable)</label>
+        <textarea id="editorTexto" rows="5" style="font-family: monospace; font-size: 0.8rem;"></textarea>
+        <button class="btn-ngc-main btn-copy-final" onclick="copiarAlPortapapeles()">📋 Copiar Texto</button>
+    </div>
+</div>
+
+<!-- Conexión con el archivo de funciones JavaScript -->
+<script src="script.js"></script>
+
+</body>
+</html>
+
