@@ -1,3 +1,11 @@
+// Leer la memoria al entrar a cualquier subpágina
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('villaser_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+    }
+});
+
 const SHEET_ID = '1tZbCYSBxx3suGLKmE_bXi_hEm0iH0yqQedqR7kdShEU';
 const URL_PRECIOS = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Hoja1`; 
 const URL_CLIENTES = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Clientes`;
