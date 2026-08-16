@@ -123,3 +123,6 @@ function toggleTheme() {
         btn.innerText = '☀️'; // Icono de sol para ir a claro
     }
 }
+
+// Dentro de tu código cuando el acceso es correcto:
+document.getElementById('userMenuWrapper').style.display = 'block';
