@@ -99,7 +99,7 @@ document.getElementById('btnPresupuesto').addEventListener('click', function() {
 });
 
 // Navegación al módulo de Materiales
-document.getElementById('btnPresupuesto').addEventListener('click', function() {
+document.getElementById('btnMateriales').addEventListener('click', function() {
     // Esto redirige a la página index.html dentro de la carpeta presupuesto
     window.location.href = './materiales/index.html';
 });
