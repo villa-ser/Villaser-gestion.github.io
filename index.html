@@ -1,1 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <!-- Metaetiquetas para comportamiento de App Móvil -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
+    
+    <title>Villaser Gestion</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Librería SheetJS para leer archivos Excel (.xlsx) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
 
+    <!-- CABECERA PRINCIPAL -->
+    <div class="gnc-card" id="mainHeader">
+        <p class="gnc-label">Plataforma Oficial</p>
+        <h1 class="gnc-title">Villaser Gestion</h1>
+        <div class="gnc-status">
+            <span class="status-dot"></span>
+            <span class="status-text">Sistema Activo</span>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE LOGIN -->
+    <div id="loginScreen" class="glass-container">
+        <h2>Acceso al Sistema</h2>
+        <input type="text" id="username" placeholder="Usuario" autocomplete="off">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button id="loginBtn" onclick="verificarCredenciales()">Ingresar</button>
+        <p id="errorMessage" class="error-text">Datos erróneos, ingresar nuevamente</p>
+    </div>
+
+    <!-- PANTALLA DE BIENVENIDA (Animación) -->
+    <div id="welcomeScreen" class="hidden">
+        <h2 class="welcome-text">¡BIENVENIDO!</h2>
+    </div>
+
+    <!-- INTERFAZ PRINCIPAL DE LA APP -->
+    <div id="appScreen" class="hidden">
+        <!-- Menú de Usuario Superior -->
+        <div class="top-bar">
+            <div class="user-menu-container">
+                <button id="userBtn" class="icon-btn" onclick="toggleUserMenu()">👤</button>
+                <div id="userDropdown" class="dropdown hidden">
+                    <button onclick="cerrarSesion()">Cerrar Sesión</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón Desplegable del Menú -->
+        <button id="menuToggleBtn" class="glass-btn primary-btn" onclick="toggleMenu()">MENÚ PRINCIPAL</button>
+
+        <!-- Cuadrícula de Botones (Referencia: 1000138871.jpg) -->
+        <div id="menuGrid" class="grid-container hidden">
+            <button class="grid-btn">Presupuesto</button>
+            <button class="grid-btn">Materiales</button>
+            <button class="grid-btn">Acortar pdf</button>
+            <button class="grid-btn">UpDate</button>
+            <button class="grid-btn">Forms Consultas</button>
+            <button class="grid-btn">Webs</button>
+            <button class="grid-btn">Modo Día</button>
+            <button class="grid-btn">Apps</button>
+            <button class="grid-btn">Ver Clientes</button>
+            <button class="grid-btn">Nuevo Cliente</button>
+            <button class="grid-btn">Catálogos</button>
+            <button class="grid-btn">Compartir WTS</button>
+            <button class="grid-btn">Precios Aprox</button>
+            <button class="grid-btn">Cal. y Tablas</button>
+            <button class="grid-btn">Catálogos 2.0</button>
+            <button class="grid-btn">P / M / Capaci. Calc</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
