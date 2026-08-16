@@ -176,3 +176,55 @@ td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-s
 
 #unitarioLabel { text-align: left; margin-top: 0 !important; white-space: nowrap; }
   
+/* =========================================
+   CONFIGURACIÓN DE TEMAS (OSCURO / CLARO)
+   ========================================= */
+
+/* Variables por defecto (Modo Oscuro / NGC Actual) */
+:root {
+  --bg-main: #121212;
+  --text-main: #ffffff;
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(0, 0, 0, 0.5);
+  --dropdown-bg: #121212;
+}
+
+/* Variables cuando se activa el Modo Día / Claro */
+body.light-mode {
+  --bg-main: #f0f2f5;
+  --text-main: #1a1a1a;
+  --glass-bg: rgba(0, 0, 0, 0.04);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --input-bg: rgba(255, 255, 255, 0.9);
+  --dropdown-bg: #ffffff;
+}
+
+/* Aplicación global de las variables de color */
+body {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Ajustes de elementos genéricos para que respeten el modo claro */
+body.light-mode input, 
+body.light-mode textarea {
+  color: #1a1a1a !important;
+  background: var(--input-bg) !important;
+}
+
+body.light-mode .dropdown,
+body.light-mode .select-items {
+  background: var(--dropdown-bg) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-mode .select-items div {
+  color: #1a1a1a !important;
+}
+
+body.light-mode .select-items div:hover {
+  background: rgba(0, 212, 255, 0.2) !important;
+  color: #0077b6 !important;
+}
