@@ -97,3 +97,29 @@ function cerrarSesion() {
 document.getElementById('btnPresupuesto').addEventListener('click', function() {
     window.location.href = './presupuesto/index.html';
 });
+
+// Al cargar la página principal, verificar qué tema estaba activo
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('villaser_theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        document.getElementById('themeToggleBtn').innerText = '🌙';
+    } else {
+        document.getElementById('themeToggleBtn').innerText = '☀️';
+    }
+    // ... resto de tu código de carga de Excel y sesión ...
+});
+
+// Función para cambiar de tema y guardarlo
+function toggleTheme() {
+    const btn = document.getElementById('themeToggleBtn');
+    document.body.classList.toggle('light-mode');
+    
+    if (document.body.classList.contains('light-mode')) {
+        localStorage.setItem('villaser_theme', 'light');
+        btn.innerText = '🌙'; // Icono de luna para volver a oscuro
+    } else {
+        localStorage.setItem('villaser_theme', 'dark');
+        btn.innerText = '☀️'; // Icono de sol para ir a claro
+    }
+}
