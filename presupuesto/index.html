@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
+    
+    <title>Villaser - Presupuesto GNC</title>
+    
+    <!-- Librería para capturar pantalla -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Conexión con el archivo de estilos -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    
+    <!-- BOTÓN VOLVER AL MENÚ -->
+    <div class="top-nav">
+        <button class="btn-back" onclick="window.location.href='../index.html'">
+            <span>⬅</span> Volver al Menú
+        </button>
+    </div>
+
+    <div id="loading">📡 SINCRONIZANDO SISTEMA NGC...</div>
+    <div id="app" style="display:none;">
+        
+        <div id="step-cliente" class="ngc-card">
+            <h4>Identificación Cliente</h4>
+            <label>Seleccionar Cliente</label>
+            <div class="custom-select">
+                <div class="select-selected" id="display-cliente" onclick="toggleDropdown('list-cliente', 'display-cliente')">-- CLIENTE --</div>
+                <div class="select-items" id="list-cliente"></div>
+            </div>
+            <input type="hidden" id="selCliente" value="">
+            
+            <div class="row-group-stretch" style="margin-top:10px;">
+                <div class="flex-3"><textarea id="cliInfo" readonly placeholder="Info cliente..." style="height: 70px; resize: none; font-size: 0.75rem;"></textarea></div>
+                <div class="flex-btn-small"><button id="btnLoadCli" class="btn-ngc btn-adapt" onclick="cargarClienteALista()" style="height: 70px;">Cargar</button></div>
+            </div>
+        </div>
+
+        <div id="step-trabajo" style="display:none; flex-direction: column; gap: 12px;">
+
+            <div class="ngc-card">
+                <h4>Detalle del Trabajo</h4>
+                
+                <div class="row-group">
+                    <div class="flex-1">
+                        <label>Rubro</label>
+                        <div class="custom-select">
+                            <div class="select-selected" id="display-tema" onclick="toggleDropdown('list-tema', 'display-tema')">-- RUBRO --</div>
+                            <div class="select-items" id="list-tema"></div>
+                        </div>
+                        <input type="hidden" id="selTema" value="">
+                    </div>
+                </div>
+
+                <div class="row-group">
+                    <div class="flex-1">
+                        <label>Trabajo</label>
+                        <div class="custom-select">
+                            <div class="select-selected disabled-select" id="display-concepto" onclick="toggleDropdown('list-concepto', 'display-concepto')">-- TRABAJO --</div>
+                            <div class="select-items" id="list-concepto"></div>
+                        </div>
+                        <input type="hidden" id="selConcepto" value="">
+                    </div>
+                </div>
+
+                <div class="row-group-stretch">
+                    <div class="flex-1">
+                        <label>Cantidad</label>
+                        <div class="stepper">
+                            <button class="btn-step" onclick="step('cantidad', -1)">-</button>
+                            <input type="number" id="cantidad" value="1">
+                            <button class="btn-step" onclick="step('cantidad', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="flex-1">
+                        <label>Desc %</label>
+                        <div class="stepper">
+                            <button class="btn-step" onclick="step('porcentajeDesc', -5)">-</button>
+                            <input type="number" id="porcentajeDesc" value="0">
+                            <button class="btn-step" onclick="step('porcentajeDesc', 5)">+</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="obs-header" style="margin-top: 10px;">
+                    <label>Notas del Item</label>
+                    <div class="obs-actions">
+                        <button class="btn-obs" onclick="habilitarEdicionObs()">✏️ Editar</button>
+                        <button class="btn-obs" onclick="volverNotasOriginales()">↩️ Volver</button>
+                        <button class="btn-obs btn-danger" onclick="borrarTodasNotas()">🗑️ Borrar</button>
+                    </div>
+                </div>
+                <textarea id="obsManual" placeholder="Notas aclaratorias..." readonly style="height: 150px; resize: none;"></textarea>
+
+                <div class="row-group-stretch" style="margin-top: 15px; align-items: center;">
+                    <div id="unitarioLabel" style="font-size: 18px; color: var(--ngc-warning); flex: 0.8; font-weight: bold; text-align: center;">
+                        Unitario: $ 0,00
+                    </div>
+                    
+                    <div style="flex: 1.2;">
+                        <button id="btnAddItem" class="btn-ngc" style="width: 100%; margin-top: 0;" onclick="agregarTrabajo()">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+            </div>       
+            
+            <div class="ngc-card">
+                <label>Notas Globales</label>
+                <div class="row-group-stretch">
+                    <textarea id="obsGenerales" placeholder="Ej: Válido por 10 días..." style="height: 75px; resize: none;" class="flex-3"></textarea>
+                    <div class="flex-btn-small">
+                        <button class="btn-ngc btn-adapt" onclick="renderTabla()">OK</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="zonaCaptura" class="capture-zone">
+                <div class="header-brand">VILLASER - PRESUPUESTO</div>
+                <table id="tablaMain"><tbody id="cuerpoTabla"></tbody></table>
+                <div class="total-display" id="totalDisplay">TOTAL: $ 0,00</div>
+            </div>
+            
+            <div class="action-grid">
+                <button id="btnCopyTitle" class="btn-ngc btn-main" onclick="copiarTitulo()" style="background: rgba(255,255,255,0.1); border-color: var(--ngc-primary);">📄 Copiar Título</button>
+                <button class="btn-ngc btn-main" onclick="tomarCaptura()" style="background: var(--ngc-primary); color: #000;">📸 Descargar Imagen</button>
+            </div>
+            
+            <div class="action-grid-footer">
+                <button class="btn-ngc btn-main btn-exp" onclick="exportarPresupuesto()">💾 Exportar</button>
+                <button class="btn-ngc btn-main btn-imp" onclick="document.getElementById('fileInput').click()">📂 Importar</button>
+                <button class="btn-ngc btn-main btn-wsp" onclick="enviarWhatsApp()">🟢 WhatsApp</button>
+                <input type="file" id="fileInput" style="display:none" accept=".txt" onchange="importarPresupuesto(event)">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conexión con el archivo de funciones JavaScript -->
+<script src="script.js"></script>
+</body>
+                          </html>
+
