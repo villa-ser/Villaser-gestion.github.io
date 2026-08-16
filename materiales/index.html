@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
+    
+    <title>Villaser - Materiales GNC</title>
+    
+    <!-- Librería para capturar pantalla -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- Conexión con el archivo de estilos -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- BOTÓN VOLVER AL MENÚ -->
+        <div class="top-nav">
+            <button class="btn-back" onclick="window.location.href='../index.html'">
+                <span>⬅</span> Volver al Menú
+            </button>
+        </div>
+
+        <div id="status">📡 SINCRONIZANDO...</div>
+        
+        <div id="section-client" class="card">
+            <h4>Cliente</h4>
+            <div class="custom-select">
+                <div class="select-selected" id="display-selCliente" onclick="toggleDropdown('list-selCliente', 'display-selCliente')">Cargando...</div>
+                <div class="select-items" id="list-selCliente"></div>
+            </div>
+            <input type="hidden" id="selCliente" value="">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px;">
+                <input type="text" id="cliTel" readonly placeholder="Tel">
+                <input type="text" id="cliDir" readonly placeholder="Dir">
+            </div>
+            <div style="display: flex; gap: 5px; margin-top: 5px;">
+                <input type="text" id="cliObs" readonly placeholder="Obs" style="flex:1; width: 0; min-width: 50%;">
+                <button id="btnCli" class="btn-add-custom btn-client" onclick="addClientToList()">Cargar</button>
+            </div>
+        </div>
+
+        <div id="main-content" class="hidden">
+            <div class="card">
+                <label>Nota Rápida:</label>
+                <div style="display: flex; gap: 5px;">
+                    <textarea id="obsGenerales" placeholder="Nota global..." style="flex:1; width: 0;"></textarea>
+                    <button id="btnGen" class="btn-add-custom btn-general" onclick="addGeneralObs()">OK</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h4>Materiales</h4>
+                
+                <div class="custom-select">
+                    <div class="select-selected disabled-select" id="display-sel0" onclick="toggleDropdown('list-sel0', 'display-sel0')">-- Selección --</div>
+                    <div class="select-items" id="list-sel0"></div>
+                </div>
+                <input type="hidden" id="sel0" value="">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px;">
+                    <div class="custom-select"><div class="select-selected disabled-select" id="display-sel1" onclick="toggleDropdown('list-sel1', 'display-sel1')">-- Selección --</div><div class="select-items" id="list-sel1"></div></div><input type="hidden" id="sel1" value="">
+                    <div class="custom-select"><div class="select-selected disabled-select" id="display-sel2" onclick="toggleDropdown('list-sel2', 'display-sel2')">-- Selección --</div><div class="select-items" id="list-sel2"></div></div><input type="hidden" id="sel2" value="">
+                    <div class="custom-select"><div class="select-selected disabled-select" id="display-sel3" onclick="toggleDropdown('list-sel3', 'display-sel3')">-- Selección --</div><div class="select-items" id="list-sel3"></div></div><input type="hidden" id="sel3" value="">
+                    <div class="custom-select"><div class="select-selected disabled-select" id="display-sel4" onclick="toggleDropdown('list-sel4', 'display-sel4')">-- Selección --</div><div class="select-items" id="list-sel4"></div></div><input type="hidden" id="sel4" value="">
+                </div>
+                
+                <div class="custom-select" style="margin-top:5px">
+                    <div class="select-selected disabled-select" id="display-sel5" onclick="toggleDropdown('list-sel5', 'display-sel5')">-- Selección --</div>
+                    <div class="select-items" id="list-sel5"></div>
+                </div>
+                <input type="hidden" id="sel5" value="">
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+                    <div>
+                        <label>Cant:</label>
+                        <div class="stepper">
+                            <button class="btn-step" onclick="changeQty(-1)">-</button>
+                            <input type="number" id="cantidad" value="1">
+                            <button class="btn-step" onclick="changeQty(1)">+</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Unidad:</label>
+                        <div class="unit-toggle">
+                            <input type="radio" id="u_unid" name="um" value="Unidades" checked style="display:none">
+                            <label for="u_unid">UNID</label>
+                            <input type="radio" id="u_metros" name="um" value="Metros" style="display:none">
+                            <label for="u_metros">MTS</label>
+                        </div>
+                    </div>
+                </div>
+                <textarea id="observaciones" placeholder="Notas del item..."></textarea>
+                <button id="btnMat" class="btn-add-custom btn-material" style="width:100%; margin-top:5px" onclick="addItem()">Agregar Item</button>
+            </div>
+
+            <div id="captureSection" class="capture-area">
+                <div class="list-header-title">VILLASER - MATERIALES</div>
+                <div id="itemsContainer"></div>
+            </div>
+
+            <div class="btn-grid-actions">
+                <button id="btnCopyTitle" class="btn-add-custom btn-copy" onclick="copyTitle()">📋 TITULO</button>
+                <button class="btn-add-custom btn-cap" onclick="takeScreenshot()">📸 CAPTURA</button>
+                <button id="btnExport" class="btn-add-custom btn-export" onclick="exportToTxt()">💾 EXPORTAR</button>
+                <button id="btnImport" class="btn-add-custom btn-import" onclick="document.getElementById('fileInput').click()">📂 IMPORTAR</button>
+                <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="importFromTxt(event)">
+                <button class="btn-add-custom btn-full btn-wsp" onclick="sendWSP()">🚀 ENVIAR WHATSAPP</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conexión con el archivo de funciones JavaScript -->
+    <script src="script.js"></script>
+</body>
+  </html>
+
