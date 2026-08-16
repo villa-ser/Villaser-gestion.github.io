@@ -104,6 +104,12 @@ document.getElementById('btnMateriales').addEventListener('click', function() {
     window.location.href = './materiales/index.html';
 });
 
+// Navegación al módulo de Nuevo Cliente
+document.getElementById('btnNuevoCliente').addEventListener('click', function() {
+    window.location.href = './nuevo_cliente/index.html';
+});
+
+
 
 // Al cargar la página principal, verificar qué tema estaba activo
 document.addEventListener('DOMContentLoaded', () => {
