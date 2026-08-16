@@ -25,50 +25,53 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function verificarCredenciales() {
-    const userIn = document.getElementById('username').value;
-    const passIn = document.getElementById('password').value;
+    // .trim() elimina espacios en blanco accidentales al principio o al final
+    const userIn = document.getElementById('username').value.trim();
+    const passIn = document.getElementById('password').value.trim();
     const errorMsg = document.getElementById('errorMessage');
     
     let accesoConcedido = false;
 
-    // Recorrer las filas del Excel para validar
-    for (let i = 0; i < credenciales.length; i++) {
+    // Empezamos el bucle en i = 1 para saltar la fila 0 (que tiene los títulos del Excel)
+    for (let i = 1; i < credenciales.length; i++) {
         const fila = credenciales[i];
-        // Fila[0] es Usuario, Fila[1] es Clave
-        if (fila[0] === userIn && fila[1] === passIn) {
-            accesoConcedido = true;
-            break;
+        
+        // Nos aseguramos de que la fila exista y tenga al menos las dos columnas
+        if (fila && fila.length >= 2) {
+            // Forzamos la conversión a Texto (String) de los datos del Excel
+            const excelUser = String(fila[0]).trim();
+            const excelPass = String(fila[1]).trim();
+
+            // Ahora sí, comparamos texto con texto
+            if (excelUser === userIn && excelPass === passIn) {
+                accesoConcedido = true;
+                break;
+            }
         }
     }
 
     if (accesoConcedido) {
-        // Ocultar error si estaba visible
         errorMsg.style.display = 'none';
         
-        // Ocultar Login y Cabecera Principal
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('mainHeader').classList.add('hidden');
         
-        // Mostrar animación de Bienvenida
         const welcomeScreen = document.getElementById('welcomeScreen');
         const welcomeText = welcomeScreen.querySelector('.welcome-text');
         welcomeScreen.classList.remove('hidden');
         welcomeText.classList.add('animate-welcome');
         
-        // Después de 3 segundos (lo que dura la animación), mostrar la App
         setTimeout(() => {
             welcomeScreen.classList.add('hidden');
             document.getElementById('appScreen').classList.remove('hidden');
         }, 3000);
         
     } else {
-        // Mostrar cartel de datos erróneos
         errorMsg.style.display = 'block';
-        
-        // Limpiar el campo de contraseña
         document.getElementById('password').value = '';
     }
 }
+
 
 // Funciones para la UI de la App
 function toggleMenu() {
