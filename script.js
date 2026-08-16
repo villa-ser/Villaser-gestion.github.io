@@ -89,3 +89,8 @@ function cerrarSesion() {
     window.location.reload();
 }
 
+// Navegación al módulo de Presupuestos
+document.getElementById('btnPresupuesto').addEventListener('click', function() {
+    // Esto redirige a la página index.html dentro de la carpeta presupuesto
+    window.location.href = './presupuesto/index.html';
+});
