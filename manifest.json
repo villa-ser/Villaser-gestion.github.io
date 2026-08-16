@@ -1,0 +1,16 @@
+{
+  "name": "Villaser Gestion",
+  "short_name": "Villaser",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#00d4ff",
+  "icons": [
+    {
+      "src": "icono.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
+
