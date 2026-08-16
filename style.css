@@ -357,3 +357,41 @@ body.light-mode .select-items div:hover {
   background: rgba(0, 212, 255, 0.2) !important;
   color: #0077b6 !important;
 }
+
+/* =========================================
+   BARRA SUPERIOR GLOBAL (TEMAS Y USUARIO)
+   ========================================= */
+.global-top-bar {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+  z-index: 1000; /* Siempre por encima de cualquier tarjeta */
+}
+
+/* Ajustes para los botones circulares de la barra */
+.global-top-bar .icon-btn {
+  background: var(--glass-bg, rgba(255, 255, 255, 0.1));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  font-size: 1.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: 0.3s;
+}
+
+.global-top-bar .icon-btn:active {
+  transform: scale(0.92);
+}
+
+.user-menu-container {
+  position: relative;
+}
