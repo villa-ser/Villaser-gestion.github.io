@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
+    
+    <title>Costos - Mano de Obra</title>
+    
+    <!-- Conexión con el archivo de estilos -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="gnc-container">
+    
+    <!-- BOTÓN VOLVER AL MENÚ -->
+    <div class="top-nav">
+        <button class="btn-back" onclick="window.location.href='../index.html'">
+            <span>⬅</span> Volver al Menú
+        </button>
+    </div>
+
+    <h2>Costos - Mano de Obra</h2>
+    
+    <div class="input-section">
+        <div class="input-group" id="group-fuente">
+            <label>Filtrar por Organización</label>
+            <div class="fuente-selector" id="fuente-container">
+                <span class="loading-text">Cargando ...</span>
+            </div>
+        </div>
+
+        <div class="input-group" id="group-tema">
+            <label>Categoría / Tema</label>
+            <div class="custom-select">
+                <div class="select-selected" id="display-tema" onclick="toggleDropdown('list-tema', 'display-tema', 'group-tema')">Seleccione organización primero</div>
+                <div class="select-items" id="list-tema"></div>
+            </div>
+            <input type="hidden" id="val-tema" value="">
+        </div>
+
+        <div class="input-group" id="group-subtema">
+            <label>Concepto Específico</label>
+            <div class="custom-select">
+                <div class="select-selected" id="display-subtema" onclick="toggleDropdown('list-subtema', 'display-subtema', 'group-subtema')">Seleccione tema primero</div>
+                <div class="select-items" id="list-subtema"></div>
+            </div>
+            <input type="hidden" id="val-subtema" value="">
+        </div>
+
+        <button class="btn-reset" onclick="resetForm()">Nueva Búsqueda</button>
+    </div>
+
+    <div id="result-card">
+        <div class="price-display">
+            <span id="res-codigo" class="badge">---</span>
+            <span class="res-label">Precio Estimado (ARS)</span>
+            <span id="res-precio" class="res-price">$ 0</span>
+        </div>
+
+        <div class="info-full-item">
+            <span class="res-label">Concepto Detallado</span>
+            <span id="res-concepto-full" class="info-val concept-text">---</span>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="res-label">Organización / Fuente</span>
+                <span id="res-org" class="info-val">---</span>
+            </div>
+            <div class="info-item">
+                <span class="res-label">Categoría</span>
+                <span id="res-tema" class="info-val">---</span>
+            </div>
+        </div>
+
+        <div class="notes-box">
+            <label>Notas Aclaratorias</label>
+            <div id="res-notes-content" class="notes-content">Sin observaciones.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Librería de Google Charts -->
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<!-- Conexión con el archivo de funciones JavaScript -->
+<script src="script.js"></script>
+
+</body>
+</html>
+
