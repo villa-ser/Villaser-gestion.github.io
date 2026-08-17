@@ -109,6 +109,10 @@ document.getElementById('btnNuevoCliente').addEventListener('click', function() 
     window.location.href = './nuevo_cliente/index.html';
 });
 
+// Navegación al modulo de Ver Clientes
+document.getElementById('btnVerClientes').addEventListener('click', function() {
+    window.location.href = './ver_clientes/index.html';
+});
 
 
 // Al cargar la página principal, verificar qué tema estaba activo
