@@ -119,6 +119,11 @@ document.getElementById('btnCostos').addEventListener('click', function() {
     window.location.href = './costos/index.html';
 });
 
+// Navegación al menu de Catálogos 
+document.getElementById('btnCatalogos').addEventListener('click', function() {
+    window.location.href = './catalogos/index.html';
+});
+
 
 // Al cargar la página principal, verificar qué tema estaba activo
 document.addEventListener('DOMContentLoaded', () => {
