@@ -1,0 +1,205 @@
+* { box-sizing: border-box; }
+
+/* =========================================
+   CONFIGURACIÓN DE TEMAS (OSCURO / CLARO)
+   ========================================= */
+:root {
+    --primary-neon: #00d4ff;
+    --success-green: #28a745;
+    --font-main: 'Segoe UI', sans-serif;
+    
+    /* Variables de Tema Oscuro */
+    --bg-main: #121212;
+    --text-main: #ffffff;
+    --bg-glass: rgba(255, 255, 255, 0.08);
+    --input-bg: rgba(0, 0, 0, 0.4);
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --content-bg: rgba(0, 0, 0, 0.2);
+    --sub-acc-bg: rgba(255, 255, 255, 0.02);
+    --summary-hover: rgba(255, 255, 255, 0.05);
+    --viewer-bg: #000;
+}
+
+body.light-mode {
+    /* Variables de Tema Claro */
+    --bg-main: #f0f2f5;
+    --text-main: #1a1a1a;
+    --bg-glass: rgba(0, 0, 0, 0.04);
+    --input-bg: rgba(255, 255, 255, 0.9);
+    --border-glass: rgba(0, 0, 0, 0.15);
+    --content-bg: rgba(0, 0, 0, 0.05);
+    --sub-acc-bg: rgba(0, 0, 0, 0.02);
+    --summary-hover: rgba(0, 0, 0, 0.05);
+    --viewer-bg: #f0f2f5;
+}
+
+body {
+    background-color: var(--bg-main) !important;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-main);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+    overscroll-behavior-y: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.gnc-container {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* Botón Volver */
+.top-nav { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 10px; }
+.btn-back { background: transparent; border: 1px solid var(--border-glass); color: var(--text-main); padding: 8px 15px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
+.btn-back:active { background: var(--summary-hover); }
+
+.gnc-main-title {
+    color: var(--primary-neon);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    margin: 15px 0;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.gnc-master-wrapper {
+    width: 100%;
+    margin-bottom: 8px;
+    background: var(--bg-glass);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid var(--border-glass);
+    border-radius: 10px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+summary {
+    list-style: none;
+    padding: 12px 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    outline: none;
+    user-select: none;
+    transition: background 0.3s;
+}
+
+summary:hover { background: var(--summary-hover); }
+summary::-webkit-details-marker { display: none; }
+
+.master-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-main);
+    font-weight: bold;
+    letter-spacing: 1px;
+    border-left: 3px solid var(--primary-neon);
+    padding-left: 10px;
+}
+
+.child-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--primary-neon);
+    font-weight: 600;
+}
+
+summary::after {
+    content: '▼';
+    font-size: 0.6rem;
+    color: var(--primary-neon);
+    transition: 0.3s;
+}
+
+details[open] > summary::after { transform: rotate(180deg); }
+
+.master-content {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: var(--content-bg);
+}
+
+.pdf-content-wrapper {
+    padding: 10px;
+    height: 75vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--input-bg);
+    border-top: 1px solid var(--border-glass);
+}
+
+@media (max-width: 768px) {
+    .pdf-content-wrapper { height: 65vh; padding: 8px; }
+}
+
+.gnc-header-tools {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.gnc-btn {
+    background: transparent;
+    padding: 4px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.6rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+}
+
+.btn-download { border: 1px solid var(--success-green); color: var(--success-green); }
+.btn-download:hover { background: var(--success-green); color: #fff; box-shadow: 0 0 10px rgba(40, 167, 69, 0.4); }
+
+.btn-expand { border: 1px solid var(--primary-neon); color: var(--primary-neon); }
+.btn-expand:hover { background: var(--primary-neon); color: #000; box-shadow: 0 0 10px rgba(0, 212, 255, 0.4); }
+
+.viewer-container {
+    flex-grow: 1;
+    background: var(--viewer-bg);
+    border-radius: 6px;
+    border: 1px solid var(--border-glass);
+    overflow: hidden;
+    position: relative;
+}
+
+/* EFECTO CARGA GNC */
+.gnc-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border: 2px solid rgba(0, 212, 255, 0.1);
+    border-top: 2px solid var(--primary-neon);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    z-index: 5;
+}
+
+@keyframes spin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+
+iframe { width: 100%; height: 100%; border: none; position: relative; z-index: 10; background: transparent; }
+
+.gnc-sub-acc {
+    border: 1px solid var(--border-glass);
+    border-radius: 8px;
+    background: var(--sub-acc-bg);
+  }
+
