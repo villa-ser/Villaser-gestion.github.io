@@ -65,9 +65,29 @@ function borrarDireccion() {
 function buscarEnMaps() {
     const direccion = document.getElementById("direccion_field").value;
     if (direccion.trim() === "") return;
-    const urlMaps = "https://www.google.com/maps/search/" + encodeURIComponent(direccion);
-    window.open(urlMaps, '_blank');
+    
+    const dirCodificada = encodeURIComponent(direccion);
+    
+    // Detectamos si el usuario está desde un dispositivo Android
+    const isAndroid = /android/i.test(navigator.userAgent);
+    
+    if (isAndroid) {
+        // Enlace de respaldo por si el teléfono no tiene Google Chrome instalado
+        const fallbackUrl = encodeURIComponent("https://www.google.com/maps/search/" + dirCodificada);
+        
+        // Intent que fuerza la apertura en el navegador Chrome para evitar la App de Maps.
+        // Desde Chrome podrás copiar la URL larga que contiene "/place/"
+        const urlMapsChrome = "intent://www.google.com/maps/search/" + dirCodificada + "#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=" + fallbackUrl + ";end";
+        
+        window.location.href = urlMapsChrome;
+    } else {
+        // Para usuarios en iOS (iPhone) o PC, abrimos en pestaña nueva.
+        // El parámetro ?force=web ayuda en algunos entornos a preferir la vista de navegador.
+        const urlMaps = "https://www.google.com/maps/search/" + dirCodificada + "?force=web";
+        window.open(urlMaps, '_blank');
+    }
 }
+
 
 function showSuccess() {
     document.getElementById("myForm").style.display = "none";
