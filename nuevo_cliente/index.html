@@ -2,54 +2,51 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#121212">
     
     <title>Registro de Cliente - Villaser</title>
     
-    <!-- Conexión con el archivo de estilos -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="ngc-form-container">
+<main class="ngc-form-container">
     
     <!-- BOTÓN VOLVER AL MENÚ -->
-    <div class="top-nav">
-        <button class="btn-back" onclick="window.location.href='../index.html'">
-            <span>⬅</span> Volver al Menú
+    <nav class="top-nav">
+        <button class="btn-back" onclick="window.location.href='../index.html'" aria-label="Volver al menú principal">
+            <span>⬅</span> Menú
         </button>
-    </div>
+    </nav>
 
     <!-- Iframe oculto para evitar redirección de Google Forms -->
-    <iframe name="hidden_confirm" id="hidden_confirm" style="display:none;" onload="if(submitted){showSuccess();}"></iframe>
+    <iframe name="hidden_confirm" id="hidden_confirm" style="display:none;" title="Frame oculto para envío de formulario"></iframe>
 
     <form id="myForm" 
           action="https://docs.google.com/forms/d/e/1FAIpQLSd3pNf1SvYgKIlSCr8cWvJiP9WI_hgVpmqys8ZmU1iW_kmLbA/formResponse" 
           method="POST" 
-          target="hidden_confirm" 
-          onsubmit="return validarFormulario();">
+          target="hidden_confirm">
 
         <div class="field-group">
-            <label>Nombre y Apellido</label>
-            <input type="text" name="entry.824784856" placeholder="Nombre completo del cliente..." required>
+            <label for="nombre_field">Nombre y Apellido</label>
+            <input type="text" id="nombre_field" name="entry.824784856" placeholder="Nombre completo del cliente..." required>
         </div>
 
         <div class="field-group">
-            <label>Teléfono (10 dígitos)</label>
+            <label for="tel_field">Teléfono (10 dígitos)</label>
             <input type="tel" id="tel_field" name="entry.1169656179" placeholder="Ej: 3512345678" required maxlength="10">
         </div>
 
         <div class="field-group">
             <div class="label-container">
-                <label>Dirección</label>
+                <label for="direccion_field" style="margin: 0;">Dirección</label>
                 <div class="btn-group-mini">
-                    <button type="button" class="btn-ngc-mini" onclick="procesarDireccion()">Procesar</button>
-                    <button type="button" class="btn-ngc-mini" onclick="borrarDireccion()">Borrar</button>
-                    <button type="button" class="btn-ngc-mini" onclick="buscarEnMaps()">Maps</button>
+                    <button type="button" class="btn-ngc-mini" onclick="procesarDireccion()" aria-label="Procesar URL de Maps">Procesar</button>
+                    <button type="button" class="btn-ngc-mini btn-danger-mini" onclick="borrarDireccion()" aria-label="Borrar dirección">Borrar</button>
+                    <button type="button" class="btn-ngc-mini btn-maps-mini" onclick="buscarEnMaps()" aria-label="Abrir en Maps">Maps</button>
                 </div>
             </div>
             <textarea id="direccion_field" name="entry.1962624102" placeholder="Pegue la URL de Maps aquí y toque Procesar..." required></textarea>
@@ -59,15 +56,14 @@
     </form>
 
     <!-- Pantalla de Éxito -->
-    <div id="success-message">
+    <section id="success-message" aria-live="polite">
         <div class="success-icon">✓</div>
         <div class="success-title">SINCRO EXITOSA</div>
         <p class="success-text">La planilla de Google ha sido actualizada correctamente.</p>
         <button class="btn-reset" onclick="resetForm()">Nueva carga</button>
-    </div>
-</div>
+    </section>
+</main>
 
-<!-- Conexión con el archivo de funciones JavaScript -->
 <script src="script.js"></script>
 
 </body>
