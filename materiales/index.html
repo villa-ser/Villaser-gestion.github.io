@@ -2,54 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#121212">
     
     <title>Villaser - Materiales GNC</title>
     
     <!-- Librería para capturar pantalla -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <!-- Conexión con el archivo de estilos -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <main class="container">
         
         <!-- BOTÓN VOLVER AL MENÚ -->
-        <div class="top-nav">
-            <button class="btn-back" onclick="window.location.href='../index.html'">
-                <span>⬅</span> Volver al Menú
+        <nav class="top-nav">
+            <button class="btn-back" onclick="window.location.href='../index.html'" aria-label="Volver al menú principal">
+                <span>⬅</span> Menú
             </button>
-        </div>
+        </nav>
 
-        <div id="status">📡 SINCRONIZANDO...</div>
+        <div id="status" aria-live="polite">📡 SINCRONIZANDO...</div>
         
-        <div id="section-client" class="card">
+        <!-- SECCIÓN CLIENTE -->
+        <section id="section-client" class="card">
             <h4>Cliente</h4>
-            <div class="custom-select">
-                <div class="select-selected" id="display-selCliente" onclick="toggleDropdown('list-selCliente', 'display-selCliente')">Cargando...</div>
-                <div class="select-items" id="list-selCliente"></div>
-            </div>
-            <input type="hidden" id="selCliente" value="">
+            
+            <label for="selCliente" class="sr-only">Seleccionar Cliente</label>
+            <select id="selCliente" class="native-select">
+                <option value="">Cargando...</option>
+            </select>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px;">
-                <input type="text" id="cliTel" readonly placeholder="Tel">
-                <input type="text" id="cliDir" readonly placeholder="Dir">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                <div>
+                    <label for="cliTel" class="sr-only">Teléfono</label>
+                    <input type="text" id="cliTel" readonly placeholder="Tel">
+                </div>
+                <div>
+                    <label for="cliDir" class="sr-only">Dirección</label>
+                    <input type="text" id="cliDir" readonly placeholder="Dir">
+                </div>
             </div>
-            <div style="display: flex; gap: 5px; margin-top: 5px;">
-                <input type="text" id="cliObs" readonly placeholder="Obs" style="flex:1; width: 0; min-width: 50%;">
+            
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <div style="flex:1; width: 0; min-width: 50%;">
+                    <label for="cliObs" class="sr-only">Observaciones Cliente</label>
+                    <input type="text" id="cliObs" readonly placeholder="Obs">
+                </div>
                 <button id="btnCli" class="btn-add-custom btn-client" onclick="addClientToList()">Cargar</button>
             </div>
-        </div>
+        </section>
 
-        <div id="main-content" class="hidden">
+        <!-- SECCIÓN PRINCIPAL -->
+        <section id="main-content" class="hidden">
+            
             <div class="card">
-                <label>Nota Rápida:</label>
-                <div style="display: flex; gap: 5px;">
+                <label for="obsGenerales">Nota Rápida:</label>
+                <div style="display: flex; gap: 8px;">
                     <textarea id="obsGenerales" placeholder="Nota global..." style="flex:1; width: 0;"></textarea>
                     <button id="btnGen" class="btn-add-custom btn-general" onclick="addGeneralObs()">OK</button>
                 </div>
@@ -58,32 +68,30 @@
             <div class="card">
                 <h4>Materiales</h4>
                 
-                <div class="custom-select">
-                    <div class="select-selected disabled-select" id="display-sel0" onclick="toggleDropdown('list-sel0', 'display-sel0')">-- Selección --</div>
-                    <div class="select-items" id="list-sel0"></div>
-                </div>
-                <input type="hidden" id="sel0" value="">
+                <label for="sel0" class="sr-only">Categoría Principal</label>
+                <select id="sel0" class="native-select" disabled>
+                    <option value="">-- Selección --</option>
+                </select>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px;">
-                    <div class="custom-select"><div class="select-selected disabled-select" id="display-sel1" onclick="toggleDropdown('list-sel1', 'display-sel1')">-- Selección --</div><div class="select-items" id="list-sel1"></div></div><input type="hidden" id="sel1" value="">
-                    <div class="custom-select"><div class="select-selected disabled-select" id="display-sel2" onclick="toggleDropdown('list-sel2', 'display-sel2')">-- Selección --</div><div class="select-items" id="list-sel2"></div></div><input type="hidden" id="sel2" value="">
-                    <div class="custom-select"><div class="select-selected disabled-select" id="display-sel3" onclick="toggleDropdown('list-sel3', 'display-sel3')">-- Selección --</div><div class="select-items" id="list-sel3"></div></div><input type="hidden" id="sel3" value="">
-                    <div class="custom-select"><div class="select-selected disabled-select" id="display-sel4" onclick="toggleDropdown('list-sel4', 'display-sel4')">-- Selección --</div><div class="select-items" id="list-sel4"></div></div><input type="hidden" id="sel4" value="">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                    <select id="sel1" class="native-select" disabled aria-label="Subcategoría 1"><option value="">-- Selección --</option></select>
+                    <select id="sel2" class="native-select" disabled aria-label="Subcategoría 2"><option value="">-- Selección --</option></select>
+                    <select id="sel3" class="native-select" disabled aria-label="Subcategoría 3"><option value="">-- Selección --</option></select>
+                    <select id="sel4" class="native-select" disabled aria-label="Subcategoría 4"><option value="">-- Selección --</option></select>
                 </div>
                 
-                <div class="custom-select" style="margin-top:5px">
-                    <div class="select-selected disabled-select" id="display-sel5" onclick="toggleDropdown('list-sel5', 'display-sel5')">-- Selección --</div>
-                    <div class="select-items" id="list-sel5"></div>
-                </div>
-                <input type="hidden" id="sel5" value="">
+                <label for="sel5" class="sr-only">Atributo extra</label>
+                <select id="sel5" class="native-select" style="margin-top:8px" disabled>
+                    <option value="">-- Selección --</option>
+                </select>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
                     <div>
-                        <label>Cant:</label>
+                        <label for="cantidad">Cant:</label>
                         <div class="stepper">
-                            <button class="btn-step" onclick="changeQty(-1)">-</button>
-                            <input type="number" id="cantidad" value="1">
-                            <button class="btn-step" onclick="changeQty(1)">+</button>
+                            <button type="button" class="btn-step" onclick="changeQty(-1)" aria-label="Disminuir">-</button>
+                            <input type="number" id="cantidad" value="1" min="1">
+                            <button type="button" class="btn-step" onclick="changeQty(1)" aria-label="Aumentar">+</button>
                         </div>
                     </div>
                     <div>
@@ -96,15 +104,19 @@
                         </div>
                     </div>
                 </div>
-                <textarea id="observaciones" placeholder="Notas del item..."></textarea>
-                <button id="btnMat" class="btn-add-custom btn-material" style="width:100%; margin-top:5px" onclick="addItem()">Agregar Item</button>
+                
+                <label for="observaciones" class="sr-only">Notas del ítem</label>
+                <textarea id="observaciones" placeholder="Notas del ítem..."></textarea>
+                <button id="btnMat" class="btn-add-custom btn-material" style="width:100%; margin-top:10px" onclick="addItem()">Agregar Ítem</button>
             </div>
 
+            <!-- ÁREA DE CAPTURA -->
             <div id="captureSection" class="capture-area">
-                <div class="list-header-title">VILLASER - MATERIALES</div>
+                <header class="list-header-title">VILLASER - MATERIALES</header>
                 <div id="itemsContainer"></div>
             </div>
 
+            <!-- CONTROLES INFERIORES -->
             <div class="btn-grid-actions">
                 <button id="btnCopyTitle" class="btn-add-custom btn-copy" onclick="copyTitle()">📋 TITULO</button>
                 <button class="btn-add-custom btn-cap" onclick="takeScreenshot()">📸 CAPTURA</button>
@@ -113,11 +125,10 @@
                 <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="importFromTxt(event)">
                 <button class="btn-add-custom btn-full btn-wsp" onclick="sendWSP()">🚀 ENVIAR WHATSAPP</button>
             </div>
-        </div>
-    </div>
+            
+        </section>
+    </main>
 
-    <!-- Conexión con el archivo de funciones JavaScript -->
     <script src="script.js"></script>
 </body>
-  </html>
-
+</html>
