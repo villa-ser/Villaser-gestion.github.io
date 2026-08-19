@@ -1,39 +1,56 @@
 // =======================================================
-// 1. DETECCIÓN DE TEMA (MODO DÍA / NOCHE) AL INICIAR
+// 1. DETECCIÓN DE TEMA (MODO DÍA / NOCHE)
 // =======================================================
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('villaser_theme');
-    if (savedTheme === 'light') {
-        document.body.classList.add('light-mode');
-    }
+    if (savedTheme === 'light') document.body.classList.add('light-mode');
 });
 
 // =======================================================
-// 2. LÓGICA DE REGISTRO DE CLIENTE
+// 2. LÓGICA DE FORMULARIO Y REGISTRO
 // =======================================================
 let submitted = false;
 
-function validarFormulario() {
+const form = document.getElementById('myForm');
+const btnSubmit = document.getElementById('btnSubmit');
+const iframe = document.getElementById('hidden_confirm');
+
+// Interceptar el envío del formulario
+form.addEventListener('submit', (e) => {
     const telInput = document.getElementById("tel_field");
     const telValue = telInput.value.trim();
     const regexTel = /^\d{10}$/;
 
     if (!regexTel.test(telValue)) {
+        e.preventDefault(); // Detiene el envío
         alert("⚠️ El teléfono debe tener exactamente 10 números.");
         telInput.focus();
         return false;
     }
-    submitted = true;
-    return true;
-}
 
-// Lógica para extraer dirección de URL de Google Maps
+    // UX: Evitar doble clic mientras carga
+    submitted = true;
+    btnSubmit.innerText = "GUARDANDO...";
+    btnSubmit.disabled = true;
+});
+
+// Detectar cuando el iframe oculto termina de cargar (sincro exitosa)
+iframe.addEventListener('load', () => {
+    if (submitted) {
+        showSuccess();
+    }
+});
+
+// =======================================================
+// 3. PROCESAMIENTO DE GOOGLE MAPS
+// =======================================================
 function procesarDireccion() {
     const campo = document.getElementById("direccion_field");
     let rawText = campo.value.trim();
 
     if (rawText === "") {
         alert("Por favor, pegue una URL o dirección primero.");
+        campo.focus();
         return;
     }
 
@@ -48,11 +65,12 @@ function procesarDireccion() {
             
             campo.value = direccionLimpia;
         } catch (e) {
-            alert("No se pudo procesar esta URL específica.");
+            console.error("Error procesando URL:", e);
+            alert("No se pudo procesar esta URL de Maps automáticamente. Por favor, edítela a mano.");
         }
     } else {
-        // Si no es URL, solo limpiamos espacios innecesarios
-        campo.value = rawText;
+        // Limpiamos espacios innecesarios si es texto normal
+        campo.value = rawText.replace(/\s+/g, ' ').trim();
     }
 }
 
@@ -64,40 +82,42 @@ function borrarDireccion() {
 
 function buscarEnMaps() {
     const direccion = document.getElementById("direccion_field").value;
-    if (direccion.trim() === "") return;
+    if (direccion.trim() === "") {
+        alert("Debe escribir una dirección para buscar en Maps.");
+        return;
+    }
     
     const dirCodificada = encodeURIComponent(direccion);
-    
-    // Detectamos si el usuario está desde un dispositivo Android
     const isAndroid = /android/i.test(navigator.userAgent);
     
     if (isAndroid) {
-        // Enlace de respaldo por si el teléfono no tiene Google Chrome instalado
+        // Intent para forzar Chrome en Android. Permite copiar la URL fácilmente.
         const fallbackUrl = encodeURIComponent("https://www.google.com/maps/search/" + dirCodificada);
-        
-        // Intent que fuerza la apertura en el navegador Chrome para evitar la App de Maps.
-        // Desde Chrome podrás copiar la URL larga que contiene "/place/"
         const urlMapsChrome = "intent://www.google.com/maps/search/" + dirCodificada + "#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=" + fallbackUrl + ";end";
-        
         window.location.href = urlMapsChrome;
     } else {
-        // Para usuarios en iOS (iPhone) o PC, abrimos en pestaña nueva.
-        // El parámetro ?force=web ayuda en algunos entornos a preferir la vista de navegador.
+        // En iOS o PC, forzar vista web
         const urlMaps = "https://www.google.com/maps/search/" + dirCodificada + "?force=web";
         window.open(urlMaps, '_blank');
     }
 }
 
-
+// =======================================================
+// 4. CONTROL DE PANTALLAS
+// =======================================================
 function showSuccess() {
-    document.getElementById("myForm").style.display = "none";
+    form.style.display = "none";
     document.getElementById("success-message").style.display = "block";
+    
+    // Restaurar el botón para la próxima carga
+    btnSubmit.innerText = "GUARDAR EN SISTEMA";
+    btnSubmit.disabled = false;
 }
 
 function resetForm() {
     submitted = false;
-    document.getElementById("myForm").reset();
+    form.reset();
     document.getElementById("success-message").style.display = "none";
-    document.getElementById("myForm").style.display = "block";
+    form.style.display = "block";
+    document.getElementById("nombre_field").focus();
 }
-  
