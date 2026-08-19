@@ -6,6 +6,7 @@
 :root {
     --ngc-primary: #00d4ff;
     --ngc-success: #28a745;
+    --ngc-danger: #ff4444;
     --ngc-text: #ffffff;
     --ngc-text-dim: rgba(255, 255, 255, 0.6);
     --ngc-glass: rgba(0, 0, 0, 0.08);
@@ -30,8 +31,8 @@ html, body {
     margin: 0;
     padding: 0;
     width: 100%;
-    background-color: var(--bg-main) !important;
-    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-main);
+    font-family: 'Segoe UI', system-ui, sans-serif;
     color: var(--ngc-text);
     display: flex;
     justify-content: center;
@@ -39,7 +40,6 @@ html, body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Contenedor Principal Adaptado */
 .ngc-form-container {
     width: 100%;
     max-width: 500px; 
@@ -50,8 +50,8 @@ html, body {
 
 /* Botón Volver */
 .top-nav { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 20px; }
-.btn-back { background: transparent; border: 1px solid var(--border-color); color: var(--ngc-text); padding: 8px 15px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.3s; }
-.btn-back:active { background: var(--btn-bg); }
+.btn-back { background: transparent; border: 1px solid var(--border-color); color: var(--ngc-text); padding: 10px 18px; border-radius: var(--ngc-radius); font-size: 0.85rem; cursor: pointer; text-transform: uppercase; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+.btn-back:active { background: rgba(0, 212, 255, 0.1); border-color: var(--ngc-primary); }
 
 .field-group { margin-bottom: 20px; }
 
@@ -59,38 +59,45 @@ html, body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 label {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--ngc-primary);
     letter-spacing: 1.2px;
+    display: block;
+    margin-bottom: 6px;
 }
 
 .btn-group-mini {
-    display: flex; gap: 8px;
+    display: flex; 
+    gap: 6px;
 }
 
+/* Botones Mini mejorados para pantallas táctiles */
 .btn-ngc-mini {
     background: var(--btn-bg);
     color: var(--ngc-text);
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    padding: 5px 12px;
-    font-size: 10px;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
     font-weight: bold;
     text-transform: uppercase;
     cursor: pointer;
+    min-height: 38px; /* Tamaño táctil mínimo recomendado */
     transition: 0.2s;
 }
+.btn-ngc-mini:active { border-color: var(--ngc-primary); color: var(--ngc-primary); background: rgba(0,212,255,0.1); }
 
-.btn-ngc-mini:active {
-    border-color: var(--ngc-primary);
-    color: var(--ngc-primary);
-}
+.btn-danger-mini:active { border-color: var(--ngc-danger); color: var(--ngc-danger); background: rgba(255,68,68,0.1); }
+.btn-maps-mini { border-color: #fbbc04; color: #fbbc04; }
+.btn-maps-mini:active { background: rgba(251,188,4,0.1); }
 
 input, textarea {
     width: 100%; 
@@ -99,30 +106,31 @@ input, textarea {
     border: 1px solid var(--border-color);
     border-radius: var(--ngc-radius);
     color: var(--ngc-text) !important;
-    font-size: 0.9rem;
+    font-size: 1rem; /* Mejor legibilidad en móviles */
+    font-family: inherit;
     outline: none;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 input:focus, textarea:focus {
     border-color: var(--ngc-primary);
-    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    box-shadow: 0 0 5px rgba(0, 212, 255, 0.2);
 }
 
-input { height: 50px; }
-textarea { height: 150px; resize: none; line-height: 1.5; }
+input { height: 55px; }
+textarea { height: 120px; resize: none; line-height: 1.5; }
 
 #btnSubmit {
     width: 100%;
-    height: 55px;
-    background: rgba(0, 212, 255, 0.1);
+    height: 60px;
+    background: rgba(0, 212, 255, 0.05);
     color: var(--ngc-primary);
     border: 2px solid var(--ngc-primary);
     border-radius: 10px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 800;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
     text-transform: uppercase;
     letter-spacing: 2px;
     margin-top: 10px;
@@ -133,35 +141,37 @@ textarea { height: 150px; resize: none; line-height: 1.5; }
     color: #000;
     transform: scale(0.98);
 }
+#btnSubmit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
 
 #success-message {
     display: none;
     text-align: center;
     background: var(--btn-bg);
-    padding: 50px 20px;
+    padding: 40px 20px;
     border-radius: 12px;
     border: 1px solid var(--ngc-success);
-    backdrop-filter: blur(10px);
 }
 
-.success-icon { font-size: 50px; margin-bottom: 15px; color: var(--ngc-success); }
-.success-title { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; color: var(--ngc-success); letter-spacing: 1px; }
-.success-text { color: var(--ngc-text-dim); font-size: 0.9rem; margin-bottom: 20px; }
+.success-icon { font-size: 55px; margin-bottom: 10px; color: var(--ngc-success); line-height: 1; }
+.success-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; color: var(--ngc-success); letter-spacing: 1.5px; }
+.success-text { color: var(--ngc-text-dim); font-size: 0.95rem; margin-bottom: 25px; }
 
 .btn-reset {
-    background: transparent;
+    background: rgba(40, 167, 69, 0.1);
     border: 1px solid var(--ngc-success);
-    margin-top: 25px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: bold;
     color: var(--ngc-success);
-    padding: 14px 40px;
-    border-radius: 6px;
+    padding: 15px 40px;
+    border-radius: 8px;
     cursor: pointer;
     text-transform: uppercase;
-    transition: 0.3s;
+    transition: 0.2s;
+    width: 100%;
 }
+.btn-reset:active { background: var(--ngc-success); color: white; }
 
-.btn-reset:active {
-    background: rgba(40, 167, 69, 0.1);
-  }
