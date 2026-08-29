@@ -9,7 +9,9 @@
     
     <title>Villaser - Presupuesto GNC</title>
     
+    <!-- Librerías para capturar pantalla y generar PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -118,17 +120,20 @@
             </div>
             
             <div id="zonaCaptura" class="capture-zone">
-                <header class="header-brand">
-                    <!-- Membrete actualizado apuntando al archivo en el servidor -->
-                    <img src="membrete.avif" alt="Membrete Villaser" class="img-membrete">
-                </header>
+                <!-- Se mantiene el texto original para la PNG. El JS inyecta la imagen solo para el PDF -->
+                <header class="header-brand" id="headerMembrete">VILLASER - PRESUPUESTO</header>
                 <table id="tablaMain"><tbody id="cuerpoTabla"></tbody></table>
                 <div class="total-display" id="totalDisplay" aria-live="polite">TOTAL: $ 0,00</div>
             </div>
             
             <div class="action-grid">
                 <button id="btnCopyTitle" class="btn-ngc btn-main" onclick="copiarTitulo()" style="background: rgba(255,255,255,0.1); border-color: var(--ngc-primary);">📄 Copiar Título</button>
-                <button class="btn-ngc btn-main" onclick="tomarCaptura()" style="background: var(--ngc-primary); color: #000;">📸 Bajar Imagen</button>
+                <button class="btn-ngc btn-main" onclick="tomarCaptura()" style="background: rgba(255,255,255,0.1); border-color: var(--ngc-primary);">📸 Bajar Imagen</button>
+            </div>
+            
+            <!-- CONTENEDOR SEPARADO PARA EL PDF (Evita que quede pegado) -->
+            <div style="margin-top: 15px;">
+                <button class="btn-ngc btn-main" onclick="generarPDF()" style="width: 100%; background: var(--ngc-primary); color: #000; font-size: 1rem;">📄 Descargar PDF</button>
             </div>
             
             <div class="action-grid-footer">
