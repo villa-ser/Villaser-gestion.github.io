@@ -208,7 +208,7 @@ input:focus, textarea:focus, .native-select:focus {
     padding-bottom: 10px; 
 }
 
-/* Estilo para ajustar el nuevo membrete en la captura */
+/* Clase para el membrete del PDF */
 .img-membrete {
     max-width: 100%;
     height: auto;
@@ -231,18 +231,17 @@ td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-s
     font-weight: bold; 
 }
 
-/* Grillas separadas para corregir botones amontonados */
 .action-grid { 
     display: grid; 
     grid-template-columns: 1fr 1fr; 
-    gap: 15px; /* Aumentado para evitar que queden pegados */
+    gap: 15px; 
     margin-top: 20px; 
 }
 
 .action-grid-footer { 
     display: grid; 
     grid-template-columns: 1fr 1fr 2fr; 
-    gap: 15px; /* Aumentado para evitar que queden pegados */
+    gap: 15px; 
     margin-top: 15px; 
     padding-bottom: 25px; 
 }
@@ -260,4 +259,4 @@ td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-s
     padding: 6px 12px;
     cursor: pointer; 
     font-size: 1rem;
-}
+    }
