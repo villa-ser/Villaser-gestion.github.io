@@ -43,7 +43,6 @@ async function init() {
         fillSelect(0, [...new Set(dataMat.map(item => item.c0))].filter(v => v));
         selects[0].disabled = false;
 
-        // Configurar Event Listeners
         setupEventListeners();
 
     } catch (e) { 
@@ -86,21 +85,18 @@ function fillClientData() {
     document.getElementById('cliObs').value = c.c3;
     selectedPhone = c.c1.replace(/\D/g, '');
     
-    // Obtener nombre sin caracteres especiales
     currentClientName = selCliente.options[selCliente.selectedIndex].text.split(' ')[0].trim().replace(/[^a-zA-Z0-9]/g, '');
 }
 
 function updateDropdown(index) {
-    // Resetear selects siguientes
     for (let i = index; i < selects.length; i++) { 
         selects[i].innerHTML = '<option value="">-- Selección --</option>';
         selects[i].value = ""; 
         selects[i].disabled = true;
     }
     
-    if (index >= selects.length) return; // Fin de la cadena
+    if (index >= selects.length) return; 
 
-    // Filtrar datos según las selecciones anteriores
     const filtered = dataMat.filter(item => {
         for (let i = 0; i < index; i++) {
             if (item[`c${i}`] !== selects[i].value) return false;
@@ -193,7 +189,6 @@ function addItem() {
         `<b>${cant} ${unit.substring(0,3)}</b> | ${textParts.join('/')} ${obs ? `<span style="color:var(--accent);">[${obs}]</span>` : ''}`
     );
     
-    // Reiniciar selectores
     selects[0].value = ""; 
     updateDropdown(1); 
     document.getElementById('observaciones').value = ""; 
@@ -212,7 +207,6 @@ function btnAlert(id, text) {
     }, 800);
 }
 
-// Portapapeles moderno
 async function copyTitle() {
     const nameToUse = currentClientName || "Cliente";
     const now = new Date();
@@ -225,7 +219,6 @@ async function copyTitle() {
         await navigator.clipboard.writeText(title);
         btnAlert('btnCopyTitle', '📋 TITULO');
     } catch (err) {
-        // Fallback
         const textArea = document.createElement("textarea");
         textArea.value = title;
         textArea.style.position = "fixed"; textArea.style.left = "-9999px";
@@ -237,22 +230,102 @@ async function copyTitle() {
     }
 }
 
+// =======================================================
+// GENERADOR DE PDF A4 (NUEVA FUNCIÓN)
+// =======================================================
+async function generarPDF() {
+    const items = document.querySelectorAll('.row-item');
+    if (items.length === 0) { 
+        alert("Agrega un cliente y materiales para generar el PDF."); 
+        return; 
+    }
+
+    let clienteNombre = currentClientName || "Cliente";
+    let clienteTel = selectedPhone || "";
+    let fecha = new Date().toLocaleDateString('es-AR');
+    let notasAcumuladas = "";
+    
+    const tbody = document.getElementById('pdf-tbody');
+    tbody.innerHTML = ''; // Limpiamos la tabla del PDF
+
+    // Recorremos los items visuales y los volcamos a la tabla PDF
+    items.forEach((i, index) => {
+        const raw = i.getAttribute('data-raw').split('\t');
+        
+        if (raw[0] === 'CLI') {
+            clienteNombre = raw[1];
+            clienteTel = raw[2];
+        } else if (raw[0] === 'OBS') {
+            notasAcumuladas += `• ${raw[1]}<br>`;
+        } else if (raw[0] === 'ITM') {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="text-align: center; font-weight: bold;">${raw[1]}</td>
+                <td style="text-align: center;">${raw[2].substring(0,4).toUpperCase()}</td>
+                <td>${raw[3]}</td>
+                <td style="font-size: 10.5px; color: #555;">${raw[4] || '-'}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+    });
+
+    // Inyectamos la info del cliente
+    document.getElementById('pdf-cliente').innerText = clienteNombre;
+    document.getElementById('pdf-tel').innerText = clienteTel;
+    document.getElementById('pdf-fecha').innerText = fecha;
+    
+    // Inyectamos las notas generales (si las hay)
+    const boxNotas = document.getElementById('pdf-notas-box');
+    if(notasAcumuladas) {
+        document.getElementById('pdf-notas').innerHTML = notasAcumuladas;
+        boxNotas.style.display = 'block';
+    } else {
+        boxNotas.style.display = 'none';
+    }
+
+    // Configurar y disparar html2pdf
+    const element = document.getElementById('plantilla-pdf');
+    element.style.display = 'block';
+    
+    window.scrollTo(0, 0); // Evitar cortes por scroll
+
+    const opt = {
+        margin:       0, // Los márgenes ya se manejan en el CSS (.pdf-container)
+        filename:     `${clienteNombre.replace(/ /g, '_')}_Materiales.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    btnAlert('btnGenerarPDF', '📄 DESCARGAR PDF');
+    
+    try {
+        await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+        console.error("Error al generar PDF: ", error);
+        alert("Hubo un error al generar el PDF.");
+    } finally {
+        element.style.display = 'none';
+    }
+}
+
+// CAPTURA DE IMAGEN ORIGINAL (INTACTA PARA WSP)
 function takeScreenshot() {
     const area = document.getElementById('captureSection');
     const deletes = area.querySelectorAll('.btn-delete');
     
-    // Ocultar botones de borrar
     deletes.forEach(b => b.style.visibility = 'hidden');
     
     const nameToUse = currentClientName || "Lista";
-    const fileName = `${nameToUse}_materiales_villaser.png`;
+    const fileName = `${nameToUse}_materiales.png`;
     
-    // Ajustar color para la captura
     const isLightMode = document.body.classList.contains('light-mode');
     const bgColor = isLightMode ? "#ffffff" : "#1e1e1e";
     area.style.color = isLightMode ? "#1a1a1a" : "#ffffff";
 
-    html2canvas(area, { backgroundColor: bgColor, scale: 2, useCORS: true }).then(canvas => {
+    window.scrollTo(0, 0);
+
+    html2canvas(area, { backgroundColor: bgColor, scale: 2, useCORS: true, scrollY: 0 }).then(canvas => {
         const dataURL = canvas.toDataURL("image/png");
         const link = document.createElement('a');
         link.setAttribute('href', dataURL); 
@@ -261,9 +334,8 @@ function takeScreenshot() {
         link.click(); 
         document.body.removeChild(link);
         
-        // Restaurar botones de borrar
         deletes.forEach(b => b.style.visibility = 'visible');
-        area.style.color = ""; // Restaurar color CSS
+        area.style.color = ""; 
     });
 }
 
@@ -342,7 +414,6 @@ function sendWSP() {
     const url = `whatsapp://send?phone=${cleanNumber}&text=${encodeURIComponent(text)}`;
     window.location.href = url;
     
-    // Fallback a web si no tiene la app instalada
     setTimeout(() => { 
         if (document.hasFocus()) {
             window.open(`https://api.whatsapp.com/send?phone=${cleanNumber}&text=${encodeURIComponent(text)}`, '_blank'); 
@@ -350,6 +421,5 @@ function sendWSP() {
     }, 500);
 }
 
-// Inicializar la aplicación
 init();
-            
+
