@@ -103,8 +103,7 @@ input:read-only { background: var(--btn-bg) !important; border-style: dashed; op
 
 .pdf-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column; /* Permite que el titulo vaya arriba y ocupe todo el ancho */
     margin-bottom: 25px;
     border-bottom: 2px solid #0088aa;
     padding-bottom: 15px;
@@ -119,11 +118,12 @@ input:read-only { background: var(--btn-bg) !important; border-style: dashed; op
     flex: 1;
     margin-bottom: 20px;
 }
+
 .pdf-informe-texto {
     font-size: 13px;
     color: #222;
     line-height: 1.6;
-    white-space: pre-wrap;
+    white-space: normal;
     background: #fdfdfd;
     padding: 15px;
     border: 1px solid #e0e0e0;
@@ -156,4 +156,4 @@ input:read-only { background: var(--btn-bg) !important; border-style: dashed; op
 }
 .pdf-contacto span {
     display: inline-block;
-              }
+          }
