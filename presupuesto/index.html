@@ -11,8 +11,66 @@
     
     <!-- Librería para capturar pantalla -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
+
+    <!-- PLANTILLA OCULTA PARA EL PDF -->
+<div id="plantilla-pdf" style="display: none;">
+    <div class="pdf-container">
+        <header class="pdf-header">
+            <div class="pdf-info-box">
+                <div class="pdf-row"><b>Nro Presupuesto</b> <span id="pdf-nro">PEM-0000</span></div>
+                <div class="pdf-row"><b>Fecha</b> <span id="pdf-fecha"></span></div>
+                <div class="pdf-row"><b>Cliente</b> <span id="pdf-cliente"></span></div>
+                <div class="pdf-row"><b>Dirección obra</b> <span id="pdf-direccion"></span></div>
+            </div>
+            <div class="pdf-logo-box">
+                <!-- Puedes cambiar el texto por una etiqueta <img> si tenés el logo subido a la web -->
+                <h1 style="color: #0088aa; margin: 0; font-size: 28px; font-weight: 900; line-height: 1;">VILLASER</h1>
+                <h2 style="color: #333; margin: 0; font-size: 16px; font-weight: 700; letter-spacing: 2px;">ELECTRICISTA</h2>
+            </div>
+        </header>
+
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Concepto</th>
+                    <th>Cantidad</th>
+                    <th>Valor</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="pdf-tbody">
+                <!-- Se llena con JS -->
+            </tbody>
+        </table>
+
+        <div class="pdf-body-lower">
+            <div class="pdf-notas-box">
+                <h3>Notas Aclaratorias por códigos</h3>
+                <div id="pdf-notas" class="pdf-notas-content"></div>
+            </div>
+            <div class="pdf-totales-box">
+                <div class="pdf-total-row"><span>Subtotal</span> <b id="pdf-subtotal"></b></div>
+                <div class="pdf-total-row"><span>Descuentos</span> <b id="pdf-descuentos" style="color: #c00;"></b></div>
+                <div class="pdf-total-row final-total"><span>Total</span> <b id="pdf-total"></b></div>
+            </div>
+        </div>
+
+        <footer class="pdf-footer">
+            <div class="pdf-pagos">
+                <h4>Formas De Pago</h4>
+                <p>Efectivo / Transferencia / QR<br>Cuotas, hasta 3 y 6 sin interés<br>Con Mercado Pago</p>
+            </div>
+            <div class="pdf-slogan">
+                ¡Electricidad Segura, Hogar Tranquilo!
+            </div>
+        </footer>
+    </div>
+</div>
+    
 <body>
 <main class="container">
     
@@ -134,6 +192,8 @@
                 <button class="btn-ngc btn-main btn-imp" onclick="document.getElementById('fileInput').click()">📂 Importar</button>
                 <button class="btn-ngc btn-main btn-wsp" onclick="enviarWhatsApp()">🟢 WhatsApp</button>
                 <input type="file" id="fileInput" style="display:none" accept=".txt" onchange="importarPresupuesto(event)">
+                <!-- NUEVO BOTÓN PDF DEBAJO DEL FOOTER -->
+                <button id="btnGenerarPDF" class="btn-ngc btn-pdf" style="width: 100%; margin-top: -10px; margin-bottom: 25px;" onclick="generarPDF()">📄 DESCARGAR PDF (A4)</button>
             </div>
         </section>
     </div>
