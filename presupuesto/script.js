@@ -350,8 +350,8 @@ async function generarPDF() {
             <td>${codigoItem}</td>
             <td>${i.concepto}</td>
             <td>${i.qty}</td>
-            <td>$ ${valorUnitarioOriginal.toLocaleString('es-AR')}</td>
-            <td>$ ${subtotalFilaPuro.toLocaleString('es-AR')}</td>
+            <td>$&nbsp;${valorUnitarioOriginal.toLocaleString('es-AR')}</td>
+            <td>$&nbsp;${subtotalFilaPuro.toLocaleString('es-AR')}</td>
         `;
         tbody.appendChild(tr);
 
