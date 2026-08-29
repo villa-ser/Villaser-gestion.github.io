@@ -308,11 +308,25 @@ td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-s
     border-bottom: 1px solid #eee;
     vertical-align: top;
 }
-.pdf-table th:nth-child(3), .pdf-table td:nth-child(3),
+
+/* Cantidad (Columna 3) */
+.pdf-table th:nth-child(3), .pdf-table td:nth-child(3) {
+    text-align: right;
+}
+
+/* Valor Unitario y Subtotal (Columnas 4 y 5) */
 .pdf-table th:nth-child(4), .pdf-table td:nth-child(4),
 .pdf-table th:nth-child(5), .pdf-table td:nth-child(5) {
     text-align: right;
+    white-space: nowrap; /* <-- Fuerza a que NO haya salto de línea */
 }
+
+/* Achicamos solo los números de los precios, no los títulos de la tabla */
+.pdf-table td:nth-child(4), 
+.pdf-table td:nth-child(5) {
+    font-size: 10.5px; /* <-- Letra más chica (antes heredaba 12px) */
+}
+
 
 .pdf-body-lower {
     display: flex;
