@@ -12,6 +12,9 @@
     <!-- Librerías para capturar pantalla y generar PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Librería nueva para la plantilla A4 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -23,7 +26,7 @@
         </button>
     </nav>
 
-    <!-- Indicador de carga preparado para inyectar botón de reintento si falla -->
+    <!-- Indicador de carga -->
     <div id="loading" aria-live="polite" class="loading-state">
         📡 SINCRONIZANDO SISTEMA NGC...
     </div>
@@ -120,7 +123,6 @@
             </div>
             
             <div id="zonaCaptura" class="capture-zone">
-                <!-- Se mantiene el texto original para la PNG. El JS inyecta la imagen solo para el PDF -->
                 <header class="header-brand" id="headerMembrete">VILLASER - PRESUPUESTO</header>
                 <table id="tablaMain"><tbody id="cuerpoTabla"></tbody></table>
                 <div class="total-display" id="totalDisplay" aria-live="polite">TOTAL: $ 0,00</div>
@@ -128,12 +130,13 @@
             
             <div class="action-grid">
                 <button id="btnCopyTitle" class="btn-ngc btn-main" onclick="copiarTitulo()" style="background: rgba(255,255,255,0.1); border-color: var(--ngc-primary);">📄 Copiar Título</button>
+                <!-- Botón de imagen intacto para WhatsApp -->
                 <button class="btn-ngc btn-main" onclick="tomarCaptura()" style="background: rgba(255,255,255,0.1); border-color: var(--ngc-primary);">📸 Bajar Imagen</button>
             </div>
             
-            <!-- CONTENEDOR SEPARADO PARA EL PDF (Evita que quede pegado) -->
+            <!-- CONTENEDOR SEPARADO PARA EL PDF CON SU NUEVO ESTILO -->
             <div style="margin-top: 15px;">
-                <button class="btn-ngc btn-main" onclick="generarPDF()" style="width: 100%; background: var(--ngc-primary); color: #000; font-size: 1rem;">📄 Descargar PDF</button>
+                <button id="btnGenerarPDF" class="btn-ngc btn-main btn-pdf" onclick="generarPDF()" style="width: 100%;">📄 Descargar PDF</button>
             </div>
             
             <div class="action-grid-footer">
@@ -145,6 +148,61 @@
         </section>
     </div>
 </main>
+
+<!-- PLANTILLA OCULTA EXCLUSIVA PARA EL PDF A4 -->
+<div id="plantilla-pdf" style="display: none;">
+    <div class="pdf-container">
+        <header class="pdf-header">
+            <div class="pdf-info-box">
+                <div class="pdf-row"><b>Nro Presupuesto</b> <span id="pdf-nro">PEM-0000</span></div>
+                <div class="pdf-row"><b>Fecha</b> <span id="pdf-fecha"></span></div>
+                <div class="pdf-row"><b>Cliente</b> <span id="pdf-cliente"></span></div>
+                <div class="pdf-row"><b>Dirección obra</b> <span id="pdf-direccion"></span></div>
+            </div>
+            <div class="pdf-logo-box">
+                <!-- Se inyecta el membrete solo para el PDF -->
+                <img src="membrete.avif" alt="Villaser Electricista" style="max-width: 100%; max-height: 70px; display: block; margin-left: auto;">
+            </div>
+        </header>
+
+        <table class="pdf-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Concepto</th>
+                    <th>Cantidad</th>
+                    <th>Valor</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody id="pdf-tbody">
+                <!-- Se llena con JS -->
+            </tbody>
+        </table>
+
+        <div class="pdf-body-lower">
+            <div class="pdf-notas-box">
+                <h3>Notas Aclaratorias por códigos</h3>
+                <div id="pdf-notas" class="pdf-notas-content"></div>
+            </div>
+            <div class="pdf-totales-box">
+                <div class="pdf-total-row"><span>Subtotal</span> <b id="pdf-subtotal"></b></div>
+                <div class="pdf-total-row"><span>Descuentos</span> <b id="pdf-descuentos" style="color: #c00;"></b></div>
+                <div class="pdf-total-row final-total"><span>Total</span> <b id="pdf-total"></b></div>
+            </div>
+        </div>
+
+        <footer class="pdf-footer">
+            <div class="pdf-pagos">
+                <h4>Formas De Pago</h4>
+                <p>Efectivo / Transferencia / QR<br>Cuotas, hasta 3 y 6 sin interés<br>Con Mercado Pago</p>
+            </div>
+            <div class="pdf-slogan">
+                ¡Electricidad Segura, Hogar Tranquilo!
+            </div>
+        </footer>
+    </div>
+</div>
 
 <script src="script.js"></script>
 </body>
