@@ -124,6 +124,10 @@ document.getElementById('btnCatalogos').addEventListener('click', function() {
     window.location.href = './catalogos/index.html';
 });
 
+// Navegación al menu de Informe Tecnico
+document.getElementById('btnInformeTecnico').addEventListener('click', function() {
+    window.location.href = './informe_tecnico/index.html';
+});
 
 // Al cargar la página principal, verificar qué tema estaba activo
 document.addEventListener('DOMContentLoaded', () => {
