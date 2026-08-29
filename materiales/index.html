@@ -11,6 +11,9 @@
     
     <!-- Librería para capturar pantalla -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Librería para generar el PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -110,10 +113,15 @@
                 <button id="btnMat" class="btn-add-custom btn-material" style="width:100%; margin-top:10px" onclick="addItem()">Agregar Ítem</button>
             </div>
 
-            <!-- ÁREA DE CAPTURA -->
+            <!-- ÁREA DE CAPTURA ORIGINAL -->
             <div id="captureSection" class="capture-area">
                 <header class="list-header-title">VILLASER - MATERIALES</header>
                 <div id="itemsContainer"></div>
+            </div>
+
+            <!-- BOTÓN PDF NUEVO -->
+            <div style="margin-top: 15px;">
+                <button id="btnGenerarPDF" class="btn-add-custom btn-pdf" onclick="generarPDF()" style="width: 100%; height: 55px; font-size: 1rem;">📄 Descargar PDF</button>
             </div>
 
             <!-- CONTROLES INFERIORES -->
@@ -128,6 +136,62 @@
             
         </section>
     </main>
+
+    <!-- PLANTILLA OCULTA EXCLUSIVA PARA EL PDF A4 -->
+    <div id="plantilla-pdf" style="display: none;">
+        <div class="pdf-container">
+            <header class="pdf-header">
+                <div class="pdf-info-box">
+                    <div class="pdf-row" style="font-size: 16px; margin-bottom: 10px; color:#0088aa;"><b>Listado de Materiales</b></div>
+                    <div class="pdf-row"><b>Fecha</b> <span id="pdf-fecha"></span></div>
+                    <div class="pdf-row"><b>Cliente</b> <span id="pdf-cliente"></span></div>
+                    <div class="pdf-row"><b>Teléfono</b> <span id="pdf-tel"></span></div>
+                </div>
+                <div class="pdf-logo-box">
+                    <img src="membrete.avif" alt="Villaser Electricista" style="max-width: 100%; max-height: 70px; display: block; margin-left: auto;">
+                </div>
+            </header>
+
+            <!-- Aclaración de no comercialización -->
+            <div class="pdf-aclaracion">
+                <b>Aclaración:</b> El presente documento detalla los materiales solicitados para la ejecución de la obra. <i>Villaser no provee ni comercializa dichos materiales.</i>
+            </div>
+
+            <table class="pdf-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%; text-align: center;">Cant.</th>
+                        <th style="width: 15%; text-align: center;">Unidad</th>
+                        <th style="width: 45%;">Descripción</th>
+                        <th style="width: 30%;">Notas del ítem</th>
+                    </tr>
+                </thead>
+                <tbody id="pdf-tbody">
+                    <!-- Se llena con JS -->
+                </tbody>
+            </table>
+
+            <div class="pdf-body-lower" id="pdf-notas-box" style="display:none;">
+                <div class="pdf-notas-box" style="width: 100%;">
+                    <h3>Notas Generales</h3>
+                    <div id="pdf-notas" class="pdf-notas-content"></div>
+                </div>
+            </div>
+
+            <footer class="pdf-footer">
+                <!-- Se deja vacío a la izquierda porque no hay formas de pago -->
+                <div></div> 
+                <div class="pdf-right-footer">
+                    <div class="pdf-slogan">
+                        ¡Electricidad Segura, Hogar Tranquilo!
+                    </div>
+                    <div class="pdf-contacto">
+                        <span>📞 351 355 9347</span> &nbsp;|&nbsp; <span>🌐 villaser.com.ar</span>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
