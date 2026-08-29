@@ -7,12 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // =======================================================
-// 2. LÓGICA PRINCIPAL DE INFORME TÉCNICO
+// 2. VARIABLES GLOBALES Y LÓGICA DE INFORME TÉCNICO
 // =======================================================
 const SHEET_ID = '1XfQoCkNMXy5WLhQciVrRoc1Pz6yeKKiAZljR_KYpohM';
 const URL_CLI = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=NombresClientes`;
 
 let dataCli = [], selectedPhone = "", currentClientName = "", clientDetails = {};
+let informeParrafos = []; // Array que almacena los párrafos individuales
 
 const selCliente = document.getElementById('selCliente');
 
@@ -120,12 +121,150 @@ async function copyTitle() {
 }
 
 // =======================================================
+// GESTIÓN DE PÁRRAFOS (AGREGAR, EDITAR, ELIMINAR, RENDER)
+// =======================================================
+
+function escapeHTML(str) {
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag]));
+}
+
+function agregarParrafo() {
+    const textarea = document.getElementById('textoInforme');
+    const texto = textarea.value.trim();
+    if (!texto) return;
+    
+    informeParrafos.push(texto);
+    textarea.value = ''; // Vacía el cuadro después de agregar
+    renderParrafos();
+}
+
+function checkPendingText() {
+    // Si el usuario olvidó presionar "Agregar" antes de generar/enviar
+    const textarea = document.getElementById('textoInforme');
+    const pendingText = textarea.value.trim();
+    if (pendingText) {
+        agregarParrafo();
+    }
+}
+
+function renderParrafos() {
+    const container = document.getElementById('lista-parrafos');
+    container.innerHTML = '';
+    
+    informeParrafos.forEach((parrafo, index) => {
+        const divItem = document.createElement('div');
+        divItem.style.display = 'flex';
+        divItem.style.flexDirection = 'column';
+        divItem.style.gap = '8px';
+        divItem.style.background = 'var(--btn-bg)';
+        divItem.style.padding = '12px';
+        divItem.style.borderRadius = '8px';
+        divItem.style.border = '1px solid var(--border-color)';
+        
+        // Vista de texto
+        const pText = document.createElement('p');
+        pText.style.margin = '0';
+        pText.style.fontSize = '0.9rem';
+        pText.style.lineHeight = '1.5';
+        pText.style.whiteSpace = 'pre-wrap';
+        pText.style.textIndent = '20px'; // Sangría
+        pText.textContent = parrafo;
+        
+        // Área de edición
+        const editArea = document.createElement('textarea');
+        editArea.value = parrafo;
+        editArea.style.display = 'none';
+        editArea.style.minHeight = '80px';
+        editArea.style.width = '100%';
+        
+        // Contenedor de Botones
+        const btnContainer = document.createElement('div');
+        btnContainer.style.display = 'flex';
+        btnContainer.style.justifyContent = 'flex-end';
+        btnContainer.style.gap = '8px';
+        
+        const btnDelete = document.createElement('button');
+        btnDelete.innerHTML = '🗑️';
+        btnDelete.className = 'btn-add-custom btn-pdf'; // Estilo rojo
+        btnDelete.style.height = '32px';
+        btnDelete.style.padding = '0 12px';
+        
+        const btnEdit = document.createElement('button');
+        btnEdit.textContent = '✏️ EDITAR';
+        btnEdit.className = 'btn-add-custom btn-copy';
+        btnEdit.style.height = '32px';
+        btnEdit.style.fontSize = '0.75rem';
+        
+        const btnSave = document.createElement('button');
+        btnSave.textContent = '💾 GUARDAR';
+        btnSave.className = 'btn-add-custom btn-success-active';
+        btnSave.style.height = '32px';
+        btnSave.style.fontSize = '0.75rem';
+        btnSave.style.display = 'none';
+        
+        // Eventos
+        btnEdit.onclick = () => {
+            pText.style.display = 'none';
+            editArea.style.display = 'block';
+            btnEdit.style.display = 'none';
+            btnDelete.style.display = 'none';
+            btnSave.style.display = 'flex';
+            editArea.focus();
+        };
+        
+        btnSave.onclick = () => {
+            const nuevoTexto = editArea.value.trim();
+            if (nuevoTexto === "") {
+                informeParrafos.splice(index, 1);
+            } else {
+                informeParrafos[index] = nuevoTexto;
+            }
+            renderParrafos();
+        };
+        
+        btnDelete.onclick = () => {
+            if(confirm("¿Eliminar este párrafo?")) {
+                informeParrafos.splice(index, 1);
+                renderParrafos();
+            }
+        };
+        
+        btnContainer.appendChild(btnDelete);
+        btnContainer.appendChild(btnEdit);
+        btnContainer.appendChild(btnSave);
+        
+        divItem.appendChild(pText);
+        divItem.appendChild(editArea);
+        divItem.appendChild(btnContainer);
+        
+        container.appendChild(divItem);
+    });
+    
+    actualizarVistasFinales();
+}
+
+function actualizarVistasFinales() {
+    let htmlContent = '';
+    
+    informeParrafos.forEach(p => {
+        // Aplica div con sangría y margen inferior a cada párrafo para las vistas (PDF y Captura)
+        htmlContent += `<div style="text-indent: 20px; margin-bottom: 12px; white-space: pre-wrap;">${escapeHTML(p)}</div>`;
+    });
+    
+    document.getElementById('previewInforme').innerHTML = htmlContent;
+    document.getElementById('pdf-texto-contenido').innerHTML = htmlContent;
+}
+
+// =======================================================
 // GENERADOR DE PDF A4 (295mm)
 // =======================================================
 async function generarPDF() {
-    const texto = document.getElementById('textoInforme').value.trim();
-    if (!texto) { 
-        alert("Escriba el texto del informe técnico antes de generar el PDF."); 
+    checkPendingText();
+    
+    if (informeParrafos.length === 0) { 
+        alert("El informe está vacío. Agregue al menos un párrafo."); 
         document.getElementById('textoInforme').focus();
         return; 
     }
@@ -135,7 +274,6 @@ async function generarPDF() {
     document.getElementById('pdf-cliente').innerText = clientDetails.nombre || "Cliente";
     document.getElementById('pdf-dir').innerText = clientDetails.dir || "A coordinar";
     document.getElementById('pdf-fecha').innerText = fecha;
-    document.getElementById('pdf-texto-contenido').innerText = texto;
 
     const element = document.getElementById('plantilla-pdf');
     element.style.display = 'block';
@@ -163,21 +301,22 @@ async function generarPDF() {
     }
 }
 
+// =======================================================
 // CAPTURA DE IMAGEN (PARA DISPOSITIVOS / WSP)
+// =======================================================
 function takeScreenshot() {
-    const texto = document.getElementById('textoInforme').value.trim();
-    if (!texto) { 
-        alert("Escriba el texto del informe técnico."); 
+    checkPendingText();
+    
+    if (informeParrafos.length === 0) { 
+        alert("El informe está vacío. Agregue al menos un párrafo."); 
         return; 
     }
 
     const area = document.getElementById('captureSection');
     const infoDiv = document.getElementById('previewClientInfo');
-    const textDiv = document.getElementById('previewInforme');
     
     const fecha = new Date().toLocaleDateString('es-AR');
     infoDiv.innerHTML = `<b>CLIENTE:</b> ${clientDetails.nombre || 'Cliente'}<br><b>FECHA:</b> ${fecha} | <b>DIR:</b> ${clientDetails.dir || '-'}`;
-    textDiv.innerText = texto;
     
     const shortName = currentClientName ? currentClientName.split(' ')[0].replace(/[^a-zA-Z0-9]/g, '') : "Lista";
     const fileName = `${shortName}_informe_tecnico.png`;
@@ -201,9 +340,16 @@ function takeScreenshot() {
     });
 }
 
+// =======================================================
+// EXPORTAR E IMPORTAR (TXT)
+// =======================================================
 function exportToTxt() {
-    const texto = document.getElementById('textoInforme').value;
-    if (!texto.trim()) { alert("El informe está vacío."); return; }
+    checkPendingText();
+    
+    if (informeParrafos.length === 0) { alert("El informe está vacío."); return; }
+    
+    // Unimos los párrafos con doble salto de línea
+    const texto = informeParrafos.join('\n\n');
     
     const headerData = `CLI\t${clientDetails.nombre || 'Cliente'}\t${clientDetails.tel || ''}\t${clientDetails.dir || ''}\n`;
     const fullContent = headerData + `INF\t` + texto.replace(/\n/g, '\\n');
@@ -241,7 +387,10 @@ function importFromTxt(event) {
                 document.getElementById('main-content').classList.remove('hidden');
             } else if (line.startsWith('INF\t')) {
                 const infText = line.substring(4).replace(/\\n/g, '\n');
-                document.getElementById('textoInforme').value = infText;
+                
+                // Reconstruimos el array separando por dobles saltos de línea
+                informeParrafos = infText.split('\n\n').filter(p => p.trim() !== '');
+                renderParrafos();
             }
         });
         
@@ -251,18 +400,24 @@ function importFromTxt(event) {
     reader.readAsText(file);
 }
 
+// =======================================================
+// ENVIAR POR WHATSAPP
+// =======================================================
 function sendWSP() {
-    const texto = document.getElementById('textoInforme').value.trim();
+    checkPendingText();
+    
     if (!selectedPhone) { 
         alert("Por favor, cargue un cliente primero."); 
         return; 
     }
-    if (!texto) { 
+    if (informeParrafos.length === 0) { 
         alert("El informe está vacío."); 
         return; 
     }
     
-    let wspText = `*VILLASER - INFORME TÉCNICO*\n*Cliente:* ${clientDetails.nombre}\n\n${texto}`;
+    // Genera el texto con sangrías usando espacios en blanco (aprox. 4 espacios)
+    let bodyText = informeParrafos.map(p => `    ${p}`).join('\n\n');
+    let wspText = `*VILLASER - INFORME TÉCNICO*\n*Cliente:* ${clientDetails.nombre}\n\n${bodyText}`;
     
     let cleanNumber = selectedPhone;
     if (cleanNumber.length === 10) cleanNumber = "549" + cleanNumber;
