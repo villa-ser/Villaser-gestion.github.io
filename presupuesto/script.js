@@ -245,7 +245,7 @@ function exportarPresupuesto() {
     if (!clienteActual || listaItems.length === 0) return alert("No hay datos para exportar.");
     const data = { cliente: clienteActual, items: listaItems, obsG: document.getElementById('obsGenerales').value };
     
-    // Método moderno y seguro para exportar Base64 compatible con caracteres latinos (UTF-8) sin usar el obsoleto 'unescape'
+    // Método moderno y seguro para exportar Base64 compatible con caracteres latinos (UTF-8)
     const jsonString = JSON.stringify(data, null, 2);
     const utf8Bytes = new TextEncoder().encode(jsonString);
     const base64Data = btoa(Array.from(new Uint8Array(utf8Bytes), b => String.fromCharCode(b)).join(''));
@@ -281,15 +281,15 @@ function importarPresupuesto(e) {
     e.target.value = '';
 }
 
+// Bajar Imagen en formato PNG (Original, sin modificar encabezado)
 async function tomarCaptura() { 
+    if (!clienteActual) return alert("Cargue un cliente primero");
     const zona = document.getElementById('zonaCaptura'); 
     const trash = document.querySelectorAll('.trash-icon'); 
     trash.forEach(b => b.style.display = 'none'); 
     
     zona.style.color = "#ffffff";
     
-    // Guardar posición de scroll actual y forzar vista al inicio de la página 
-    // para evitar que el html2canvas recorte el contenedor desde el medio.
     const scrollX = window.scrollX;
     const scrollY = window.scrollY;
     window.scrollTo(0, 0);
@@ -297,19 +297,89 @@ async function tomarCaptura() {
     const canvas = await html2canvas(zona, { 
         backgroundColor: "#1e1e1e", 
         scale: 2,
-        useCORS: true // Permite cargar la imagen del membrete correctamente
+        useCORS: true,
+        scrollY: 0
     }); 
     
-    // Restaurar scroll al lugar original tras la captura
     window.scrollTo(scrollX, scrollY);
 
     const link = document.createElement('a'); 
-    link.download = `Presupuesto_NGC_${clienteActual?.nombre || 'Generico'}.png`; 
+    link.download = `Presupuesto_NGC_${clienteActual.nombre.split(' ')[0]}.png`; 
     link.href = canvas.toDataURL(); 
     link.click(); 
     
     trash.forEach(b => b.style.display = 'inline-block'); 
     zona.style.color = ""; 
+}
+
+// NUEVA FUNCION PDF: Inserta el membrete.avif, evita cortes centrados
+async function generarPDF() { 
+    if (!clienteActual) return alert("Cargue un cliente primero");
+    
+    const zona = document.getElementById('zonaCaptura'); 
+    const trash = document.querySelectorAll('.trash-icon'); 
+    const header = document.getElementById('headerMembrete');
+    
+    // Guardamos el texto original (VILLASER - PRESUPUESTO)
+    const originalHeaderText = header.innerHTML;
+
+    trash.forEach(b => b.style.display = 'none'); 
+    zona.style.color = "#ffffff";
+    
+    // Inyectamos la imagen membrete y esperamos que cargue antes de capturar
+    await new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            header.innerHTML = '';
+            img.className = 'img-membrete';
+            header.appendChild(img);
+            resolve();
+        };
+        img.onerror = () => {
+            console.warn("No se pudo cargar membrete.avif");
+            resolve(); // Continuar igual si falla
+        };
+        img.src = 'membrete.avif';
+    });
+
+    // Guardar scroll y subir para que empiece desde ARRIBA (Top)
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    window.scrollTo(0, 0);
+
+    // Capturar canvas forzando dimensiones desde arriba (scrollY: 0)
+    const canvas = await html2canvas(zona, { 
+        backgroundColor: "#1e1e1e", 
+        scale: 2,
+        useCORS: true,
+        scrollY: 0,
+        windowHeight: document.documentElement.scrollHeight
+    }); 
+    
+    // Restaurar a la normalidad el UI
+    window.scrollTo(scrollX, scrollY);
+    header.innerHTML = originalHeaderText; // Volvemos al texto original
+    trash.forEach(b => b.style.display = 'inline-block'); 
+    zona.style.color = ""; 
+
+    // Generar el PDF
+    const { jsPDF } = window.jspdf;
+    const imgData = canvas.toDataURL('image/png');
+    
+    const pdfWidth = 210; 
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    
+    const pdf = new jsPDF({
+        orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: [pdfWidth, pdfHeight]
+    });
+    
+    // Inserción obligatoria desde la coordenada 0,0 (arriba a la izquierda)
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    
+    const f = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+    pdf.save(`Presupuesto_NGC_${clienteActual.nombre.split(' ')[0]}_${f}.pdf`);
 }
 
 function enviarWhatsApp() { 
@@ -329,5 +399,5 @@ function animarBoton(id) {
         b.classList.remove('active-success'); 
         b.innerText = originalText;
     }, 1000); 
-                }
-        
+    }
+                                   
