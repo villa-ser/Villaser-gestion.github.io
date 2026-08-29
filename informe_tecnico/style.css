@@ -1,0 +1,159 @@
+* { box-sizing: border-box; } 
+
+:root { 
+    --primary: #ffffff; 
+    --text: #ffffff; 
+    --success: #28a745; 
+    --accent: #00d4ff; 
+    --bg-main: #121212;
+    --bg-dark-capture: #1e1e1e; 
+    --input-bg: #1a1a1a; 
+    --border-color: rgba(255, 255, 255, 0.2);
+    --btn-bg: rgba(255, 255, 255, 0.05);
+    --btn-height: 48px;
+}
+
+body.light-mode {
+    --primary: #1a1a1a;
+    --text: #1a1a1a;
+    --bg-main: #f0f2f5;
+    --bg-dark-capture: #ffffff;
+    --input-bg: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.15);
+    --btn-bg: rgba(0, 0, 0, 0.03);
+}
+
+body { 
+    font-family: 'Segoe UI', system-ui, sans-serif; 
+    background-color: var(--bg-main); 
+    color: var(--text); 
+    margin: 0; 
+    padding: 0;
+    width: 100%; 
+    overflow-x: hidden; 
+    overscroll-behavior-y: none; 
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.container { width: 100%; max-width: 500px; margin: 0 auto; padding: 15px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+.top-nav { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 10px; }
+.btn-back { background: transparent; border: 1px solid var(--border-color); color: var(--text); padding: 10px 15px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+.btn-back:active { background: var(--btn-bg); }
+
+.card { background: transparent; padding: 0px; margin-bottom: 15px; border-radius: 8px; width: 100%; }
+
+.hidden { display: none !important; }
+h4 { margin: 0 0 10px 0; color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; }
+label { font-weight: 600; display: block; margin: 4px 0 6px 0; font-size: 0.75rem; color: var(--text); opacity: 0.7; text-transform: uppercase; }
+
+input:not([type="hidden"]), textarea, .native-select { 
+    width: 100%; padding: 12px 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; background-color: var(--input-bg) !important; color: var(--text) !important; outline: none; font-family: inherit; appearance: none; transition: border-color 0.2s;
+}
+input:focus, textarea:focus, .native-select:focus { border-color: var(--accent); box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+
+.native-select { cursor: pointer; background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; }
+.native-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+input:read-only { background: var(--btn-bg) !important; border-style: dashed; opacity: 0.8; }
+
+.btn-add-custom { background: var(--btn-bg); color: var(--text); border: 1px solid var(--border-color); padding: 0 15px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; transition: 0.2s; height: var(--btn-height); display: flex; align-items: center; justify-content: center; }
+.btn-add-custom:active { transform: scale(0.98); }
+.btn-client { border-color: var(--accent); color: var(--accent); }
+.btn-success-active { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
+
+.capture-area { background: var(--bg-dark-capture); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 15px; width: 100%; transition: background-color 0.3s ease; }
+.list-header-title { color: var(--accent); font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,212,255,0.3); padding-bottom: 8px; text-transform: uppercase; }
+
+.action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.btn-grid-actions-footer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; width: 100%; padding-bottom: 20px; }
+
+.btn-cap { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
+.btn-copy { border-color: var(--text); color: var(--text); background: var(--btn-bg); }
+.btn-export { border-color: #ff9800; color: #ff9800; background: rgba(255,152,0,0.05); }
+.btn-import { border-color: #e91e63; color: #e91e63; background: rgba(233,30,99,0.05); }
+.btn-full { grid-column: span 2; padding: 14px; border-color: #25d366; color: #25d366; background: rgba(37,211,102,0.05); font-size: 0.9rem; height: 55px; }
+
+#status { color: var(--accent); font-size: 0.8rem; text-align: center; margin-bottom: 10px; font-weight: 600; }
+
+/* --- ESTILOS PARA EL BOTÓN PDF --- */
+.btn-pdf {
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
+    background: rgba(255, 68, 68, 0.05);
+}
+.btn-pdf:active { background: rgba(255, 68, 68, 0.2); }
+
+/* --- ESTILOS EXCLUSIVOS PARA LA PLANTILLA A4 (PDF - 295mm) --- */
+.pdf-container {
+    background: #ffffff;
+    color: #000000;
+    width: 210mm;
+    min-height: 295mm;
+    padding: 10mm 12mm 20mm 12mm;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.pdf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #0088aa;
+    padding-bottom: 15px;
+}
+
+.pdf-info-box { width: 60%; }
+.pdf-row { display: grid; grid-template-columns: 100px 1fr; margin-bottom: 6px; font-size: 13px; }
+.pdf-row b { color: #555; }
+.pdf-logo-box { width: 35%; text-align: right; }
+
+.pdf-body-content {
+    flex: 1;
+    margin-bottom: 20px;
+}
+.pdf-informe-texto {
+    font-size: 13px;
+    color: #222;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    background: #fdfdfd;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    min-height: 150px;
+}
+
+.pdf-footer {
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+.pdf-right-footer {
+    text-align: right;
+}
+.pdf-slogan {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0088aa;
+    font-style: italic;
+    margin-bottom: 6px;
+}
+.pdf-contacto {
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+.pdf-contacto span {
+    display: inline-block;
+              }
