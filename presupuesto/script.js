@@ -9,7 +9,6 @@ const URL_CLIENTES = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq
 
 let dbPrecios = [], dbClientes = [], clienteActual = null, listaItems = [], notasOriginales = "";
 
-// Referencias a los Selects
 const selCliente = document.getElementById('selCliente');
 const selTema = document.getElementById('selTema');
 const selConcepto = document.getElementById('selConcepto');
@@ -17,8 +16,18 @@ const selConcepto = document.getElementById('selConcepto');
 window.onload = fetchData;
 
 async function fetchData() {
+    // Implementación de Timeout de 8 segundos para evitar bloqueos infinitos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
     try {
-        const [resCli, resPre] = await Promise.all([fetch(URL_CLIENTES), fetch(URL_PRECIOS)]);
+        const [resCli, resPre] = await Promise.all([
+            fetch(URL_CLIENTES, { signal: controller.signal }),
+            fetch(URL_PRECIOS, { signal: controller.signal })
+        ]);
+        
+        clearTimeout(timeoutId); // Limpia el timeout si la respuesta es exitosa
+        
         const txtCli = await resCli.text(), txtPre = await resPre.text();
         const jCli = JSON.parse(txtCli.substring(txtCli.indexOf("{"), txtCli.lastIndexOf("}") + 1));
         const jPre = JSON.parse(txtPre.substring(txtPre.indexOf("{"), txtPre.lastIndexOf("}") + 1));
@@ -33,7 +42,15 @@ async function fetchData() {
         poblarTemas();
         setupEventListeners();
     } catch (e) { 
-        document.getElementById('loading').innerText = "⚠️ Error de conexión"; 
+        clearTimeout(timeoutId);
+        const loadingDiv = document.getElementById('loading');
+        
+        // Manejo específico si el error fue por tiempo agotado o red
+        if (e.name === 'AbortError') {
+            loadingDiv.innerHTML = `⚠️ Tiempo de conexión agotado.<br><br><button class="btn-ngc" onclick="location.reload()">Reintentar</button>`;
+        } else {
+            loadingDiv.innerHTML = `⚠️ Error de conexión a la base de datos.<br><br><button class="btn-ngc" onclick="location.reload()">Reintentar</button>`;
+        }
         console.error(e);
     }
 }
@@ -158,7 +175,7 @@ function agregarTrabajo() {
     renderTabla(); 
     document.getElementById('obsManual').value = ""; 
     document.getElementById('cantidad').value = 1; 
-    selConcepto.value = ""; // Reiniciar select
+    selConcepto.value = ""; 
     document.getElementById('unitarioLabel').innerText = "Unitario: $ 0,00";
     animarBoton('btnAddItem');
 }
@@ -202,7 +219,6 @@ function borrarItem(id) {
     renderTabla(); 
 }
 
-// Portapapeles Moderno
 async function copiarTitulo() {
     if(!clienteActual) return;
     const primerNombre = clienteActual.nombre.split(' ')[0];
@@ -214,7 +230,6 @@ async function copiarTitulo() {
         await navigator.clipboard.writeText(texto);
         animarBoton('btnCopyTitle');
     } catch (err) {
-        // Fallback para navegadores antiguos
         const textArea = document.createElement("textarea");
         textArea.value = texto;
         textArea.style.position = "fixed"; textArea.style.left = "-99999px"; 
@@ -226,11 +241,15 @@ async function copiarTitulo() {
     }
 }
 
-// Lógica de exportación / importación / captura / whatsapp intacta
 function exportarPresupuesto() {
     if (!clienteActual || listaItems.length === 0) return alert("No hay datos para exportar.");
     const data = { cliente: clienteActual, items: listaItems, obsG: document.getElementById('obsGenerales').value };
-    const base64Data = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+    
+    // Método moderno y seguro para exportar Base64 compatible con caracteres latinos (UTF-8) sin usar el obsoleto 'unescape'
+    const jsonString = JSON.stringify(data, null, 2);
+    const utf8Bytes = new TextEncoder().encode(jsonString);
+    const base64Data = btoa(Array.from(new Uint8Array(utf8Bytes), b => String.fromCharCode(b)).join(''));
+    
     const a = document.createElement('a');
     const f = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
     a.href = 'data:text/plain;base64,' + base64Data;
@@ -251,7 +270,6 @@ function importarPresupuesto(e) {
             listaItems = data.items;
             document.getElementById('obsGenerales').value = data.obsG || "";
             
-            // Refrescar Select
             selCliente.value = clienteActual.nombre;
             
             document.getElementById('step-cliente').style.display = 'none';
@@ -268,17 +286,30 @@ async function tomarCaptura() {
     const trash = document.querySelectorAll('.trash-icon'); 
     trash.forEach(b => b.style.display = 'none'); 
     
-    // Forzamos temporalmente a que el texto sea blanco para la captura (por si estaba en modo claro)
     zona.style.color = "#ffffff";
     
-    const canvas = await html2canvas(zona, { backgroundColor: "#1e1e1e", scale: 2 }); 
+    // Guardar posición de scroll actual y forzar vista al inicio de la página 
+    // para evitar que el html2canvas recorte el contenedor desde el medio.
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    window.scrollTo(0, 0);
+
+    const canvas = await html2canvas(zona, { 
+        backgroundColor: "#1e1e1e", 
+        scale: 2,
+        useCORS: true // Permite cargar la imagen del membrete correctamente
+    }); 
+    
+    // Restaurar scroll al lugar original tras la captura
+    window.scrollTo(scrollX, scrollY);
+
     const link = document.createElement('a'); 
     link.download = `Presupuesto_NGC_${clienteActual?.nombre || 'Generico'}.png`; 
     link.href = canvas.toDataURL(); 
     link.click(); 
     
     trash.forEach(b => b.style.display = 'inline-block'); 
-    zona.style.color = ""; // Restaurar color
+    zona.style.color = ""; 
 }
 
 function enviarWhatsApp() { 
@@ -298,91 +329,5 @@ function animarBoton(id) {
         b.classList.remove('active-success'); 
         b.innerText = originalText;
     }, 1000); 
-}
-
-// --- GENERADOR DE PDF A4 ---
-async function generarPDF() {
-    if (!clienteActual || listaItems.length === 0) {
-        alert("Agregá un cliente y trabajos para generar el PDF.");
-        return;
-    }
-
-    // 1. Rellenar datos del cliente
-    const nroPresupuesto = `PEM-${Math.floor(Math.random() * 9000) + 1000}`; // Simula un NRO
-    document.getElementById('pdf-nro').innerText = nroPresupuesto;
-    document.getElementById('pdf-fecha').innerText = clienteActual.fecha;
-    document.getElementById('pdf-cliente').innerText = clienteActual.nombre;
-    document.getElementById('pdf-direccion').innerText = clienteActual.dir || 'A coordinar';
-
-    // 2. Rellenar la tabla de ítems y calcular totales
-    const tbody = document.getElementById('pdf-tbody');
-    tbody.innerHTML = '';
-    
-    let subtotalPuro = 0;
-    let totalDescuentos = 0;
-    let notasAcumuladas = '';
-
-    listaItems.forEach((i, index) => {
-        // Creamos un pseudo-código usando las iniciales del concepto (Ej: 01-02)
-        const codigoItem = `0${index + 1}-0${Math.floor(Math.random() * 5) + 1}`; 
+                }
         
-        const valorUnitarioOriginal = i.unitario;
-        const subtotalFilaPuro = valorUnitarioOriginal * i.qty;
-        const subtotalFilaConDesc = i.total;
-        const descuentoFila = subtotalFilaPuro - subtotalFilaConDesc;
-
-        subtotalPuro += subtotalFilaPuro;
-        totalDescuentos += descuentoFila;
-
-        // Fila
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${codigoItem}</td>
-            <td>${i.concepto}</td>
-            <td>${i.qty}</td>
-            <td>$ ${valorUnitarioOriginal.toLocaleString('es-AR')}</td>
-            <td>$ ${subtotalFilaPuro.toLocaleString('es-AR')}</td>
-        `;
-        tbody.appendChild(tr);
-
-        // Notas (si tiene)
-        if(i.obs) {
-            notasAcumuladas += `<b>${codigoItem}</b> ${i.obs.replace(/\n/g, ' ')}\n`;
-        }
-    });
-
-    const og = document.getElementById('obsGenerales').value;
-    if(og) notasAcumuladas += `\n<b>Gral:</b> ${og}`;
-
-    // 3. Rellenar totales
-    const totalFinal = subtotalPuro - totalDescuentos;
-    document.getElementById('pdf-subtotal').innerText = `$ ${subtotalPuro.toLocaleString('es-AR')}`;
-    document.getElementById('pdf-descuentos').innerText = `-$ ${totalDescuentos.toLocaleString('es-AR')}`;
-    document.getElementById('pdf-total').innerText = `$ ${totalFinal.toLocaleString('es-AR')}`;
-    document.getElementById('pdf-notas').innerHTML = notasAcumuladas ? notasAcumuladas.replace(/\n/g, '<br>') : 'Sin notas aclaratorias.';
-
-    // 4. Configurar y disparar html2pdf
-    const element = document.getElementById('plantilla-pdf');
-    element.style.display = 'block'; // Mostramos temporalmente el div
-
-    const opt = {
-        margin:       0, // El padding ya está manejado en el CSS (.pdf-container)
-        filename:     `${clienteActual.nombre.replace(/ /g, '_')}_Villaser_${nroPresupuesto}.pdf`,
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    animarBoton('btnGenerarPDF'); // Da feedback visual de "LISTO"
-    
-    // Generamos y volvemos a ocultar el div
-    try {
-        await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-        console.error("Error al generar PDF: ", error);
-        alert("Hubo un error al generar el PDF.");
-    } finally {
-        element.style.display = 'none';
-    }
-}
-
