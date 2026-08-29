@@ -61,15 +61,20 @@
             
             <div class="card">
                 <h4>Redacción de Informe Técnico</h4>
-                <label for="textoInforme">Detalle del relevamiento, diagnóstico o trabajo realizado:</label>
-                <textarea id="textoInforme" placeholder="Escriba aquí el informe técnico..." style="min-height: 200px; resize: vertical; line-height: 1.5;"></textarea>
+                <label for="textoInforme">Redactar párrafo:</label>
+                <textarea id="textoInforme" placeholder="Escriba aquí el párrafo y presione agregar..." style="min-height: 100px; resize: vertical; line-height: 1.5;"></textarea>
+                
+                <button id="btnAgregarParrafo" class="btn-add-custom" style="width: 100%; margin-top: 10px; border-color: var(--success); color: var(--success); background: rgba(40, 167, 69, 0.1);" onclick="agregarParrafo()">+ AGREGAR PÁRRAFO AL INFORME</button>
+                
+                <!-- LISTA DE PÁRRAFOS EDITABLES -->
+                <div id="lista-parrafos" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;"></div>
             </div>
 
             <!-- ÁREA DE CAPTURA (PARA IMAGEN / WSP) -->
             <div id="captureSection" class="capture-area">
                 <header class="list-header-title">VILLASER - INFORME TÉCNICO</header>
                 <div id="previewClientInfo" style="font-size: 0.85rem; margin-bottom: 12px; color: var(--accent); line-height: 1.4; border-bottom: 1px dashed rgba(255,255,255,0.15); padding-bottom: 8px;"></div>
-                <div id="previewInforme" style="font-size: 0.9rem; white-space: pre-wrap; line-height: 1.5; padding: 4px;"></div>
+                <div id="previewInforme" style="font-size: 0.9rem; white-space: normal; line-height: 1.5; padding: 4px;"></div>
             </div>
 
             <!-- CONTROLES INFERIORES -->
@@ -96,14 +101,20 @@
     <div id="plantilla-pdf" style="display: none;">
         <div class="pdf-container">
             <header class="pdf-header">
-                <div class="pdf-info-box">
-                    <div class="pdf-row" style="font-size: 16px; margin-bottom: 10px; color:#0088aa;"><b>Informe Técnico</b></div>
-                    <div class="pdf-row"><b>Fecha</b> <span id="pdf-fecha"></span></div>
-                    <div class="pdf-row"><b>Cliente</b> <span id="pdf-cliente"></span></div>
-                    <div class="pdf-row"><b>Dirección</b> <span id="pdf-dir"></span></div>
+                <!-- TÍTULO PRINCIPAL CENTRADO Y EN UN SOLO RENGLÓN -->
+                <div style="text-align: center; margin-bottom: 20px; width: 100%;">
+                    <h2 style="margin: 0; color: #0088aa; font-size: 22px; text-transform: uppercase;">Informe Técnico</h2>
                 </div>
-                <div class="pdf-logo-box">
-                    <img src="membrete.avif" alt="Villaser Electricista" style="max-width: 100%; max-height: 70px; display: block; margin-left: auto;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                    <div class="pdf-info-box">
+                        <div class="pdf-row"><b>Fecha</b> <span id="pdf-fecha"></span></div>
+                        <div class="pdf-row"><b>Cliente</b> <span id="pdf-cliente"></span></div>
+                        <div class="pdf-row"><b>Dirección</b> <span id="pdf-dir"></span></div>
+                    </div>
+                    <div class="pdf-logo-box">
+                        <img src="membrete.avif" alt="Villaser Electricista" style="max-width: 100%; max-height: 70px; display: block; margin-left: auto;">
+                    </div>
                 </div>
             </header>
 
@@ -133,5 +144,4 @@
 
     <script src="script.js"></script>
 </body>
-                  </html>
-
+</html>
