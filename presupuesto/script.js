@@ -16,7 +16,6 @@ const selConcepto = document.getElementById('selConcepto');
 window.onload = fetchData;
 
 async function fetchData() {
-    // Implementación de Timeout de 8 segundos para evitar bloqueos infinitos
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
 
@@ -26,7 +25,7 @@ async function fetchData() {
             fetch(URL_PRECIOS, { signal: controller.signal })
         ]);
         
-        clearTimeout(timeoutId); // Limpia el timeout si la respuesta es exitosa
+        clearTimeout(timeoutId); 
         
         const txtCli = await resCli.text(), txtPre = await resPre.text();
         const jCli = JSON.parse(txtCli.substring(txtCli.indexOf("{"), txtCli.lastIndexOf("}") + 1));
@@ -45,7 +44,6 @@ async function fetchData() {
         clearTimeout(timeoutId);
         const loadingDiv = document.getElementById('loading');
         
-        // Manejo específico si el error fue por tiempo agotado o red
         if (e.name === 'AbortError') {
             loadingDiv.innerHTML = `⚠️ Tiempo de conexión agotado.<br><br><button class="btn-ngc" onclick="location.reload()">Reintentar</button>`;
         } else {
@@ -245,7 +243,6 @@ function exportarPresupuesto() {
     if (!clienteActual || listaItems.length === 0) return alert("No hay datos para exportar.");
     const data = { cliente: clienteActual, items: listaItems, obsG: document.getElementById('obsGenerales').value };
     
-    // Método moderno y seguro para exportar Base64 compatible con caracteres latinos (UTF-8)
     const jsonString = JSON.stringify(data, null, 2);
     const utf8Bytes = new TextEncoder().encode(jsonString);
     const base64Data = btoa(Array.from(new Uint8Array(utf8Bytes), b => String.fromCharCode(b)).join(''));
@@ -281,7 +278,8 @@ function importarPresupuesto(e) {
     e.target.value = '';
 }
 
-// Bajar Imagen en formato PNG (Original, sin modificar encabezado)
+// --- GENERADOR DE IMAGEN (PNG) PARA WHATSAPP ---
+// (Se mantiene intacto sin alterar con el membrete.avif del PDF)
 async function tomarCaptura() { 
     if (!clienteActual) return alert("Cargue un cliente primero");
     const zona = document.getElementById('zonaCaptura'); 
@@ -312,74 +310,93 @@ async function tomarCaptura() {
     zona.style.color = ""; 
 }
 
-// NUEVA FUNCION PDF: Inserta el membrete.avif, evita cortes centrados
-async function generarPDF() { 
-    if (!clienteActual) return alert("Cargue un cliente primero");
-    
-    const zona = document.getElementById('zonaCaptura'); 
-    const trash = document.querySelectorAll('.trash-icon'); 
-    const header = document.getElementById('headerMembrete');
-    
-    // Guardamos el texto original (VILLASER - PRESUPUESTO)
-    const originalHeaderText = header.innerHTML;
+// --- GENERADOR DE PDF A4 (NUEVA FUNCIÓN) ---
+async function generarPDF() {
+    if (!clienteActual || listaItems.length === 0) {
+        alert("Agregá un cliente y trabajos para generar el PDF.");
+        return;
+    }
 
-    trash.forEach(b => b.style.display = 'none'); 
-    zona.style.color = "#ffffff";
+    // 1. Rellenar datos del cliente
+    const nroPresupuesto = `PEM-${Math.floor(Math.random() * 9000) + 1000}`; // Simula un NRO
+    document.getElementById('pdf-nro').innerText = nroPresupuesto;
+    document.getElementById('pdf-fecha').innerText = clienteActual.fecha;
+    document.getElementById('pdf-cliente').innerText = clienteActual.nombre;
+    document.getElementById('pdf-direccion').innerText = clienteActual.dir || 'A coordinar';
+
+    // 2. Rellenar la tabla de ítems y calcular totales
+    const tbody = document.getElementById('pdf-tbody');
+    tbody.innerHTML = '';
     
-    // Inyectamos la imagen membrete y esperamos que cargue antes de capturar
-    await new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-            header.innerHTML = '';
-            img.className = 'img-membrete';
-            header.appendChild(img);
-            resolve();
-        };
-        img.onerror = () => {
-            console.warn("No se pudo cargar membrete.avif");
-            resolve(); // Continuar igual si falla
-        };
-        img.src = 'membrete.avif';
+    let subtotalPuro = 0;
+    let totalDescuentos = 0;
+    let notasAcumuladas = '';
+
+    listaItems.forEach((i, index) => {
+        // Creamos un pseudo-código usando las iniciales del concepto (Ej: 01-02)
+        const codigoItem = `0${index + 1}-0${Math.floor(Math.random() * 5) + 1}`; 
+        
+        const valorUnitarioOriginal = i.unitario;
+        const subtotalFilaPuro = valorUnitarioOriginal * i.qty;
+        const subtotalFilaConDesc = i.total;
+        const descuentoFila = subtotalFilaPuro - subtotalFilaConDesc;
+
+        subtotalPuro += subtotalFilaPuro;
+        totalDescuentos += descuentoFila;
+
+        // Fila
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${codigoItem}</td>
+            <td>${i.concepto}</td>
+            <td>${i.qty}</td>
+            <td>$ ${valorUnitarioOriginal.toLocaleString('es-AR')}</td>
+            <td>$ ${subtotalFilaPuro.toLocaleString('es-AR')}</td>
+        `;
+        tbody.appendChild(tr);
+
+        // Notas (si tiene)
+        if(i.obs) {
+            notasAcumuladas += `<b>${codigoItem}</b> ${i.obs.replace(/\n/g, ' ')}\n`;
+        }
     });
 
-    // Guardar scroll y subir para que empiece desde ARRIBA (Top)
-    const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
+    const og = document.getElementById('obsGenerales').value;
+    if(og) notasAcumuladas += `\n<b>Gral:</b> ${og}`;
+
+    // 3. Rellenar totales
+    const totalFinal = subtotalPuro - totalDescuentos;
+    document.getElementById('pdf-subtotal').innerText = `$ ${subtotalPuro.toLocaleString('es-AR')}`;
+    document.getElementById('pdf-descuentos').innerText = `-$ ${totalDescuentos.toLocaleString('es-AR')}`;
+    document.getElementById('pdf-total').innerText = `$ ${totalFinal.toLocaleString('es-AR')}`;
+    document.getElementById('pdf-notas').innerHTML = notasAcumuladas ? notasAcumuladas.replace(/\n/g, '<br>') : 'Sin notas aclaratorias.';
+
+    // 4. Configurar y disparar html2pdf
+    const element = document.getElementById('plantilla-pdf');
+    element.style.display = 'block'; // Mostramos temporalmente el div
+
+    // Solución para que siempre escanee desde arriba
     window.scrollTo(0, 0);
 
-    // Capturar canvas forzando dimensiones desde arriba (scrollY: 0)
-    const canvas = await html2canvas(zona, { 
-        backgroundColor: "#1e1e1e", 
-        scale: 2,
-        useCORS: true,
-        scrollY: 0,
-        windowHeight: document.documentElement.scrollHeight
-    }); 
-    
-    // Restaurar a la normalidad el UI
-    window.scrollTo(scrollX, scrollY);
-    header.innerHTML = originalHeaderText; // Volvemos al texto original
-    trash.forEach(b => b.style.display = 'inline-block'); 
-    zona.style.color = ""; 
+    const opt = {
+        margin:       0, // El padding ya está manejado en el CSS (.pdf-container)
+        filename:     `${clienteActual.nombre.replace(/ /g, '_')}_Villaser_${nroPresupuesto}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
 
-    // Generar el PDF
-    const { jsPDF } = window.jspdf;
-    const imgData = canvas.toDataURL('image/png');
+    animarBoton('btnGenerarPDF'); // Da feedback visual de "LISTO"
     
-    const pdfWidth = 210; 
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-    const pdf = new jsPDF({
-        orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
-        unit: 'mm',
-        format: [pdfWidth, pdfHeight]
-    });
-    
-    // Inserción obligatoria desde la coordenada 0,0 (arriba a la izquierda)
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    
-    const f = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
-    pdf.save(`Presupuesto_NGC_${clienteActual.nombre.split(' ')[0]}_${f}.pdf`);
+    // Generamos y volvemos a ocultar el div
+    try {
+        await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+        console.error("Error al generar PDF: ", error);
+        alert("Hubo un error al generar el PDF.");
+    } finally {
+        element.style.display = 'none';
+    }
 }
 
 function enviarWhatsApp() { 
@@ -399,5 +416,5 @@ function animarBoton(id) {
         b.classList.remove('active-success'); 
         b.innerText = originalText;
     }, 1000); 
-    }
-                                   
+}
+    
