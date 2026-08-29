@@ -375,9 +375,22 @@ td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-s
 }
 .pdf-pagos h4 { margin: 0 0 5px 0; color: #333; font-size: 13px; }
 .pdf-pagos p { margin: 0; font-size: 11px; color: #666; line-height: 1.5; }
+.pdf-right-footer {
+    text-align: right;
+}
 .pdf-slogan {
     font-size: 16px;
     font-weight: bold;
     color: #0088aa;
     font-style: italic;
+    margin-bottom: 6px; /* Separación entre eslogan y contacto */
+}
+.pdf-contacto {
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+.pdf-contacto span {
+    display: inline-block;
 }
