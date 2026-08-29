@@ -300,3 +300,89 @@ function animarBoton(id) {
     }, 1000); 
 }
 
+// --- GENERADOR DE PDF A4 ---
+async function generarPDF() {
+    if (!clienteActual || listaItems.length === 0) {
+        alert("Agregá un cliente y trabajos para generar el PDF.");
+        return;
+    }
+
+    // 1. Rellenar datos del cliente
+    const nroPresupuesto = `PEM-${Math.floor(Math.random() * 9000) + 1000}`; // Simula un NRO
+    document.getElementById('pdf-nro').innerText = nroPresupuesto;
+    document.getElementById('pdf-fecha').innerText = clienteActual.fecha;
+    document.getElementById('pdf-cliente').innerText = clienteActual.nombre;
+    document.getElementById('pdf-direccion').innerText = clienteActual.dir || 'A coordinar';
+
+    // 2. Rellenar la tabla de ítems y calcular totales
+    const tbody = document.getElementById('pdf-tbody');
+    tbody.innerHTML = '';
+    
+    let subtotalPuro = 0;
+    let totalDescuentos = 0;
+    let notasAcumuladas = '';
+
+    listaItems.forEach((i, index) => {
+        // Creamos un pseudo-código usando las iniciales del concepto (Ej: 01-02)
+        const codigoItem = `0${index + 1}-0${Math.floor(Math.random() * 5) + 1}`; 
+        
+        const valorUnitarioOriginal = i.unitario;
+        const subtotalFilaPuro = valorUnitarioOriginal * i.qty;
+        const subtotalFilaConDesc = i.total;
+        const descuentoFila = subtotalFilaPuro - subtotalFilaConDesc;
+
+        subtotalPuro += subtotalFilaPuro;
+        totalDescuentos += descuentoFila;
+
+        // Fila
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${codigoItem}</td>
+            <td>${i.concepto}</td>
+            <td>${i.qty}</td>
+            <td>$ ${valorUnitarioOriginal.toLocaleString('es-AR')}</td>
+            <td>$ ${subtotalFilaPuro.toLocaleString('es-AR')}</td>
+        `;
+        tbody.appendChild(tr);
+
+        // Notas (si tiene)
+        if(i.obs) {
+            notasAcumuladas += `<b>${codigoItem}</b> ${i.obs.replace(/\n/g, ' ')}\n`;
+        }
+    });
+
+    const og = document.getElementById('obsGenerales').value;
+    if(og) notasAcumuladas += `\n<b>Gral:</b> ${og}`;
+
+    // 3. Rellenar totales
+    const totalFinal = subtotalPuro - totalDescuentos;
+    document.getElementById('pdf-subtotal').innerText = `$ ${subtotalPuro.toLocaleString('es-AR')}`;
+    document.getElementById('pdf-descuentos').innerText = `-$ ${totalDescuentos.toLocaleString('es-AR')}`;
+    document.getElementById('pdf-total').innerText = `$ ${totalFinal.toLocaleString('es-AR')}`;
+    document.getElementById('pdf-notas').innerHTML = notasAcumuladas ? notasAcumuladas.replace(/\n/g, '<br>') : 'Sin notas aclaratorias.';
+
+    // 4. Configurar y disparar html2pdf
+    const element = document.getElementById('plantilla-pdf');
+    element.style.display = 'block'; // Mostramos temporalmente el div
+
+    const opt = {
+        margin:       0, // El padding ya está manejado en el CSS (.pdf-container)
+        filename:     `${clienteActual.nombre.replace(/ /g, '_')}_Villaser_${nroPresupuesto}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    animarBoton('btnGenerarPDF'); // Da feedback visual de "LISTO"
+    
+    // Generamos y volvemos a ocultar el div
+    try {
+        await html2pdf().set(opt).from(element).save();
+    } catch (error) {
+        console.error("Error al generar PDF: ", error);
+        alert("Hubo un error al generar el PDF.");
+    } finally {
+        element.style.display = 'none';
+    }
+}
+
