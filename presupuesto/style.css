@@ -208,15 +208,6 @@ input:focus, textarea:focus, .native-select:focus {
     padding-bottom: 10px; 
 }
 
-/* Clase para el membrete del PDF */
-.img-membrete {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    border-radius: 6px;
-}
-
 table { width: 100%; border-collapse: collapse; }
 td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-size: 0.95rem; }
 
@@ -259,4 +250,120 @@ td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-s
     padding: 6px 12px;
     cursor: pointer; 
     font-size: 1rem;
-    }
+}
+
+/* --- ESTILOS PARA EL BOTÓN PDF --- */
+.btn-pdf {
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
+    background: rgba(255, 68, 68, 0.05);
+    height: 55px;
+    font-size: 1rem;
+}
+.btn-pdf:active { background: rgba(255, 68, 68, 0.2); }
+
+/* --- ESTILOS EXCLUSIVOS PARA LA PLANTILLA A4 (PDF) --- */
+.pdf-container {
+    background: #ffffff;
+    color: #000000;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 20mm;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+}
+
+.pdf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #0088aa;
+    padding-bottom: 15px;
+}
+
+.pdf-info-box { width: 60%; }
+.pdf-row { display: grid; grid-template-columns: 120px 1fr; margin-bottom: 5px; font-size: 13px; }
+.pdf-row b { color: #555; }
+.pdf-logo-box { width: 35%; text-align: right; }
+
+.pdf-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+.pdf-table th {
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ccc;
+    font-size: 11px;
+}
+.pdf-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+}
+.pdf-table th:nth-child(3), .pdf-table td:nth-child(3),
+.pdf-table th:nth-child(4), .pdf-table td:nth-child(4),
+.pdf-table th:nth-child(5), .pdf-table td:nth-child(5) {
+    text-align: right;
+}
+
+.pdf-body-lower {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.pdf-notas-box {
+    width: 55%;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+}
+.pdf-notas-box h3 { margin: 0 0 10px 0; font-size: 12px; color: #0088aa; text-transform: uppercase; }
+.pdf-notas-content { font-size: 10px; color: #555; line-height: 1.4; white-space: pre-wrap; }
+
+.pdf-totales-box {
+    width: 40%;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+.pdf-total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.final-total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #333;
+    font-size: 18px;
+    color: #0088aa;
+}
+
+.pdf-footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+.pdf-pagos h4 { margin: 0 0 5px 0; color: #333; font-size: 13px; }
+.pdf-pagos p { margin: 0; font-size: 11px; color: #666; line-height: 1.5; }
+.pdf-slogan {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0088aa;
+    font-style: italic;
+}
