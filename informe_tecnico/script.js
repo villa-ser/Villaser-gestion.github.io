@@ -121,8 +121,24 @@ async function copyTitle() {
 }
 
 // =======================================================
-// GESTIÓN DE PÁRRAFOS (AGREGAR, EDITAR, ELIMINAR, RENDER)
+// GESTIÓN DE PÁRRAFOS (REVISAR, AGREGAR, EDITAR)
 // =======================================================
+
+function revisarOrtografia() {
+    const textarea = document.getElementById('textoInforme');
+    if (!textarea.value.trim()) return;
+    
+    // Forzar re-evaluación del motor nativo de ortografía del navegador
+    const textoOriginal = textarea.value;
+    textarea.value = '';
+    textarea.value = textoOriginal;
+    textarea.focus();
+    
+    // Cambiar temporalmente el botón
+    const b = document.getElementById('btnRevisar');
+    b.innerText = "🔍 REVISANDO";
+    setTimeout(() => { b.innerText = "🔍 REVISAR"; }, 2000);
+}
 
 function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({
@@ -141,7 +157,6 @@ function agregarParrafo() {
 }
 
 function checkPendingText() {
-    // Si el usuario olvidó presionar "Agregar" antes de generar/enviar
     const textarea = document.getElementById('textoInforme');
     const pendingText = textarea.value.trim();
     if (pendingText) {
@@ -178,6 +193,8 @@ function renderParrafos() {
         editArea.style.display = 'none';
         editArea.style.minHeight = '80px';
         editArea.style.width = '100%';
+        editArea.lang = 'es';
+        editArea.spellcheck = true;
         
         // Contenedor de Botones
         const btnContainer = document.createElement('div');
@@ -341,16 +358,14 @@ function takeScreenshot() {
 }
 
 // =======================================================
-// EXPORTAR E IMPORTAR (TXT)
+// EXPORTAR E IMPORTAR (GUARDAR / ABRIR)
 // =======================================================
 function exportToTxt() {
     checkPendingText();
     
     if (informeParrafos.length === 0) { alert("El informe está vacío."); return; }
     
-    // Unimos los párrafos con doble salto de línea
     const texto = informeParrafos.join('\n\n');
-    
     const headerData = `CLI\t${clientDetails.nombre || 'Cliente'}\t${clientDetails.tel || ''}\t${clientDetails.dir || ''}\n`;
     const fullContent = headerData + `INF\t` + texto.replace(/\n/g, '\\n');
     
@@ -363,7 +378,8 @@ function exportToTxt() {
     link.click(); 
     document.body.removeChild(link);
     
-    btnAlert('btnExport', '💾 EXPORTAR');
+    // Cambiado mensaje a GUARDAR
+    btnAlert('btnExport', '💾 GUARDAR');
 }
 
 function importFromTxt(event) {
@@ -388,14 +404,15 @@ function importFromTxt(event) {
             } else if (line.startsWith('INF\t')) {
                 const infText = line.substring(4).replace(/\\n/g, '\n');
                 
-                // Reconstruimos el array separando por dobles saltos de línea
                 informeParrafos = infText.split('\n\n').filter(p => p.trim() !== '');
                 renderParrafos();
             }
         });
         
         event.target.value = ""; 
-        btnAlert('btnImport', '📂 IMPORTAR');
+        
+        // Cambiado mensaje a ABRIR
+        btnAlert('btnImport', '📂 ABRIR');
     };
     reader.readAsText(file);
 }
@@ -415,7 +432,6 @@ function sendWSP() {
         return; 
     }
     
-    // Genera el texto con sangrías usando espacios en blanco (aprox. 4 espacios)
     let bodyText = informeParrafos.map(p => `    ${p}`).join('\n\n');
     let wspText = `*VILLASER - INFORME TÉCNICO*\n*Cliente:* ${clientDetails.nombre}\n\n${bodyText}`;
     
@@ -434,3 +450,4 @@ function sendWSP() {
 }
 
 init();
+                                  
