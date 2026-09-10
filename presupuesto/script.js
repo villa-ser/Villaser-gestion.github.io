@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+Document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('villaser_theme');
     if (savedTheme === 'light') document.body.classList.add('light-mode');
 });
@@ -279,7 +279,6 @@ function importarPresupuesto(e) {
 }
 
 // --- GENERADOR DE IMAGEN (PNG) PARA WHATSAPP ---
-// (Se mantiene intacto sin alterar con el membrete.avif del PDF)
 async function tomarCaptura() { 
     if (!clienteActual) return alert("Cargue un cliente primero");
     const zona = document.getElementById('zonaCaptura'); 
@@ -310,7 +309,7 @@ async function tomarCaptura() {
     zona.style.color = ""; 
 }
 
-// --- GENERADOR DE PDF A4 (NUEVA FUNCIÓN) ---
+// --- GENERADOR DE PDF A4 ---
 async function generarPDF() {
     if (!clienteActual || listaItems.length === 0) {
         alert("Agregá un cliente y trabajos para generar el PDF.");
@@ -318,7 +317,7 @@ async function generarPDF() {
     }
 
     // 1. Rellenar datos del cliente
-    const nroPresupuesto = `PEM-${Math.floor(Math.random() * 9000) + 1000}`; // Simula un NRO
+    const nroPresupuesto = `PEM-${Math.floor(Math.random() * 9000) + 1000}`; 
     document.getElementById('pdf-nro').innerText = nroPresupuesto;
     document.getElementById('pdf-fecha').innerText = clienteActual.fecha;
     document.getElementById('pdf-cliente').innerText = clienteActual.nombre;
@@ -333,7 +332,6 @@ async function generarPDF() {
     let notasAcumuladas = '';
 
     listaItems.forEach((i, index) => {
-        // Creamos un pseudo-código usando las iniciales del concepto (Ej: 01-02)
         const codigoItem = `0${index + 1}-0${Math.floor(Math.random() * 5) + 1}`; 
         
         const valorUnitarioOriginal = i.unitario;
@@ -344,11 +342,17 @@ async function generarPDF() {
         subtotalPuro += subtotalFilaPuro;
         totalDescuentos += descuentoFila;
 
+        // MODIFICACIÓN: Mostrar el descuento junto al concepto
+        let textoConcepto = i.concepto;
+        if (i.desc > 0) {
+            textoConcepto += ` <strong style="color: #ffc107;">(-${i.desc}% -$ ${descuentoFila.toLocaleString('es-AR')})</strong>`;
+        }
+
         // Fila
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>${codigoItem}</td>
-            <td>${i.concepto}</td>
+            <td>${textoConcepto}</td>
             <td>${i.qty}</td>
             <td>$&nbsp;${valorUnitarioOriginal.toLocaleString('es-AR')}</td>
             <td>$&nbsp;${subtotalFilaPuro.toLocaleString('es-AR')}</td>
@@ -373,22 +377,20 @@ async function generarPDF() {
 
     // 4. Configurar y disparar html2pdf
     const element = document.getElementById('plantilla-pdf');
-    element.style.display = 'block'; // Mostramos temporalmente el div
+    element.style.display = 'block'; 
 
-    // Solución para que siempre escanee desde arriba
     window.scrollTo(0, 0);
 
     const opt = {
-        margin:       0, // El padding ya está manejado en el CSS (.pdf-container)
+        margin:       0, 
         filename:     `${clienteActual.nombre.replace(/ /g, '_')}_Villaser_${nroPresupuesto}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
         jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    animarBoton('btnGenerarPDF'); // Da feedback visual de "LISTO"
+    animarBoton('btnGenerarPDF'); 
     
-    // Generamos y volvemos a ocultar el div
     try {
         await html2pdf().set(opt).from(element).save();
     } catch (error) {
@@ -416,5 +418,5 @@ function animarBoton(id) {
         b.classList.remove('active-success'); 
         b.innerText = originalText;
     }, 1000); 
-}
-    
+        }
+                                            
