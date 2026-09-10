@@ -304,7 +304,7 @@ td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-s
     font-size: 11px;
 }
 
-/* MODIFICACIÓN: Aplicamos tamaño 10.5px a toda la fila para asegurar coherencia visual (código, concepto y valores numéricos) */
+/* Tamaño de letra unificado para todas las celdas del PDF (código, concepto, y números) */
 .pdf-table td {
     padding: 10px;
     border-bottom: 1px solid #eee;
