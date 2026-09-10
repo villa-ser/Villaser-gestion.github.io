@@ -1,4 +1,4 @@
-Document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('villaser_theme');
     if (savedTheme === 'light') document.body.classList.add('light-mode');
 });
@@ -342,7 +342,7 @@ async function generarPDF() {
         subtotalPuro += subtotalFilaPuro;
         totalDescuentos += descuentoFila;
 
-        // MODIFICACIÓN: Mostrar el descuento junto al concepto
+        // Mostrar el descuento junto al concepto en el PDF
         let textoConcepto = i.concepto;
         if (i.desc > 0) {
             textoConcepto += ` <strong style="color: #ffc107;">(-${i.desc}% -$ ${descuentoFila.toLocaleString('es-AR')})</strong>`;
@@ -419,4 +419,4 @@ function animarBoton(id) {
         b.innerText = originalText;
     }, 1000); 
         }
-                                            
+                    
