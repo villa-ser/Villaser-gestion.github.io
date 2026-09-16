@@ -9,7 +9,6 @@
     
     <title>Villaser - Reporte Fotográfico</title>
     
-    <!-- Librería para generar el PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <link rel="stylesheet" href="style.css">
@@ -23,21 +22,20 @@
         </button>
     </nav>
 
-    <!-- Indicador de sincronización inicial -->
+    <!-- Indicadores de carga -->
     <div id="loading" aria-live="polite" class="loading-state">
         📡 SINCRONIZANDO CLIENTES NGC...
     </div>
 
-    <!-- Indicador de carga para el procesado de fotos -->
     <div id="loadingOverlay" class="loading-overlay" style="display:none;">
         <div class="loading-state">
-            📸 PROCESANDO IMAGEN...<br><small>Por favor espere</small>
+            📸 PROCESANDO IMAGEN...<br><small>Liberando memoria RAM</small>
         </div>
     </div>
     
     <div id="app" style="display:none;">
         
-        <!-- PASO 1: SELECCIÓN DEL CLIENTE -->
+        <!-- PASO 1: SELECCIÓN DEL CLIENTE (Usa BD) -->
         <section id="step-cliente" class="ngc-card">
             <h4>Identificación Cliente</h4>
             
@@ -59,12 +57,12 @@
             </div>
         </section>
 
-        <!-- PASO 2: CAPTURA DE FOTOS -->
+        <!-- PASO 2: CAPTURA Y GALERÍA -->
         <section id="step-fotos" style="display:none; flex-direction: column; gap: 15px;">
 
             <div class="ngc-card">
                 <h4 style="display: flex; justify-content: space-between;">
-                    <span>Detalle de la Toma</span>
+                    <span>Datos de la Toma</span>
                     <span id="clienteLabel" style="color: var(--text-dim); font-size: 0.75rem;"></span>
                 </h4>
                 
@@ -103,30 +101,49 @@
 
                 <div class="row-group">
                     <label for="obsFoto">Observaciones (Medidas, estado, etc.)</label>
-                    <!-- Altura incrementada de 60px a 110px para mayor comodidad -->
+                    <!-- Cuadro de texto más grande -->
                     <textarea id="obsFoto" placeholder="Ej: Altura 1.20m, medidas internas 3x3m..." style="height: 110px; resize: none;"></textarea>
                 </div>
 
-                <div class="row-group" style="margin-top: 15px; text-align: center;">
-                    <input type="file" id="cameraInput" accept="image/*" multiple capture="environment" style="display: none;" onchange="procesarNuevasFotos(event)">
+                <!-- Botones de Acción de Imagen -->
+                <div style="margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <label>Ingresar Imágenes</label>
+                        <span id="contadorLote" style="color: var(--ngc-warning); font-size: 0.8rem; font-weight: bold;">0/3 de este lote</span>
+                    </div>
+
+                    <!-- Inputs Ocultos -->
+                    <!-- capture="environment" fuerza abrir la cámara directo en móviles -->
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="procesarNuevasFotos(event)">
+                    <!-- multiple permite elegir de la galería -->
+                    <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;" onchange="procesarNuevasFotos(event)">
                     
-                    <button id="btnTomarFoto" class="btn-ngc btn-main" style="width: 100%; border-color: var(--ngc-success); color: var(--ngc-success);" onclick="document.getElementById('cameraInput').click()">
-                        📸 TOMAR FOTOS (Máx 3)
+                    <div class="action-grid" style="margin-top: 0; margin-bottom: 15px; gap: 10px;">
+                        <button class="btn-ngc btn-main" style="border-color: var(--ngc-success); color: var(--ngc-success);" onclick="abrirCamara()">
+                            📸 CÁMARA
+                        </button>
+                        <button class="btn-ngc btn-main" style="border-color: var(--ngc-info); color: var(--ngc-info);" onclick="abrirGaleria()">
+                            🖼️ GALERÍA
+                        </button>
+                    </div>
+
+                    <button class="btn-ngc btn-main" style="width: 100%; border-color: var(--ngc-primary);" onclick="prepararNuevaCarga()">
+                        🔄 NUEVA CARGA (Limpiar selectores)
                     </button>
-                    <small style="color: var(--text-dim); display: block; margin-top: 8px;">Las fotos se marcarán con los datos ingresados arriba.</small>
+                    <small style="color: var(--text-dim); display: block; margin-top: 8px; text-align: center;">El cliente se mantiene hasta generar el PDF.</small>
                 </div>
             </div>       
             
             <div class="ngc-card">
                 <h4 style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Galería del Informe</span>
-                    <span id="contadorFotos" style="color: var(--ngc-primary); font-weight: bold;">0 fotos</span>
+                    <span>Total del Informe</span>
+                    <span id="contadorFotosTotal" style="color: var(--ngc-primary); font-weight: bold;">0 fotos</span>
                 </h4>
                 
                 <div id="galeriaFotos" class="galeria-grid"></div>
             </div>
             
-            <div style="margin-top: 10px;">
+            <div style="margin-top: 10px; padding-bottom: 30px;">
                 <button id="btnGenerarPDF" class="btn-ngc btn-main btn-pdf" onclick="generarPDFReporte()" style="width: 100%;">📄 Generar Reporte PDF</button>
             </div>
             
