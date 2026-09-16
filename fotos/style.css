@@ -1,0 +1,71 @@
+:root {
+    --ngc-primary: #00d4ff; 
+    --ngc-success: #28a745; 
+    --ngc-danger: #ff4444;
+    --ngc-warning: #ffc107; 
+    --bg-main: #121212;
+    --text-main: #ffffff; 
+    --text-dim: rgba(255, 255, 255, 0.6);
+    --ngc-glass: rgba(255, 255, 255, 0.03); 
+    --input-bg: rgba(26, 26, 26, 0.95);
+    --ngc-border: 1px solid rgba(255, 255, 255, 0.08);
+    --btn-height: 48px;
+}
+
+body { 
+    font-family: 'Segoe UI', system-ui, sans-serif; 
+    background-color: var(--bg-main); 
+    color: var(--text-main); 
+    margin: 0; padding: 0; display: flex; justify-content: center; width: 100%;
+}
+
+.container { width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 15px; padding: 15px; box-sizing: border-box; }
+
+.top-nav { margin-bottom: 5px; }
+.btn-back { background: transparent; border: 1px solid var(--ngc-primary); color: var(--text-main); padding: 10px 18px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+
+.loading-state { text-align: center; padding: 30px; font-size: 1rem; color: var(--ngc-primary); background: var(--ngc-glass); border: var(--ngc-border); border-radius: 12px; margin-bottom: 15px; }
+
+.ngc-card { background: var(--ngc-glass); border: var(--ngc-border); border-radius: 12px; padding: 15px; }
+
+h4 { color: var(--ngc-primary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 15px 0; }
+
+label { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; font-weight: 600; margin-bottom: 6px; display: block; }
+
+input:not([type="hidden"]), textarea, .native-select { 
+    width: 100%; background: var(--input-bg); color: var(--text-main); border: 1px solid rgba(150, 150, 150, 0.2); border-radius: 8px; padding: 12px 10px; font-size: 1rem; outline: none; box-sizing: border-box; font-family: inherit;
+}
+input:focus, textarea:focus, .native-select:focus { border-color: var(--ngc-primary); box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+
+.native-select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
+
+.row-group { margin-bottom: 15px; width: 100%; }
+
+.btn-ngc { background: rgba(0, 212, 255, 0.05); border: 1px solid var(--ngc-primary); color: var(--ngc-primary); border-radius: 8px; height: var(--btn-height); font-size: 0.85rem; font-weight: bold; text-transform: uppercase; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.btn-ngc:active { background: rgba(0, 212, 255, 0.2); transform: scale(0.98); }
+.btn-adapt { height: 100% !important; width: 100%; min-height: 55px; }
+.btn-ngc.active-success { background: rgba(40, 167, 69, 0.2); border-color: var(--ngc-success); color: var(--ngc-success); }
+.btn-pdf { border-color: #ff4444 !important; color: #ff4444 !important; background: rgba(255, 68, 68, 0.05); height: 55px; font-size: 1rem; }
+
+/* Galería preview en la app */
+.gallery-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.gallery-item { position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--ngc-primary); }
+.gallery-item img { width: 100%; display: block; object-fit: cover; aspect-ratio: 4/3; }
+.btn-del-foto { position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; font-weight: bold; }
+
+/* --- ESTILOS EXCLUSIVOS PARA LA PLANTILLA A4 (PDF) --- */
+.pdf-container { background: #ffffff; color: #000000; width: 210mm; min-height: 295mm; padding: 12mm; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+.pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #0088aa; padding-bottom: 10px; }
+.pdf-info-box { width: 65%; }
+.pdf-row { margin-bottom: 5px; font-size: 14px; }
+.pdf-row b { color: #555; }
+.pdf-logo-box { width: 30%; text-align: right; }
+
+.pdf-photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+.pdf-photo-wrapper { page-break-inside: avoid; break-inside: avoid; text-align: center; border: 1px solid #ccc; padding: 5px; background: #f9f9f9; border-radius: 4px; }
+.pdf-photo-wrapper img { width: 100%; height: auto; max-height: 320px; object-fit: contain; display: block; }
+
+.pdf-footer { margin-top: 20px; border-top: 1px solid #ddd; padding-top: 15px; }
+.pdf-slogan { font-size: 16px; font-weight: bold; color: #0088aa; font-style: italic; margin-bottom: 6px; }
+.pdf-contacto { font-size: 12px; color: #555; font-weight: 500; letter-spacing: 0.5px; }
+
