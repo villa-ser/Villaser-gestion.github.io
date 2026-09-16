@@ -9,6 +9,7 @@
     
     <title>Villaser - Reporte Fotográfico</title>
     
+    <!-- Librería para generar el PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <link rel="stylesheet" href="style.css">
@@ -22,11 +23,12 @@
         </button>
     </nav>
 
-    <!-- Indicadores de carga -->
+    <!-- Indicador de sincronización de base de datos -->
     <div id="loading" aria-live="polite" class="loading-state">
         📡 SINCRONIZANDO CLIENTES NGC...
     </div>
 
+    <!-- Pantalla de carga que bloquea la interfaz mientras se procesan fotos pesadas -->
     <div id="loadingOverlay" class="loading-overlay" style="display:none;">
         <div class="loading-state">
             📸 PROCESANDO IMAGEN...<br><small>Liberando memoria RAM</small>
@@ -35,7 +37,7 @@
     
     <div id="app" style="display:none;">
         
-        <!-- PASO 1: SELECCIÓN DEL CLIENTE (Usa BD) -->
+        <!-- PASO 1: SELECCIÓN DEL CLIENTE (Usa BD de Google Sheets) -->
         <section id="step-cliente" class="ngc-card">
             <h4>Identificación Cliente</h4>
             
@@ -57,7 +59,7 @@
             </div>
         </section>
 
-        <!-- PASO 2: CAPTURA Y GALERÍA -->
+        <!-- PASO 2: CONFIGURACIÓN DE TOMA Y GALERÍA -->
         <section id="step-fotos" style="display:none; flex-direction: column; gap: 15px;">
 
             <div class="ngc-card">
@@ -101,24 +103,22 @@
 
                 <div class="row-group">
                     <label for="obsFoto">Observaciones (Medidas, estado, etc.)</label>
-                    <!-- Cuadro de texto más grande -->
                     <textarea id="obsFoto" placeholder="Ej: Altura 1.20m, medidas internas 3x3m..." style="height: 110px; resize: none;"></textarea>
                 </div>
 
-                <!-- Botones de Acción de Imagen -->
+                <!-- Botones de Acción y Controles -->
                 <div style="margin-top: 15px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                         <label>Ingresar Imágenes</label>
                         <span id="contadorLote" style="color: var(--ngc-warning); font-size: 0.8rem; font-weight: bold;">0/3 de este lote</span>
                     </div>
 
-                    <!-- Inputs Ocultos -->
-                    <!-- capture="environment" fuerza abrir la cámara directo en móviles -->
+                    <!-- Inputs Ocultos para cámara y galería -->
                     <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="procesarNuevasFotos(event)">
-                    <!-- multiple permite elegir de la galería -->
                     <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;" onchange="procesarNuevasFotos(event)">
                     
-                    <div class="action-grid" style="margin-top: 0; margin-bottom: 15px; gap: 10px;">
+                    <!-- Botones Principales -->
+                    <div class="action-grid" style="margin-top: 0; margin-bottom: 15px; gap: 10px; display: grid; grid-template-columns: 1fr 1fr;">
                         <button class="btn-ngc btn-main" style="border-color: var(--ngc-success); color: var(--ngc-success);" onclick="abrirCamara()">
                             📸 CÁMARA
                         </button>
@@ -134,13 +134,15 @@
                 </div>
             </div>       
             
+            <!-- GALERÍA EN FORMATO LISTA -->
             <div class="ngc-card">
                 <h4 style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Total del Informe</span>
+                    <span>Listado de Entradas</span>
                     <span id="contadorFotosTotal" style="color: var(--ngc-primary); font-weight: bold;">0 fotos</span>
                 </h4>
                 
-                <div id="galeriaFotos" class="galeria-grid"></div>
+                <!-- Contenedor donde se inyectan las fotos en miniatura -->
+                <div id="galeriaFotos" class="galeria-list"></div>
             </div>
             
             <div style="margin-top: 10px; padding-bottom: 30px;">
@@ -150,6 +152,7 @@
         </section>
     </div>
 </main>
+
 <script src="script.js"></script>
 </body>
 </html>
