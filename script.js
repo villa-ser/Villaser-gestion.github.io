@@ -129,6 +129,11 @@ document.getElementById('btnInformeTecnico').addEventListener('click', function(
     window.location.href = './informe_tecnico/index.html';
 });
 
+// Navegación al menu de Fotos
+document.getElementById('btnFotos').addEventListener('click', function() {
+    window.location.href = './fotos/index.html';
+});
+
 // Al cargar la página principal, verificar qué tema estaba activo
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('villaser_theme');
