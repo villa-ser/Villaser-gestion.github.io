@@ -4,7 +4,7 @@ const URL_CLIENTES = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq
 let dbClientes = [];
 let clienteActual = null;
 let fotosArray = []; 
-let fotosLoteActual = 0; // Cuenta cuántas fotos van con la misma Habitación/Boca
+let fotosLoteActual = 0; 
 
 const selCliente = document.getElementById('selCliente');
 
@@ -69,7 +69,6 @@ function iniciarReporte() {
     document.getElementById('step-fotos').style.display = 'flex';
 }
 
-
 // --- LÓGICA DE FOTOS Y MEMORIA ---
 
 function abrirCamara() {
@@ -119,14 +118,13 @@ async function procesarNuevasFotos(event) {
 
     document.getElementById('loadingOverlay').style.display = 'flex';
 
-    // Procesamiento secuencial estricto para evitar colapso de RAM
     for(let file of fotosAProcesar) {
         try {
             const stampedBase64 = await estamparDatosEnImagen(file, hab, boca, obs);
             fotosArray.push({
                 id: Date.now() + Math.random(),
                 src: stampedBase64,
-                hab, boca
+                hab, boca, obs // Ahora también guardamos la observación en el array
             });
             fotosLoteActual++;
         } catch(err) {
@@ -135,7 +133,6 @@ async function procesarNuevasFotos(event) {
         }
     }
 
-    // Limpieza de inputs
     document.getElementById('cameraInput').value = ''; 
     document.getElementById('galleryInput').value = ''; 
 
@@ -157,7 +154,7 @@ function estamparDatosEnImagen(file, habitacion, boca, observaciones) {
             
             let width = img.width;
             let height = img.height;
-            const MAX_SIZE = 800; // Mantiene el tamaño controlado
+            const MAX_SIZE = 800; 
             
             if (width > height && width > MAX_SIZE) {
                 height *= MAX_SIZE / width; width = MAX_SIZE;
@@ -204,7 +201,6 @@ function estamparDatosEnImagen(file, habitacion, boca, observaciones) {
 
             const finalBase64 = canvas.toDataURL('image/jpeg', 0.6);
             
-            // LIMPIEZA EXTREMA DE MEMORIA RAM
             ctx.clearRect(0, 0, width, height);
             canvas.width = 0;
             canvas.height = 0;
@@ -226,16 +222,25 @@ function estamparDatosEnImagen(file, habitacion, boca, observaciones) {
     });
 }
 
+// --- ACTUALIZACIÓN DE INTERFAZ: VISTA LISTA ---
 function actualizarGaleria() {
     const gal = document.getElementById('galeriaFotos');
     gal.innerHTML = '';
     
     fotosArray.forEach(foto => {
         const div = document.createElement('div');
-        div.className = 'foto-item';
+        div.className = 'foto-item-list';
         div.innerHTML = `
-            <img src="${foto.src}" alt="Foto">
-            <button class="btn-delete-foto" onclick="borrarFoto(${foto.id})">✕</button>
+            <img src="${foto.src}" class="foto-thumb" alt="Miniatura">
+            <div class="foto-info">
+                <strong style="color: white;">${foto.hab}</strong><br>
+                <span style="color: var(--ngc-primary);">${foto.boca}</span>
+                ${foto.obs ? `<div class="foto-obs">${foto.obs}</div>` : ''}
+            </div>
+            <div class="foto-actions">
+                <button class="btn-action-icon btn-edit" onclick="editarFoto(${foto.id})" title="Editar Datos">✏️</button>
+                <button class="btn-action-icon btn-delete" onclick="borrarFoto(${foto.id})" title="Eliminar Foto">🗑️</button>
+            </div>
         `;
         gal.appendChild(div);
     });
@@ -243,11 +248,28 @@ function actualizarGaleria() {
     document.getElementById('contadorFotosTotal').innerText = `${fotosArray.length} fotos`;
 }
 
+function editarFoto(id) {
+    const foto = fotosArray.find(f => f.id === id);
+    if(!foto) return;
+
+    // Cargar los datos de la foto en los selectores
+    document.getElementById('selHabitacion').value = foto.hab;
+    document.getElementById('selBoca').value = foto.boca;
+    document.getElementById('obsFoto').value = foto.obs || '';
+
+    // Llevamos al usuario arriba para que vea el formulario
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    alert("📝 DATOS CARGADOS.\n\nComo el texto está estampado en la imagen, para editarla debes tomar/subir la foto nuevamente con estos datos y luego eliminar la vieja de la lista.");
+}
+
 function borrarFoto(id) {
-    fotosArray = fotosArray.filter(f => f.id !== id);
-    // Si borraste una foto, idealmente el lote actual debería decrecer si pertenece al lote
-    // Por simplicidad de UX, acá solo actualizamos el total general. 
-    actualizarGaleria();
+    if(confirm("¿Seguro que deseas eliminar esta entrada?")) {
+        fotosArray = fotosArray.filter(f => f.id !== id);
+        // NOTA: No restamos 'fotosLoteActual' aquí porque el usuario podría estar borrando 
+        // una foto de un lote anterior. Simplemente actualizamos la lista.
+        actualizarGaleria();
+    }
 }
 
 // --- GENERACIÓN DE PDF ---
@@ -341,5 +363,5 @@ function generarPDFReporte() {
             btnPdf.style.pointerEvents = "auto";
         }
     }, 100);
-            }
-                                                
+                         }
+                                       
