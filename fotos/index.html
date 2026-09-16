@@ -7,10 +7,10 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121212">
     
-    <title>Villaser - Relevamiento Fotográfico</title>
+    <title>Villaser - Reporte Fotográfico</title>
     
-    <!-- Librería para la plantilla A4 PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Librería para generar el PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <link rel="stylesheet" href="style.css">
 </head>
@@ -23,132 +23,116 @@
         </button>
     </nav>
 
-    <!-- Indicador de carga -->
-    <div id="loading" class="loading-state" style="display: none;">
-        📡 PROCESANDO IMAGEN...
+    <!-- Indicador de sincronización inicial -->
+    <div id="loading" aria-live="polite" class="loading-state">
+        📡 SINCRONIZANDO CLIENTES NGC...
+    </div>
+
+    <!-- Indicador de carga para el procesado de fotos -->
+    <div id="loadingOverlay" class="loading-overlay" style="display:none;">
+        <div class="loading-state">
+            📸 PROCESANDO IMAGEN...<br><small>Por favor espere</small>
+        </div>
     </div>
     
-    <div id="app">
+    <div id="app" style="display:none;">
         
-        <!-- PASO 1: DATOS DEL CLIENTE -->
+        <!-- PASO 1: SELECCIÓN DEL CLIENTE -->
         <section id="step-cliente" class="ngc-card">
-            <h4>Datos del Cliente</h4>
+            <h4>Identificación Cliente</h4>
             
             <div class="row-group">
-                <label for="cliNombre">Nombre / Razón Social</label>
-                <input type="text" id="cliNombre" placeholder="Ej: Juan Pérez">
+                <label for="selCliente">Seleccionar Cliente</label>
+                <select id="selCliente" class="native-select" aria-label="Lista de clientes">
+                    <option value="">-- SELECCIONE CLIENTE --</option>
+                </select>
             </div>
             
-            <div class="row-group">
-                <label for="cliDireccion">Dirección de la Obra</label>
-                <input type="text" id="cliDireccion" placeholder="Ej: Av. San Martín 123">
+            <div class="row-group-stretch" style="margin-top:10px;">
+                <div class="flex-3">
+                    <label for="cliInfo" class="sr-only">Información del cliente</label>
+                    <textarea id="cliInfo" readonly placeholder="Info cliente..." style="height: 70px; resize: none; font-size: 0.85rem;"></textarea>
+                </div>
+                <div class="flex-btn-small">
+                    <button id="btnLoadCli" class="btn-ngc btn-adapt" onclick="iniciarReporte()">Cargar</button>
+                </div>
             </div>
-            
-            <div class="row-group">
-                <label for="cliTelefono">Teléfono (Opcional)</label>
-                <input type="tel" id="cliTelefono" placeholder="Ej: 351...">
-            </div>
-
-            <button class="btn-ngc btn-adapt" onclick="iniciarRelevamiento()" style="margin-top: 10px;">Iniciar Relevamiento</button>
         </section>
 
-        <!-- PASO 2: TOMA DE FOTOS -->
+        <!-- PASO 2: CAPTURA DE FOTOS -->
         <section id="step-fotos" style="display:none; flex-direction: column; gap: 15px;">
+
             <div class="ngc-card">
-                <h4>Captura de Punto</h4>
+                <h4 style="display: flex; justify-content: space-between;">
+                    <span>Detalle de la Toma</span>
+                    <span id="clienteLabel" style="color: var(--text-dim); font-size: 0.75rem;"></span>
+                </h4>
                 
-                <div class="row-group">
-                    <label for="selHabitacion">Ubicación / Habitación</label>
-                    <select id="selHabitacion" class="native-select">
-                        <option value="">-- SELECCIONE UBICACIÓN --</option>
-                        <option value="Cocina">Cocina</option>
-                        <option value="Comedor">Comedor</option>
-                        <option value="Living">Living</option>
-                        <option value="Baño">Baño</option>
-                        <option value="Dormitorio Principal">Dormitorio Principal</option>
-                        <option value="Dormitorio Secundario">Dormitorio Secundario</option>
-                        <option value="Pasillo">Pasillo</option>
-                        <option value="Exterior / Fachada">Exterior / Fachada</option>
-                        <option value="Patio / Jardín">Patio / Jardín</option>
-                        <option value="Garage">Garage</option>
-                    </select>
+                <div class="row-group-stretch">
+                    <div class="flex-1">
+                        <label for="selHabitacion">Ubicación</label>
+                        <select id="selHabitacion" class="native-select">
+                            <option value="">-- SELECCIONE --</option>
+                            <option value="Cocina">Cocina</option>
+                            <option value="Comedor">Comedor</option>
+                            <option value="Living">Living</option>
+                            <option value="Dormitorio">Dormitorio</option>
+                            <option value="Baño">Baño</option>
+                            <option value="Pasillo">Pasillo</option>
+                            <option value="Exterior / Patio">Exterior / Patio</option>
+                            <option value="Fachada">Fachada</option>
+                            <option value="General">General</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="selBoca">Tipo de Elemento</label>
+                        <select id="selBoca" class="native-select">
+                            <option value="">-- SELECCIONE --</option>
+                            <option value="Tablero Principal (TP)">Tablero Principal (TP)</option>
+                            <option value="Tablero Seccional (TS)">Tablero Seccional (TS)</option>
+                            <option value="Tomacorriente">Tomacorriente</option>
+                            <option value="Interruptor (Punto)">Interruptor (Punto)</option>
+                            <option value="Boca de Iluminación">Boca de Iluminación</option>
+                            <option value="Toma Especial (IUG/TUE)">Toma Especial (TUE)</option>
+                            <option value="Puesta a Tierra (PAT)">Puesta a Tierra (PAT)</option>
+                            <option value="Canalización">Canalización</option>
+                            <option value="Cajas de Paso">Cajas de Paso</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="row-group">
-                    <label for="selBoca">Tipo de Boca / Elemento</label>
-                    <select id="selBoca" class="native-select">
-                        <option value="">-- SELECCIONE ELEMENTO --</option>
-                        <option value="Tablero Principal (TP)">Tablero Principal (TP)</option>
-                        <option value="Tablero Seccional (TS)">Tablero Seccional (TS)</option>
-                        <option value="Toma Corriente de Uso General (TUG)">Toma Corriente (TUG)</option>
-                        <option value="Toma Corriente de Uso Especial (TUE)">Toma Corriente (TUE)</option>
-                        <option value="Interruptor de Efecto (Llave)">Interruptor de Efecto (Llave)</option>
-                        <option value="Boca de Iluminación Techo">Boca de Iluminación Techo</option>
-                        <option value="Boca de Iluminación Pared">Boca de Iluminación Pared</option>
-                        <option value="Puesta a Tierra (Jabalina)">Puesta a Tierra (Jabalina)</option>
-                        <option value="Canalización / Cañería">Canalización / Cañería</option>
-                    </select>
+                    <label for="obsFoto">Observaciones (Medidas, estado, etc.)</label>
+                    <!-- Altura incrementada de 60px a 110px para mayor comodidad -->
+                    <textarea id="obsFoto" placeholder="Ej: Altura 1.20m, medidas internas 3x3m..." style="height: 110px; resize: none;"></textarea>
                 </div>
 
-                <div class="row-group">
-                    <label for="obsFoto">Observaciones (Medidas, detalles)</label>
-                    <textarea id="obsFoto" placeholder="Ej: A 20cm del nivel del piso terminado, caja desplazada..." style="height: 60px; resize: none;"></textarea>
+                <div class="row-group" style="margin-top: 15px; text-align: center;">
+                    <input type="file" id="cameraInput" accept="image/*" multiple capture="environment" style="display: none;" onchange="procesarNuevasFotos(event)">
+                    
+                    <button id="btnTomarFoto" class="btn-ngc btn-main" style="width: 100%; border-color: var(--ngc-success); color: var(--ngc-success);" onclick="document.getElementById('cameraInput').click()">
+                        📸 TOMAR FOTOS (Máx 3)
+                    </button>
+                    <small style="color: var(--text-dim); display: block; margin-top: 8px;">Las fotos se marcarán con los datos ingresados arriba.</small>
                 </div>
-
-                <!-- Input oculto para abrir la cámara -->
-                <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="procesarFotografia(event)">
-
-                <button id="btnTomarFoto" class="btn-ngc btn-adapt active-success" onclick="abrirCamara()" style="margin-top: 5px;">📸 Tomar Fotografía</button>
             </div>       
             
-            <!-- GALERÍA DE FOTOS TOMADAS -->
-            <div class="ngc-card" id="galeria-card" style="display: none;">
-                <h4>Fotos Capturadas (<span id="contador-fotos">0</span>)</h4>
-                <div class="gallery-grid" id="galeria-preview"></div>
+            <div class="ngc-card">
+                <h4 style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>Galería del Informe</span>
+                    <span id="contadorFotos" style="color: var(--ngc-primary); font-weight: bold;">0 fotos</span>
+                </h4>
                 
-                <button id="btnGenerarPDF" class="btn-ngc btn-main btn-pdf" onclick="generarPDF()" style="width: 100%; margin-top: 15px;">📄 Generar Informe PDF</button>
+                <div id="galeriaFotos" class="galeria-grid"></div>
             </div>
+            
+            <div style="margin-top: 10px;">
+                <button id="btnGenerarPDF" class="btn-ngc btn-main btn-pdf" onclick="generarPDFReporte()" style="width: 100%;">📄 Generar Reporte PDF</button>
+            </div>
+            
         </section>
     </div>
 </main>
-
-<!-- PLANTILLA OCULTA EXCLUSIVA PARA EL PDF A4 -->
-<div id="plantilla-pdf" style="display: none;">
-    <div class="pdf-container">
-        <header class="pdf-header">
-            <div class="pdf-info-box">
-                <h2 style="margin: 0 0 10px 0; color: #0088aa; text-transform: uppercase;">Fotografías de la Instalación</h2>
-                <div class="pdf-row"><b>Cliente:</b> <span id="pdf-cliente"></span></div>
-                <div class="pdf-row"><b>Dirección:</b> <span id="pdf-direccion"></span></div>
-                <div class="pdf-row"><b>Fecha:</b> <span id="pdf-fecha"></span></div>
-            </div>
-            <div class="pdf-logo-box">
-                <!-- Reemplazar con la ruta real de tu logo -->
-                <img src="membrete.avif" alt="Villaser Electricista" style="max-width: 100%; max-height: 70px; display: block; margin-left: auto;">
-            </div>
-        </header>
-
-        <!-- Aquí se inyectarán las fotos generadas -->
-        <div class="pdf-photo-grid" id="pdf-photo-container"></div>
-
-        <footer class="pdf-footer">
-            <div class="pdf-right-footer" style="width: 100%; text-align: right;">
-                <div class="pdf-slogan">¡Electricidad Segura, Hogar Tranquilo!</div>
-                <div class="pdf-contacto">
-                    <span>📞 351 355 9347</span> &nbsp;|&nbsp; <span>🌐 villaser.com.ar</span>
-                </div>
-                <div class="pdf-contacto" style="margin-top: 4px;">
-                    <span>🪪 Sergio Adrian Villagra - Electricista Habilitado Cat III</span>
-                </div>
-                <div class="pdf-contacto">
-                    <span>ERSeP Registro Nro 29029389 - 14027</span>
-                </div>
-            </div>
-        </footer>
-    </div>
-</div>
-
 <script src="script.js"></script>
 </body>
 </html>
-
