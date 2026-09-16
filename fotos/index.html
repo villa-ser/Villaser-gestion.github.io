@@ -9,7 +9,6 @@
     
     <title>Villaser - Reporte Fotográfico</title>
     
-    <!-- Librería para generar el PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <link rel="stylesheet" href="style.css">
@@ -23,12 +22,10 @@
         </button>
     </nav>
 
-    <!-- Indicador de sincronización de base de datos -->
     <div id="loading" aria-live="polite" class="loading-state">
         📡 SINCRONIZANDO CLIENTES NGC...
     </div>
 
-    <!-- Pantalla de carga que bloquea la interfaz mientras se procesan fotos pesadas -->
     <div id="loadingOverlay" class="loading-overlay" style="display:none;">
         <div class="loading-state">
             📸 PROCESANDO IMAGEN...<br><small>Liberando memoria RAM</small>
@@ -37,7 +34,7 @@
     
     <div id="app" style="display:none;">
         
-        <!-- PASO 1: SELECCIÓN DEL CLIENTE (Usa BD de Google Sheets) -->
+        <!-- PASO 1: SELECCIÓN DEL CLIENTE -->
         <section id="step-cliente" class="ngc-card">
             <h4>Identificación Cliente</h4>
             
@@ -57,6 +54,13 @@
                     <button id="btnLoadCli" class="btn-ngc btn-adapt" onclick="iniciarReporte()">Cargar</button>
                 </div>
             </div>
+
+            <!-- Botón para cargar un informe previo -->
+            <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+                <button class="btn-ngc btn-main btn-imp" style="width: 100%;" onclick="document.getElementById('fileImport').click()">
+                    📂 CARGAR AVANCE GUARDADO
+                </button>
+            </div>
         </section>
 
         <!-- PASO 2: CONFIGURACIÓN DE TOMA Y GALERÍA -->
@@ -70,7 +74,7 @@
                 
                 <div class="row-group-stretch">
                     <div class="flex-1">
-                        <label for="selHabitacion">Ubicación</label>
+                        <label for="selHabitacion">Ambiente</label>
                         <select id="selHabitacion" class="native-select">
                             <option value="">-- SELECCIONE --</option>
                             <option value="Cocina">Cocina</option>
@@ -85,7 +89,7 @@
                         </select>
                     </div>
                     <div class="flex-1">
-                        <label for="selBoca">Tipo de Elemento</label>
+                        <label for="selBoca">Tipo Elemento</label>
                         <select id="selBoca" class="native-select">
                             <option value="">-- SELECCIONE --</option>
                             <option value="Tablero Principal (TP)">Tablero Principal (TP)</option>
@@ -101,58 +105,68 @@
                     </div>
                 </div>
 
+                <!-- NUEVO SELECTOR: POSICIÓN EN LA HABITACIÓN -->
+                <div class="row-group">
+                    <label for="selPared">Posición en el ambiente</label>
+                    <select id="selPared" class="native-select">
+                        <option value="">-- SELECCIONE POSICIÓN --</option>
+                        <option value="Izquierda">Izquierda</option>
+                        <option value="Derecha">Derecha</option>
+                        <option value="Frente">Frente</option>
+                        <option value="Fondo">Fondo</option>
+                        <option value="Abajo (Piso)">Abajo (Piso)</option>
+                        <option value="Arriba (Techo)">Arriba (Techo)</option>
+                    </select>
+                </div>
+
                 <div class="row-group">
                     <label for="obsFoto">Observaciones (Medidas, estado, etc.)</label>
                     <textarea id="obsFoto" placeholder="Ej: Altura 1.20m, medidas internas 3x3m..." style="height: 110px; resize: none;"></textarea>
                 </div>
 
-                <!-- Botones de Acción y Controles -->
                 <div style="margin-top: 15px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                         <label>Ingresar Imágenes</label>
                         <span id="contadorLote" style="color: var(--ngc-warning); font-size: 0.8rem; font-weight: bold;">0/3 de este lote</span>
                     </div>
 
-                    <!-- Inputs Ocultos para cámara y galería -->
                     <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="procesarNuevasFotos(event)">
                     <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;" onchange="procesarNuevasFotos(event)">
                     
-                    <!-- Botones Principales -->
                     <div class="action-grid" style="margin-top: 0; margin-bottom: 15px; gap: 10px; display: grid; grid-template-columns: 1fr 1fr;">
-                        <button class="btn-ngc btn-main" style="border-color: var(--ngc-success); color: var(--ngc-success);" onclick="abrirCamara()">
-                            📸 CÁMARA
-                        </button>
-                        <button class="btn-ngc btn-main" style="border-color: var(--ngc-info); color: var(--ngc-info);" onclick="abrirGaleria()">
-                            🖼️ GALERÍA
-                        </button>
+                        <button class="btn-ngc btn-main" style="border-color: var(--ngc-success); color: var(--ngc-success);" onclick="abrirCamara()">📸 CÁMARA</button>
+                        <button class="btn-ngc btn-main" style="border-color: var(--ngc-info); color: var(--ngc-info);" onclick="abrirGaleria()">🖼️ GALERÍA</button>
                     </div>
 
-                    <button class="btn-ngc btn-main" style="width: 100%; border-color: var(--ngc-primary);" onclick="prepararNuevaCarga()">
-                        🔄 NUEVA CARGA (Limpiar selectores)
-                    </button>
-                    <small style="color: var(--text-dim); display: block; margin-top: 8px; text-align: center;">El cliente se mantiene hasta generar el PDF.</small>
+                    <button class="btn-ngc btn-main" style="width: 100%; border-color: var(--ngc-primary);" onclick="prepararNuevaCarga()">🔄 NUEVA CARGA (Limpiar selectores)</button>
                 </div>
             </div>       
             
-            <!-- GALERÍA EN FORMATO LISTA -->
             <div class="ngc-card">
                 <h4 style="display: flex; justify-content: space-between; align-items: center;">
                     <span>Listado de Entradas</span>
                     <span id="contadorFotosTotal" style="color: var(--ngc-primary); font-weight: bold;">0 fotos</span>
                 </h4>
-                
-                <!-- Contenedor donde se inyectan las fotos en miniatura -->
                 <div id="galeriaFotos" class="galeria-list"></div>
             </div>
             
-            <div style="margin-top: 10px; padding-bottom: 30px;">
+            <div style="margin-top: 10px;">
                 <button id="btnGenerarPDF" class="btn-ngc btn-main btn-pdf" onclick="generarPDFReporte()" style="width: 100%;">📄 Generar Reporte PDF</button>
+            </div>
+
+            <!-- Botones de Guardado y Carga de Avance -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; padding-bottom: 30px;">
+                <button class="btn-ngc btn-main btn-exp" onclick="exportarAvance()">💾 Guardar Avance</button>
+                <button class="btn-ngc btn-main btn-imp" onclick="document.getElementById('fileImport').click()">📂 Cargar Avance</button>
             </div>
             
         </section>
     </div>
-</main>
+    
+    <!-- Input oculto para cargar archivos compartido por ambas pantallas -->
+    <input type="file" id="fileImport" style="display:none" accept=".txt" onchange="importarAvance(event)">
 
+</main>
 <script src="script.js"></script>
 </body>
 </html>
