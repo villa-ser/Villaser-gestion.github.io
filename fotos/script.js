@@ -90,6 +90,7 @@ function abrirGaleria() {
 function prepararNuevaCarga() {
     document.getElementById('selHabitacion').value = '';
     document.getElementById('selBoca').value = '';
+    document.getElementById('selPared').value = ''; // Limpiamos el nuevo selector
     document.getElementById('obsFoto').value = '';
     fotosLoteActual = 0;
     actualizarContadorLote();
@@ -114,17 +115,18 @@ async function procesarNuevasFotos(event) {
 
     const hab = document.getElementById('selHabitacion').value || 'S/E';
     const boca = document.getElementById('selBoca').value || 'General';
+    const pared = document.getElementById('selPared').value || ''; // Capturamos la pared
     const obs = document.getElementById('obsFoto').value.trim();
 
     document.getElementById('loadingOverlay').style.display = 'flex';
 
     for(let file of fotosAProcesar) {
         try {
-            const stampedBase64 = await estamparDatosEnImagen(file, hab, boca, obs);
+            const stampedBase64 = await estamparDatosEnImagen(file, hab, boca, pared, obs);
             fotosArray.push({
                 id: Date.now() + Math.random(),
                 src: stampedBase64,
-                hab, boca, obs // Ahora también guardamos la observación en el array
+                hab, boca, pared, obs
             });
             fotosLoteActual++;
         } catch(err) {
@@ -141,7 +143,7 @@ async function procesarNuevasFotos(event) {
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
-function estamparDatosEnImagen(file, habitacion, boca, observaciones) {
+function estamparDatosEnImagen(file, habitacion, boca, pared, observaciones) {
     return new Promise((resolve, reject) => {
         let img = new Image();
         const objectUrl = URL.createObjectURL(file); 
@@ -171,8 +173,14 @@ function estamparDatosEnImagen(file, habitacion, boca, observaciones) {
             ctx.font = `${fontSize}px sans-serif`;
             const padding = fontSize;
             
+            // Lógica para agregar la pared al texto de la habitación si existe
+            let txtHabitacion = habitacion;
+            if (pared !== "") {
+                txtHabitacion += ` (${pared})`;
+            }
+
             const lineas = [
-                `Ubic.: ${habitacion}`,
+                `Ubic.: ${txtHabitacion}`,
                 `Boca: ${boca}`
             ];
             if(observaciones) lineas.push(`Notas: ${observaciones}`);
@@ -222,18 +230,20 @@ function estamparDatosEnImagen(file, habitacion, boca, observaciones) {
     });
 }
 
-// --- ACTUALIZACIÓN DE INTERFAZ: VISTA LISTA ---
 function actualizarGaleria() {
     const gal = document.getElementById('galeriaFotos');
     gal.innerHTML = '';
     
     fotosArray.forEach(foto => {
+        // Mostramos la pared en la miniatura si existe
+        const txtPared = foto.pared ? ` (${foto.pared})` : '';
+
         const div = document.createElement('div');
         div.className = 'foto-item-list';
         div.innerHTML = `
             <img src="${foto.src}" class="foto-thumb" alt="Miniatura">
             <div class="foto-info">
-                <strong style="color: white;">${foto.hab}</strong><br>
+                <strong style="color: white;">${foto.hab}${txtPared}</strong><br>
                 <span style="color: var(--ngc-primary);">${foto.boca}</span>
                 ${foto.obs ? `<div class="foto-obs">${foto.obs}</div>` : ''}
             </div>
@@ -252,24 +262,83 @@ function editarFoto(id) {
     const foto = fotosArray.find(f => f.id === id);
     if(!foto) return;
 
-    // Cargar los datos de la foto en los selectores
-    document.getElementById('selHabitacion').value = foto.hab;
-    document.getElementById('selBoca').value = foto.boca;
+    document.getElementById('selHabitacion').value = foto.hab || '';
+    document.getElementById('selBoca').value = foto.boca || '';
+    document.getElementById('selPared').value = foto.pared || ''; // Cargamos la pared para editar
     document.getElementById('obsFoto').value = foto.obs || '';
-
-    // Llevamos al usuario arriba para que vea el formulario
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    alert("📝 DATOS CARGADOS.\n\nComo el texto está estampado en la imagen, para editarla debes tomar/subir la foto nuevamente con estos datos y luego eliminar la vieja de la lista.");
+    alert("📝 DATOS CARGADOS.\n\nPara editar la foto, tómala o súbela nuevamente con estos datos y luego elimina la vieja de la lista.");
 }
 
 function borrarFoto(id) {
     if(confirm("¿Seguro que deseas eliminar esta entrada?")) {
         fotosArray = fotosArray.filter(f => f.id !== id);
-        // NOTA: No restamos 'fotosLoteActual' aquí porque el usuario podría estar borrando 
-        // una foto de un lote anterior. Simplemente actualizamos la lista.
         actualizarGaleria();
     }
+}
+
+// --- EXPORTAR E IMPORTAR AVANCE ---
+
+function exportarAvance() {
+    if (!clienteActual && fotosArray.length === 0) {
+        return alert("No hay datos para guardar.");
+    }
+
+    const dataToSave = {
+        cliente: clienteActual,
+        fotos: fotosArray,
+        loteActual: fotosLoteActual
+    };
+
+    const jsonString = JSON.stringify(dataToSave);
+    const blob = new Blob([jsonString], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+    const nombre = clienteActual ? clienteActual.nombre.split(' ')[0] : 'Borrador';
+    
+    a.href = url;
+    a.download = `Avance_Reporte_${nombre}_${fecha}.txt`;
+    
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importarAvance(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.cliente) {
+                clienteActual = data.cliente;
+                fotosArray = data.fotos || [];
+                fotosLoteActual = data.loteActual || 0;
+
+                // Actualizar interfaz
+                document.getElementById('clienteLabel').innerText = clienteActual.nombre;
+                document.getElementById('step-cliente').style.display = 'none';
+                document.getElementById('step-fotos').style.display = 'flex';
+                
+                actualizarContadorLote();
+                actualizarGaleria();
+                
+                alert("✅ Avance cargado exitosamente.");
+            } else {
+                alert("El archivo no tiene el formato de Villaser Gestión.");
+            }
+        } catch (err) {
+            alert("Error al leer el archivo. Asegúrate de que sea el archivo .txt de avance.");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; 
 }
 
 // --- GENERACIÓN DE PDF ---
@@ -363,5 +432,4 @@ function generarPDFReporte() {
             btnPdf.style.pointerEvents = "auto";
         }
     }, 100);
-                         }
-                                       
+}
