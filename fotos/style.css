@@ -165,7 +165,10 @@ input:focus, textarea:focus, .native-select:focus {
 }
 .btn-pdf:active { background: rgba(255, 68, 68, 0.2); }
 
-/* --- Overlay de carga de memoria (Bloquea pantalla) --- */
+.btn-exp { border-color: var(--ngc-warning) !important; color: var(--ngc-warning) !important; }
+.btn-imp { border-color: var(--ngc-info) !important; color: var(--ngc-info) !important; }
+
+/* Overlay de carga */
 .loading-overlay {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -181,7 +184,7 @@ input:focus, textarea:focus, .native-select:focus {
     color: var(--ngc-warning);
 }
 
-/* --- ESTILOS EXCLUSIVOS PARA LA VISTA DE LISTA (REPORTE) --- */
+/* Galería en formato lista */
 .galeria-list {
     display: flex;
     flex-direction: column;
@@ -244,9 +247,6 @@ input:focus, textarea:focus, .native-select:focus {
     transition: 0.2s;
 }
 
-.btn-action-icon:active {
-    transform: scale(0.9);
-}
-
+.btn-action-icon:active { transform: scale(0.9); }
 .btn-edit { border-color: var(--ngc-warning); }
 .btn-delete { border-color: var(--ngc-danger); }
