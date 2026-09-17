@@ -22,8 +22,8 @@
         </button>
     </nav>
 
-    <div id="loading" aria-live="polite" class="loading-state">
-        📡 SINCRONIZANDO CLIENTES NGC...
+    <div id="loading" id="status" aria-live="polite" style="color: var(--accent); font-size: 0.8rem; text-align: center; margin-bottom: 10px; font-weight: 600;">
+        📡 SINCRONIZANDO CLIENTES...
     </div>
 
     <!-- Overlay de carga global -->
@@ -45,8 +45,8 @@
             </div>
         </div>
         <div class="camera-footer">
-            <span id="camaraContador" style="color: var(--ngc-warning); font-weight: bold; margin-bottom: 10px; display: block; text-align: center;">0/3 fotos</span>
-            <button id="btnCapturarVisor" class="btn-ngc btn-main" style="width: 100%; border-color: var(--ngc-primary); background: rgba(0,212,255,0.1); font-size: 1.2rem;" onclick="tomarCapturaVisor()">
+            <span id="camaraContador" style="color: #ffc107; font-weight: bold; margin-bottom: 10px; display: block; text-align: center;">0/3 fotos</span>
+            <button id="btnCapturarVisor" class="btn-add-custom" style="width: 100%; border-color: var(--accent); background: rgba(0,212,255,0.1); font-size: 1.2rem; height: 55px;" onclick="tomarCapturaVisor()">
                 ⭕ CAPTURAR FOTO
             </button>
         </div>
@@ -55,29 +55,24 @@
     <div id="app" style="display:none;">
         
         <!-- PASO 1: SELECCIÓN DEL CLIENTE -->
-        <section id="step-cliente" class="ngc-card">
+        <section id="step-cliente" class="card">
             <h4>Identificación Cliente</h4>
             
-            <div class="row-group">
-                <label for="selCliente">Seleccionar Cliente</label>
-                <select id="selCliente" class="native-select" aria-label="Lista de clientes">
-                    <option value="">-- SELECCIONE CLIENTE --</option>
-                </select>
-            </div>
+            <label for="selCliente" class="sr-only">Seleccionar Cliente</label>
+            <select id="selCliente" class="native-select" aria-label="Lista de clientes">
+                <option value="">-- SELECCIONE CLIENTE --</option>
+            </select>
             
-            <div class="row-group-stretch" style="margin-top:10px;">
-                <div class="flex-3">
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <div style="flex:1; width: 0; min-width: 50%;">
                     <label for="cliInfo" class="sr-only">Información del cliente</label>
-                    <textarea id="cliInfo" readonly placeholder="Info cliente..." style="height: 70px; resize: none; font-size: 0.85rem;"></textarea>
+                    <textarea id="cliInfo" readonly placeholder="Info cliente..." style="height: 48px; min-height: 48px; resize: none; overflow: hidden; padding-top: 14px;"></textarea>
                 </div>
-                <div class="flex-btn-small">
-                    <button id="btnLoadCli" class="btn-ngc btn-adapt" onclick="iniciarReporte()">Cargar</button>
-                </div>
+                <button id="btnLoadCli" class="btn-add-custom btn-client" onclick="iniciarReporte()">Cargar</button>
             </div>
 
-            <!-- Botón para cargar un informe previo -->
-            <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
-                <button class="btn-ngc btn-main btn-imp" style="width: 100%;" onclick="document.getElementById('fileImport').click()">
+            <div style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <button class="btn-add-custom btn-import" style="width: 100%;" onclick="document.getElementById('fileImport').click()">
                     📂 CARGAR AVANCE GUARDADO
                 </button>
             </div>
@@ -86,14 +81,14 @@
         <!-- PASO 2: CONFIGURACIÓN DE TOMA Y GALERÍA -->
         <section id="step-fotos" style="display:none; flex-direction: column; gap: 15px;">
 
-            <div class="ngc-card">
-                <h4 style="display: flex; justify-content: space-between;">
-                    <span>Datos de la Toma</span>
-                    <span id="clienteLabel" style="color: var(--text-dim); font-size: 0.75rem;"></span>
+            <div class="card">
+                <h4>
+                    Datos de la Toma
+                    <span id="clienteLabel" style="float: right; color: var(--text); opacity: 0.6; font-size: 0.75rem;"></span>
                 </h4>
                 
-                <div class="row-group-stretch">
-                    <div class="flex-1">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div>
                         <label for="selHabitacion">Ambiente</label>
                         <select id="selHabitacion" class="native-select">
                             <option value="">-- SELECCIONE --</option>
@@ -108,7 +103,7 @@
                             <option value="General">General</option>
                         </select>
                     </div>
-                    <div class="flex-1">
+                    <div>
                         <label for="selBoca">Tipo Elemento</label>
                         <select id="selBoca" class="native-select">
                             <option value="">-- SELECCIONE --</option>
@@ -125,68 +120,64 @@
                     </div>
                 </div>
 
-                <div class="row-group">
-                    <label for="selPared">Posición en el ambiente</label>
-                    <select id="selPared" class="native-select">
-                        <option value="">-- SELECCIONE POSICIÓN --</option>
-                        <option value="Izquierda">Izquierda</option>
-                        <option value="Derecha">Derecha</option>
-                        <option value="Frente">Frente</option>
-                        <option value="Fondo">Fondo</option>
-                        <option value="Abajo (Piso)">Abajo (Piso)</option>
-                        <option value="Arriba (Techo)">Arriba (Techo)</option>
-                    </select>
-                </div>
+                <label for="selPared" style="margin-top: 10px;">Posición en el ambiente</label>
+                <select id="selPared" class="native-select">
+                    <option value="">-- SELECCIONE POSICIÓN --</option>
+                    <option value="Izquierda">Izquierda</option>
+                    <option value="Derecha">Derecha</option>
+                    <option value="Frente">Frente</option>
+                    <option value="Fondo">Fondo</option>
+                    <option value="Abajo (Piso)">Abajo (Piso)</option>
+                    <option value="Arriba (Techo)">Arriba (Techo)</option>
+                </select>
 
-                <div class="row-group-stretch">
-                    <div class="flex-1">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                    <div>
                         <label for="inpAltura">Altura (m)</label>
                         <input type="number" id="inpAltura" step="0.01" placeholder="Ej: 1.20">
                     </div>
-                    <div class="flex-1">
+                    <div>
                         <label for="inpDistancia">Distancia a pared (m)</label>
                         <input type="number" id="inpDistancia" step="0.01" placeholder="Ej: 0.50">
                     </div>
                 </div>
 
-                <div class="row-group">
-                    <label for="obsFoto">Observaciones</label>
-                    <textarea id="obsFoto" placeholder="Detalles de estado, cables, etc..." style="height: 70px; resize: none;"></textarea>
-                </div>
+                <label for="obsFoto" style="margin-top: 10px;">Observaciones</label>
+                <textarea id="obsFoto" placeholder="Detalles de estado, cables, etc..."></textarea>
 
-                <div style="margin-top: 15px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <label>Ingresar Imágenes (Formato Cuadrado)</label>
-                        <span id="contadorLote" style="color: var(--ngc-warning); font-size: 0.8rem; font-weight: bold;">0/3 de este lote</span>
+                <div style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <label style="margin:0;">Ingresar Imágenes (1:1)</label>
+                        <span id="contadorLote" style="color: #ffc107; font-size: 0.8rem; font-weight: bold;">0/3 de este lote</span>
                     </div>
 
                     <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;" onchange="procesarGaleria(event)">
                     
-                    <div class="action-grid" style="margin-top: 0; margin-bottom: 15px; gap: 10px; display: grid; grid-template-columns: 1fr 1fr;">
-                        <button class="btn-ngc btn-main" style="border-color: var(--ngc-success); color: var(--ngc-success);" onclick="iniciarCamaraVisor()">📸 CÁMARA</button>
-                        <button class="btn-ngc btn-main" style="border-color: var(--ngc-info); color: var(--ngc-info);" onclick="abrirGaleria()">🖼️ GALERÍA</button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px;">
+                        <button class="btn-add-custom" style="border-color: #28a745; color: #28a745;" onclick="iniciarCamaraVisor()">📸 CÁMARA</button>
+                        <button class="btn-add-custom btn-copy" onclick="abrirGaleria()">🖼️ GALERÍA</button>
                     </div>
 
-                    <button class="btn-ngc btn-main" style="width: 100%; border-color: var(--ngc-primary);" onclick="prepararNuevaCarga()">🔄 NUEVA CARGA (Limpiar selectores)</button>
+                    <button class="btn-add-custom btn-client" style="width: 100%;" onclick="prepararNuevaCarga()">🔄 NUEVA CARGA (Limpiar)</button>
                 </div>
             </div>       
             
-            <div class="ngc-card">
-                <h4 style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>Listado de Entradas</span>
-                    <span id="contadorFotosTotal" style="color: var(--ngc-primary); font-weight: bold;">0 fotos</span>
+            <div class="card">
+                <h4>
+                    Listado de Entradas
+                    <span id="contadorFotosTotal" style="float: right; color: var(--accent); font-weight: bold; font-size: 0.85rem;">0 fotos</span>
                 </h4>
                 <div id="galeriaFotos" class="galeria-list"></div>
             </div>
             
             <div style="margin-top: 10px;">
-                <button id="btnGenerarPDF" class="btn-ngc btn-main btn-pdf" onclick="generarPDFReporte()" style="width: 100%;">📄 Generar Reporte PDF</button>
+                <button id="btnGenerarPDF" class="btn-add-custom btn-pdf" onclick="generarPDFReporte()" style="width: 100%; height: 55px; font-size: 1rem;">📄 Generar Reporte PDF</button>
             </div>
 
             <!-- Botones de Guardado y Carga de Avance -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px; padding-bottom: 30px;">
-                <button class="btn-ngc btn-main btn-exp" onclick="exportarAvance()">💾 Guardar Avance</button>
-                <button class="btn-ngc btn-main btn-imp" onclick="document.getElementById('fileImport').click()">📂 Cargar Avance</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; padding-bottom: 30px;">
+                <button class="btn-add-custom btn-export" onclick="exportarAvance()">💾 Guardar Avance</button>
+                <button class="btn-add-custom btn-import" onclick="document.getElementById('fileImport').click()">📂 Cargar Avance</button>
             </div>
             
         </section>
