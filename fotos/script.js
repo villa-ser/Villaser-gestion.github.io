@@ -41,7 +41,7 @@ async function fetchData() {
         
     } catch (e) { 
         clearTimeout(timeoutId);
-        document.getElementById('loading').innerHTML = `⚠️ Error de conexión a la BD.<br><button class="btn-ngc" onclick="location.reload()">Reintentar</button>`;
+        document.getElementById('loading').innerHTML = `⚠️ Error de conexión a la BD.<br><button class="btn-add-custom" onclick="location.reload()">Reintentar</button>`;
     }
 }
 
@@ -298,11 +298,12 @@ function actualizarGaleria() {
         const txtPared = foto.pared ? ` (${foto.pared})` : '';
         const div = document.createElement('div');
         div.className = 'foto-item-list';
+        // Ajustamos los colores para que usen las variables del nuevo tema
         div.innerHTML = `
             <img src="${foto.src}" class="foto-thumb" alt="Miniatura">
             <div class="foto-info">
-                <strong style="color: white;">${foto.hab}${txtPared}</strong><br>
-                <span style="color: var(--ngc-primary);">${foto.boca}</span>
+                <strong style="color: var(--text);">${foto.hab}${txtPared}</strong><br>
+                <span style="color: var(--accent);">${foto.boca}</span>
             </div>
             <div class="foto-actions">
                 <button class="btn-action-icon btn-edit" onclick="editarFoto(${foto.id})" title="Editar Datos">✏️</button>
@@ -480,4 +481,5 @@ function generarPDFReporte() {
         } catch (error) { alert("Error generando el PDF."); console.error(error); } 
         finally { btnPdf.innerText = originalText; btnPdf.style.pointerEvents = "auto"; }
     }, 100);
-}
+                    }
+                       
