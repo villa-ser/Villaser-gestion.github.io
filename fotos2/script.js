@@ -5,7 +5,7 @@ let dbClientes = [];
 let clienteActual = null;
 let fotosArray = []; 
 let fotosLoteActual = 0; 
-let streamCamara = null; // Variable para controlar el video
+let streamCamara = null; 
 
 const selCliente = document.getElementById('selCliente');
 
@@ -70,7 +70,7 @@ function iniciarReporte() {
     document.getElementById('step-fotos').style.display = 'flex';
 }
 
-// --- LOGICA DEL VISOR DE CAMARA (ANTI-MEMORIA) ---
+// --- LOGICA DEL VISOR DE CAMARA Y RECORTE CUADRADO ---
 
 async function iniciarCamaraVisor() {
     if (fotosLoteActual >= 3) {
@@ -82,17 +82,10 @@ async function iniciarCamaraVisor() {
     const modal = document.getElementById('cameraModal');
     
     try {
-        // Pide permiso para la cámara trasera con resolución controlada
         streamCamara = await navigator.mediaDevices.getUserMedia({
-            video: { 
-                facingMode: 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 }
-            }
+            video: { facingMode: 'environment', width: { ideal: 1080 }, height: { ideal: 1080 } }
         });
         videoObj.srcObject = streamCamara;
-        
-        // Actualizamos texto de contador en el visor
         document.getElementById('camaraContador').innerText = `Foto ${fotosLoteActual + 1} de 3 (de este lote)`;
         modal.style.display = 'flex';
     } catch (err) {
@@ -102,61 +95,49 @@ async function iniciarCamaraVisor() {
 }
 
 function cerrarVisor() {
-    if (streamCamara) {
-        streamCamara.getTracks().forEach(track => track.stop());
-    }
+    if (streamCamara) streamCamara.getTracks().forEach(track => track.stop());
     document.getElementById('cameraModal').style.display = 'none';
 }
 
 function tomarCapturaVisor() {
     const video = document.getElementById('videoElement');
-    
-    // Crear un canvas off-screen
     let canvas = document.createElement('canvas');
     let ctx = canvas.getContext('2d');
     
-    // Limitamos la captura a máximo 800px para evitar pesos excesivos en el PDF
-    let width = video.videoWidth;
-    let height = video.videoHeight;
-    const MAX_SIZE = 800;
+    // Lógica para recortar un CUADRADO perfecto del centro del video
+    let size = Math.min(video.videoWidth, video.videoHeight);
+    let sx = (video.videoWidth - size) / 2;
+    let sy = (video.videoHeight - size) / 2;
+
+    let finalSize = Math.min(size, 800); // Max resolución 800x800 px
+    canvas.width = finalSize;
+    canvas.height = finalSize;
     
-    if (width > height && width > MAX_SIZE) {
-        height *= MAX_SIZE / width; width = MAX_SIZE;
-    } else if (height > MAX_SIZE) {
-        width *= MAX_SIZE / height; height = MAX_SIZE;
-    }
+    // Dibujamos solo la parte central cuadrada al canvas
+    ctx.drawImage(video, sx, sy, size, size, 0, 0, finalSize, finalSize);
     
-    canvas.width = width;
-    canvas.height = height;
-    
-    // Dibujamos el frame actual del video en el canvas
-    ctx.drawImage(video, 0, 0, width, height);
-    
-    // Obtenemos los datos de los selectores
+    // Obtenemos los datos actuales
     const hab = document.getElementById('selHabitacion').value || 'S/E';
     const boca = document.getElementById('selBoca').value || 'General';
     const pared = document.getElementById('selPared').value || '';
+    const altura = document.getElementById('inpAltura').value || '';
+    const distancia = document.getElementById('inpDistancia').value || '';
     const obs = document.getElementById('obsFoto').value.trim();
 
-    // Reutilizamos la función de estampado pasándole el Canvas ya dibujado
-    aplicarEstampaAlCanvas(canvas, ctx, width, height, hab, boca, pared, obs);
+    aplicarEstampaAlCanvas(canvas, ctx, finalSize, finalSize, hab, boca, pared, altura, distancia, obs);
     
-    // Extraemos la imagen comprimida
     const finalBase64 = canvas.toDataURL('image/jpeg', 0.65);
     
-    // Guardamos en el array global
     fotosArray.push({
         id: Date.now() + Math.random(),
         src: finalBase64,
-        hab, boca, pared, obs
+        hab, boca, pared, altura, distancia, obs
     });
     
     fotosLoteActual++;
     
-    // Destruimos objetos de memoria
-    ctx.clearRect(0, 0, width, height);
-    canvas.width = 0; canvas.height = 0;
-    canvas = null; ctx = null;
+    ctx.clearRect(0, 0, finalSize, finalSize);
+    canvas.width = 0; canvas.height = 0; canvas = null; ctx = null;
 
     actualizarContadorLote();
     actualizarGaleria();
@@ -165,16 +146,15 @@ function tomarCapturaVisor() {
         cerrarVisor();
         alert("Lote completado (3/3). Si desea cargar más fotos de otros lugares, presione 'NUEVA CARGA'.");
     } else {
-        // Preparamos para la siguiente captura actualizando el contador del visor
         document.getElementById('camaraContador').innerText = `Foto ${fotosLoteActual + 1} de 3 (de este lote)`;
     }
 }
 
 
-// --- GALERÍA (Mantenemos por si el usuario quiere subir fotos ya tomadas) ---
+// --- GALERÍA (También recorta a cuadrado automáticamente) ---
 function abrirGaleria() {
     if (fotosLoteActual >= 3) {
-        alert("Ya subiste 3 fotos para esta configuración. Presioná 'NUEVA CARGA' para ingresar otros datos.");
+        alert("Ya subiste 3 fotos para esta configuración. Presioná 'NUEVA CARGA'.");
         return;
     }
     document.getElementById('galleryInput').click();
@@ -194,17 +174,19 @@ async function procesarGaleria(event) {
     const hab = document.getElementById('selHabitacion').value || 'S/E';
     const boca = document.getElementById('selBoca').value || 'General';
     const pared = document.getElementById('selPared').value || '';
+    const altura = document.getElementById('inpAltura').value || '';
+    const distancia = document.getElementById('inpDistancia').value || '';
     const obs = document.getElementById('obsFoto').value.trim();
 
     document.getElementById('loadingOverlay').style.display = 'flex';
 
     for(let file of fotosAProcesar) {
         try {
-            const stampedBase64 = await procesarArchivoGaleria(file, hab, boca, pared, obs);
+            const stampedBase64 = await procesarArchivoGaleria(file, hab, boca, pared, altura, distancia, obs);
             fotosArray.push({
                 id: Date.now() + Math.random(),
                 src: stampedBase64,
-                hab, boca, pared, obs
+                hab, boca, pared, altura, distancia, obs
             });
             fotosLoteActual++;
         } catch(err) {
@@ -218,7 +200,7 @@ async function procesarGaleria(event) {
     document.getElementById('loadingOverlay').style.display = 'none';
 }
 
-function procesarArchivoGaleria(file, hab, boca, pared, obs) {
+function procesarArchivoGaleria(file, hab, boca, pared, altura, distancia, obs) {
     return new Promise((resolve, reject) => {
         let img = new Image();
         const objectUrl = URL.createObjectURL(file); 
@@ -228,17 +210,19 @@ function procesarArchivoGaleria(file, hab, boca, pared, obs) {
             let canvas = document.createElement('canvas');
             let ctx = canvas.getContext('2d');
             
-            let width = img.width; let height = img.height; const MAX_SIZE = 800; 
-            if (width > height && width > MAX_SIZE) { height *= MAX_SIZE / width; width = MAX_SIZE; } 
-            else if (height > MAX_SIZE) { width *= MAX_SIZE / height; height = MAX_SIZE; }
+            // Recorte cuadrado para galería
+            let size = Math.min(img.width, img.height);
+            let sx = (img.width - size) / 2;
+            let sy = (img.height - size) / 2;
+            let finalSize = Math.min(size, 800); 
             
-            canvas.width = width; canvas.height = height;
-            ctx.drawImage(img, 0, 0, width, height);
+            canvas.width = finalSize; canvas.height = finalSize;
+            ctx.drawImage(img, sx, sy, size, size, 0, 0, finalSize, finalSize);
 
-            aplicarEstampaAlCanvas(canvas, ctx, width, height, hab, boca, pared, obs);
+            aplicarEstampaAlCanvas(canvas, ctx, finalSize, finalSize, hab, boca, pared, altura, distancia, obs);
             const finalBase64 = canvas.toDataURL('image/jpeg', 0.65);
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, finalSize, finalSize);
             canvas.width = 0; canvas.height = 0;
             canvas = null; ctx = null; img.onload = null; img.src = ''; img = null;
             
@@ -249,9 +233,8 @@ function procesarArchivoGaleria(file, hab, boca, pared, obs) {
     });
 }
 
-// --- FUNCIÓN CENTRAL DE ESTAMPADO DE TEXTOS ---
-// Funciona tanto para el visor de cámara como para la galería
-function aplicarEstampaAlCanvas(canvas, ctx, width, height, hab, boca, pared, obs) {
+// --- FUNCIÓN CENTRAL DE ESTAMPADO ---
+function aplicarEstampaAlCanvas(canvas, ctx, width, height, hab, boca, pared, altura, distancia, obs) {
     const fontSize = Math.max(14, Math.floor(width * 0.035));
     ctx.font = `${fontSize}px sans-serif`;
     const padding = fontSize;
@@ -263,6 +246,13 @@ function aplicarEstampaAlCanvas(canvas, ctx, width, height, hab, boca, pared, ob
         `Ubic.: ${txtHabitacion}`,
         `Boca: ${boca}`
     ];
+    
+    // Armar línea de medidas si las hay
+    let medidas = [];
+    if(altura) medidas.push(`Alt: ${altura}m`);
+    if(distancia) medidas.push(`Dist: ${distancia}m`);
+    if(medidas.length > 0) lineas.push(medidas.join(' | '));
+
     if(obs) lineas.push(`Notas: ${obs}`);
     lineas.push(`Fecha: ${clienteActual.fecha} - Villaser`);
 
@@ -288,13 +278,14 @@ function aplicarEstampaAlCanvas(canvas, ctx, width, height, hab, boca, pared, ob
     }
 }
 
-
 // --- MANEJO DE INTERFAZ Y LOTES ---
 
 function prepararNuevaCarga() {
     document.getElementById('selHabitacion').value = '';
     document.getElementById('selBoca').value = '';
     document.getElementById('selPared').value = '';
+    document.getElementById('inpAltura').value = '';
+    document.getElementById('inpDistancia').value = '';
     document.getElementById('obsFoto').value = '';
     fotosLoteActual = 0;
     actualizarContadorLote();
@@ -318,7 +309,6 @@ function actualizarGaleria() {
             <div class="foto-info">
                 <strong style="color: white;">${foto.hab}${txtPared}</strong><br>
                 <span style="color: var(--ngc-primary);">${foto.boca}</span>
-                ${foto.obs ? `<div class="foto-obs">${foto.obs}</div>` : ''}
             </div>
             <div class="foto-actions">
                 <button class="btn-action-icon btn-edit" onclick="editarFoto(${foto.id})" title="Editar Datos">✏️</button>
@@ -338,6 +328,8 @@ function editarFoto(id) {
     document.getElementById('selHabitacion').value = foto.hab || '';
     document.getElementById('selBoca').value = foto.boca || '';
     document.getElementById('selPared').value = foto.pared || ''; 
+    document.getElementById('inpAltura').value = foto.altura || '';
+    document.getElementById('inpDistancia').value = foto.distancia || '';
     document.getElementById('obsFoto').value = foto.obs || '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -390,7 +382,7 @@ function importarAvance(event) {
     reader.readAsText(file); event.target.value = ''; 
 }
 
-// --- GENERACIÓN DE PDF ---
+// --- GENERACIÓN DE PDF CUADRADO ---
 function generarPDFReporte() {
     if(fotosArray.length === 0) return alert("Agregue al menos 1 fotografía.");
 
@@ -422,25 +414,35 @@ function generarPDFReporte() {
             }
 
             function addFooter() {
-                const footY = pageHeight - 15;
-                doc.setDrawColor(0, 136, 170); doc.line(margin, footY - 5, pageWidth - margin, footY - 5);
+                const footY = pageHeight - 20;
+                doc.setDrawColor(0, 136, 170); doc.line(margin, footY - 4, pageWidth - margin, footY - 4);
+                
+                // NOTA ACLARATORIA DE MEDIDAS
+                doc.setFontSize(7); doc.setTextColor(150, 150, 150);
+                doc.text("* Alturas corresponden a la arista inferior del elemento. Distancias tomadas a la pared perpendicular más cercana.", margin, footY);
+                
                 doc.setFontSize(8); doc.setTextColor(100, 100, 100);
-                doc.text("Sergio Adrian Villagra - Electricista Habilitado Cat III", margin, footY);
-                doc.text("ERSeP Registro Nro 29029389 - 14027", margin, footY + 4);
-                doc.text("villaser.com.ar", pageWidth - margin, footY, { align: "right" });
+                doc.text("Sergio Adrian Villagra - Electricista Habilitado Cat III (ERSeP 29029389 - 14027)", margin, footY + 5);
+                doc.text("villaser.com.ar", pageWidth - margin, footY + 5, { align: "right" });
             }
 
             addHeader(); addFooter();
-            const colWidth = (pageWidth - (margin * 2) - 10) / 2; const rowHeight = 75; 
+            
+            // Grilla perfectamente cuadrada
+            const squareSize = 75; // 75x75 mm
+            // Centrado en el A4 horizontal
+            const xOffset = (pageWidth - (squareSize * 2 + 10)) / 2; 
             
             fotosArray.forEach((foto, i) => {
                 const indexOnPage = i % 6; 
                 if (i > 0 && indexOnPage === 0) { doc.addPage(); addHeader(); addFooter(); }
                 const col = indexOnPage % 2; const row = Math.floor(indexOnPage / 2); 
-                const xPos = margin + (col * (colWidth + 10)); const yPos = currentY + (row * (rowHeight + 5));
+                
+                const xPos = xOffset + (col * (squareSize + 10)); 
+                const yPos = currentY + (row * (squareSize + 10));
 
-                doc.addImage(foto.src, 'JPEG', xPos, yPos, colWidth, rowHeight);
-                doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.3); doc.rect(xPos, yPos, colWidth, rowHeight);
+                doc.addImage(foto.src, 'JPEG', xPos, yPos, squareSize, squareSize);
+                doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.3); doc.rect(xPos, yPos, squareSize, squareSize);
             });
 
             const fileName = `Reporte_${clienteActual.nombre.split(' ')[0]}_${clienteActual.fecha.replace(/\//g, '-')}.pdf`;
@@ -449,4 +451,3 @@ function generarPDFReporte() {
         finally { btnPdf.innerText = originalText; btnPdf.style.pointerEvents = "auto"; }
     }, 100);
 }
-
