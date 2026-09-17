@@ -104,19 +104,16 @@ function tomarCapturaVisor() {
     let canvas = document.createElement('canvas');
     let ctx = canvas.getContext('2d');
     
-    // Lógica para recortar un CUADRADO perfecto del centro del video
     let size = Math.min(video.videoWidth, video.videoHeight);
     let sx = (video.videoWidth - size) / 2;
     let sy = (video.videoHeight - size) / 2;
 
-    let finalSize = Math.min(size, 800); // Max resolución 800x800 px
+    let finalSize = Math.min(size, 800); 
     canvas.width = finalSize;
     canvas.height = finalSize;
     
-    // Dibujamos solo la parte central cuadrada al canvas
     ctx.drawImage(video, sx, sy, size, size, 0, 0, finalSize, finalSize);
     
-    // Obtenemos los datos actuales
     const hab = document.getElementById('selHabitacion').value || 'S/E';
     const boca = document.getElementById('selBoca').value || 'General';
     const pared = document.getElementById('selPared').value || '';
@@ -210,7 +207,6 @@ function procesarArchivoGaleria(file, hab, boca, pared, altura, distancia, obs) 
             let canvas = document.createElement('canvas');
             let ctx = canvas.getContext('2d');
             
-            // Recorte cuadrado para galería
             let size = Math.min(img.width, img.height);
             let sx = (img.width - size) / 2;
             let sy = (img.height - size) / 2;
@@ -247,7 +243,6 @@ function aplicarEstampaAlCanvas(canvas, ctx, width, height, hab, boca, pared, al
         `Boca: ${boca}`
     ];
     
-    // Armar línea de medidas si las hay
     let medidas = [];
     if(altura) medidas.push(`Alt: ${altura}m`);
     if(distancia) medidas.push(`Dist: ${distancia}m`);
@@ -382,7 +377,19 @@ function importarAvance(event) {
     reader.readAsText(file); event.target.value = ''; 
 }
 
-// --- GENERACIÓN DE PDF CUADRADO ---
+// --- OBTENER LOGO (MEMBRETE) ---
+function getMembreteData() {
+    const img = document.getElementById('imgMembrete');
+    if (!img || !img.complete || img.naturalWidth === 0) return null;
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    return canvas.toDataURL('image/png'); // Lo convertimos a formato seguro
+}
+
+// --- GENERACIÓN DE PDF MEJORADO ---
 function generarPDFReporte() {
     if(fotosArray.length === 0) return alert("Agregue al menos 1 fotografía.");
 
@@ -399,10 +406,20 @@ function generarPDFReporte() {
             const margin = 15; let currentY = margin;
 
             function addHeader() {
-                doc.setFillColor(0, 136, 170); doc.rect(0, 0, pageWidth, 25, 'F');
-                doc.setTextColor(255, 255, 255); doc.setFontSize(16); doc.setFont("helvetica", "bold");
-                doc.text("REPORTE FOTOGRÁFICO DE INSTALACIÓN", margin, 16);
+                // Título sobrio e informe (Sin franja azul)
+                doc.setTextColor(0, 136, 170); // Azul técnico
+                doc.setFontSize(14); // Más chico
+                doc.setFont("helvetica", "bold");
+                doc.text("INFORME FOTOGRÁFICO DE INSTALACIÓN", margin, 20);
                 
+                // Agregar el membrete a la derecha
+                const logoB64 = getMembreteData();
+                if (logoB64) {
+                    // Posición X: Margen derecho, Posición Y: 10, Ancho: 45, Alto: 15
+                    doc.addImage(logoB64, 'PNG', pageWidth - margin - 45, 10, 45, 15);
+                }
+                
+                // Textos del cliente
                 doc.setTextColor(50, 50, 50); doc.setFontSize(10); doc.setFont("helvetica", "normal");
                 currentY = 32;
                 doc.text(`Cliente / Obra: ${clienteActual.nombre}`, margin, currentY);
@@ -410,14 +427,13 @@ function generarPDFReporte() {
                 doc.text(`Teléfono: ${clienteActual.tel}  |  Fecha: ${clienteActual.fecha}`, margin, currentY + 10);
                 
                 doc.setDrawColor(200, 200, 200); doc.line(margin, currentY + 14, pageWidth - margin, currentY + 14);
-                currentY += 20;
+                currentY += 20; // 52 mm es donde arrancan las fotos
             }
 
             function addFooter() {
                 const footY = pageHeight - 20;
                 doc.setDrawColor(0, 136, 170); doc.line(margin, footY - 4, pageWidth - margin, footY - 4);
                 
-                // NOTA ACLARATORIA DE MEDIDAS
                 doc.setFontSize(7); doc.setTextColor(150, 150, 150);
                 doc.text("* Alturas corresponden a la arista inferior del elemento. Distancias tomadas a la pared perpendicular más cercana.", margin, footY);
                 
@@ -428,26 +444,27 @@ function generarPDFReporte() {
 
             addHeader(); addFooter();
             
-            // Grilla perfectamente cuadrada
-            const squareSize = 75; // 75x75 mm
-            // Centrado en el A4 horizontal
-            const xOffset = (pageWidth - (squareSize * 2 + 10)) / 2; 
+            // Grilla perfectamente cuadrada y MÁS CHICA (65mm) para no pisar el Footer
+            const squareSize = 65; 
+            const gap = 10;
+            const xOffset = (pageWidth - (squareSize * 2 + gap)) / 2; // Centra las dos columnas
             
             fotosArray.forEach((foto, i) => {
                 const indexOnPage = i % 6; 
-                if (i > 0 && indexOnPage === 0) { doc.addPage(); addHeader(); addFooter(); }
+                if (i > 0 && indexOnPage === 0) { doc.addPage(); currentY = 32; addHeader(); addFooter(); }
                 const col = indexOnPage % 2; const row = Math.floor(indexOnPage / 2); 
                 
-                const xPos = xOffset + (col * (squareSize + 10)); 
-                const yPos = currentY + (row * (squareSize + 10));
+                const xPos = xOffset + (col * (squareSize + gap)); 
+                const yPos = currentY + (row * (squareSize + gap));
 
                 doc.addImage(foto.src, 'JPEG', xPos, yPos, squareSize, squareSize);
                 doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.3); doc.rect(xPos, yPos, squareSize, squareSize);
             });
 
-            const fileName = `Reporte_${clienteActual.nombre.split(' ')[0]}_${clienteActual.fecha.replace(/\//g, '-')}.pdf`;
+            const fileName = `Informe_${clienteActual.nombre.split(' ')[0]}_${clienteActual.fecha.replace(/\//g, '-')}.pdf`;
             doc.save(fileName);
-        } catch (error) { alert("Error generando el PDF."); } 
+        } catch (error) { alert("Error generando el PDF."); console.error(error); } 
         finally { btnPdf.innerText = originalText; btnPdf.style.pointerEvents = "auto"; }
     }, 100);
-}
+    }
+            
