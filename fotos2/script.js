@@ -420,7 +420,7 @@ function generarPDFReporte() {
                 // Lógica Membrete Proporcional
                 const logoData = getMembreteData();
                 if (logoData) {
-                    const logoWidth = 45; // Ancho fijo deseado (mm)
+                    const logoWidth = 30; // Ancho fijo deseado (mm)
                     const logoHeight = logoWidth * logoData.ratio; // Altura auto-calculada
                     doc.addImage(logoData.base64, 'PNG', pageWidth - margin - logoWidth, 10, logoWidth, logoHeight);
                 }
