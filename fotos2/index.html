@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#121212">
     
-    <title>Villaser - Reporte Fotográfico</title>
+    <title>Villaser - Informe Fotográfico</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
@@ -41,7 +41,6 @@
         </div>
         <div class="video-container">
             <div class="video-square">
-                <!-- playsinline evita que en iOS se abra en pantalla completa -->
                 <video id="videoElement" autoplay playsinline></video>
             </div>
         </div>
@@ -76,7 +75,6 @@
                 </div>
             </div>
 
-            <!-- Botón para cargar un informe previo -->
             <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
                 <button class="btn-ngc btn-main btn-imp" style="width: 100%;" onclick="document.getElementById('fileImport').click()">
                     📂 CARGAR AVANCE GUARDADO
@@ -139,7 +137,6 @@
                     </select>
                 </div>
 
-                <!-- NUEVOS CAMPOS: ALTURA Y DISTANCIA -->
                 <div class="row-group-stretch">
                     <div class="flex-1">
                         <label for="inpAltura">Altura (m)</label>
@@ -195,6 +192,9 @@
     </div>
     
     <input type="file" id="fileImport" style="display:none" accept=".txt" onchange="importarAvance(event)">
+    
+    <!-- Imagen del membrete oculta para que el JS la pueda leer e insertar en el PDF -->
+    <img id="imgMembrete" src="membrete.avif" alt="Membrete" style="display: none;" crossorigin="anonymous">
 
 </main>
 <script src="script.js"></script>
