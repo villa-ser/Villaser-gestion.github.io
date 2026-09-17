@@ -33,15 +33,17 @@
         </div>
     </div>
     
-    <!-- VISOR DE CÁMARA INTERNO (Anti Memoria Insuficiente) -->
+    <!-- VISOR DE CÁMARA INTERNO CUADRADO -->
     <div id="cameraModal" class="camera-modal" style="display: none;">
         <div class="camera-header">
-            <span>📸 Visor Villaser</span>
+            <span>📸 Visor Villaser (1:1)</span>
             <button class="btn-close-camera" onclick="cerrarVisor()">✖ Cancelar</button>
         </div>
         <div class="video-container">
-            <!-- playsinline es vital para que iOS no abra el video en pantalla completa nativa -->
-            <video id="videoElement" autoplay playsinline></video>
+            <div class="video-square">
+                <!-- playsinline evita que en iOS se abra en pantalla completa -->
+                <video id="videoElement" autoplay playsinline></video>
+            </div>
         </div>
         <div class="camera-footer">
             <span id="camaraContador" style="color: var(--ngc-warning); font-weight: bold; margin-bottom: 10px; display: block; text-align: center;">0/3 fotos</span>
@@ -137,22 +139,32 @@
                     </select>
                 </div>
 
+                <!-- NUEVOS CAMPOS: ALTURA Y DISTANCIA -->
+                <div class="row-group-stretch">
+                    <div class="flex-1">
+                        <label for="inpAltura">Altura (m)</label>
+                        <input type="number" id="inpAltura" step="0.01" placeholder="Ej: 1.20">
+                    </div>
+                    <div class="flex-1">
+                        <label for="inpDistancia">Distancia a pared (m)</label>
+                        <input type="number" id="inpDistancia" step="0.01" placeholder="Ej: 0.50">
+                    </div>
+                </div>
+
                 <div class="row-group">
-                    <label for="obsFoto">Observaciones (Medidas, estado, etc.)</label>
-                    <textarea id="obsFoto" placeholder="Ej: Altura 1.20m, medidas internas 3x3m..." style="height: 110px; resize: none;"></textarea>
+                    <label for="obsFoto">Observaciones</label>
+                    <textarea id="obsFoto" placeholder="Detalles de estado, cables, etc..." style="height: 70px; resize: none;"></textarea>
                 </div>
 
                 <div style="margin-top: 15px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <label>Ingresar Imágenes</label>
+                        <label>Ingresar Imágenes (Formato Cuadrado)</label>
                         <span id="contadorLote" style="color: var(--ngc-warning); font-size: 0.8rem; font-weight: bold;">0/3 de este lote</span>
                     </div>
 
-                    <!-- Input oculto para Galería (mantenemos esto para subir archivos si quiere) -->
                     <input type="file" id="galleryInput" accept="image/*" multiple style="display: none;" onchange="procesarGaleria(event)">
                     
                     <div class="action-grid" style="margin-top: 0; margin-bottom: 15px; gap: 10px; display: grid; grid-template-columns: 1fr 1fr;">
-                        <!-- BOTÓN NUEVO CÁMARA LIGERA -->
                         <button class="btn-ngc btn-main" style="border-color: var(--ngc-success); color: var(--ngc-success);" onclick="iniciarCamaraVisor()">📸 CÁMARA</button>
                         <button class="btn-ngc btn-main" style="border-color: var(--ngc-info); color: var(--ngc-info);" onclick="abrirGaleria()">🖼️ GALERÍA</button>
                     </div>
@@ -187,5 +199,4 @@
 </main>
 <script src="script.js"></script>
 </body>
-  </html>
-
+</html>
