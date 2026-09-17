@@ -147,7 +147,6 @@ function tomarCapturaVisor() {
     }
 }
 
-
 // --- GALERÍA (También recorta a cuadrado automáticamente) ---
 function abrirGaleria() {
     if (fotosLoteActual >= 3) {
@@ -377,19 +376,24 @@ function importarAvance(event) {
     reader.readAsText(file); event.target.value = ''; 
 }
 
-// --- OBTENER LOGO (MEMBRETE) ---
+// --- OBTENER LOGO PROPORCIONAL ---
 function getMembreteData() {
     const img = document.getElementById('imgMembrete');
     if (!img || !img.complete || img.naturalWidth === 0) return null;
+    
     const canvas = document.createElement('canvas');
     canvas.width = img.naturalWidth;
     canvas.height = img.naturalHeight;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
-    return canvas.toDataURL('image/png'); // Lo convertimos a formato seguro
+    
+    return {
+        base64: canvas.toDataURL('image/png'),
+        ratio: img.naturalHeight / img.naturalWidth
+    };
 }
 
-// --- GENERACIÓN DE PDF MEJORADO ---
+// --- GENERACIÓN DE PDF: 3x3 FOTOS ---
 function generarPDFReporte() {
     if(fotosArray.length === 0) return alert("Agregue al menos 1 fotografía.");
 
@@ -402,24 +406,25 @@ function generarPDFReporte() {
         try {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
-            const pageWidth = doc.internal.pageSize.getWidth(); const pageHeight = doc.internal.pageSize.getHeight(); 
-            const margin = 15; let currentY = margin;
+            const pageWidth = doc.internal.pageSize.getWidth(); 
+            const pageHeight = doc.internal.pageSize.getHeight(); 
+            const margin = 10; // Sacrificamos margen lateral a 10mm
+            let currentY = margin;
 
             function addHeader() {
-                // Título sobrio e informe (Sin franja azul)
-                doc.setTextColor(0, 136, 170); // Azul técnico
-                doc.setFontSize(14); // Más chico
+                doc.setTextColor(0, 136, 170); 
+                doc.setFontSize(14); 
                 doc.setFont("helvetica", "bold");
                 doc.text("INFORME FOTOGRÁFICO DE INSTALACIÓN", margin, 20);
                 
-                // Agregar el membrete a la derecha
-                const logoB64 = getMembreteData();
-                if (logoB64) {
-                    // Posición X: Margen derecho, Posición Y: 10, Ancho: 45, Alto: 15
-                    doc.addImage(logoB64, 'PNG', pageWidth - margin - 45, 10, 45, 15);
+                // Lógica Membrete Proporcional
+                const logoData = getMembreteData();
+                if (logoData) {
+                    const logoWidth = 45; // Ancho fijo deseado (mm)
+                    const logoHeight = logoWidth * logoData.ratio; // Altura auto-calculada
+                    doc.addImage(logoData.base64, 'PNG', pageWidth - margin - logoWidth, 10, logoWidth, logoHeight);
                 }
                 
-                // Textos del cliente
                 doc.setTextColor(50, 50, 50); doc.setFontSize(10); doc.setFont("helvetica", "normal");
                 currentY = 32;
                 doc.text(`Cliente / Obra: ${clienteActual.nombre}`, margin, currentY);
@@ -427,32 +432,41 @@ function generarPDFReporte() {
                 doc.text(`Teléfono: ${clienteActual.tel}  |  Fecha: ${clienteActual.fecha}`, margin, currentY + 10);
                 
                 doc.setDrawColor(200, 200, 200); doc.line(margin, currentY + 14, pageWidth - margin, currentY + 14);
-                currentY += 20; // 52 mm es donde arrancan las fotos
+                currentY += 20; // 52 mm donde arrancan las fotos
             }
 
             function addFooter() {
-                const footY = pageHeight - 20;
+                const footY = pageHeight - 25; // Subimos un poco para dar espacio a la nueva línea
                 doc.setDrawColor(0, 136, 170); doc.line(margin, footY - 4, pageWidth - margin, footY - 4);
                 
                 doc.setFontSize(7); doc.setTextColor(150, 150, 150);
                 doc.text("* Alturas corresponden a la arista inferior del elemento. Distancias tomadas a la pared perpendicular más cercana.", margin, footY);
+                doc.text("* La ubicación izquierda, derecha, arriba, abajo, frente y fondo se toma desde el punto de vista de la entrada más principal al ambiente, desde su ingreso.", margin, footY + 4);
                 
                 doc.setFontSize(8); doc.setTextColor(100, 100, 100);
-                doc.text("Sergio Adrian Villagra - Electricista Habilitado Cat III (ERSeP 29029389 - 14027)", margin, footY + 5);
-                doc.text("villaser.com.ar", pageWidth - margin, footY + 5, { align: "right" });
+                doc.text("Sergio Adrian Villagra - Electricista Habilitado Cat III (ERSeP 29029389 - 14027)", margin, footY + 10);
+                doc.text("villaser.com.ar", pageWidth - margin, footY + 10, { align: "right" });
             }
 
             addHeader(); addFooter();
             
-            // Grilla perfectamente cuadrada y MÁS CHICA (65mm) para no pisar el Footer
-            const squareSize = 65; 
-            const gap = 10;
-            const xOffset = (pageWidth - (squareSize * 2 + gap)) / 2; // Centra las dos columnas
+            // Grilla de 3 filas x 3 columnas = 9 imágenes por página
+            const squareSize = 60; // Fotos de 60x60mm
+            const gap = 5; // Separación de 5mm
+            
+            // El ancho usable es pageWidth - (2*margin) = 210 - 20 = 190.
+            // 3 fotos de 60 = 180. 2 gaps de 5 = 10. (180+10 = 190). Entra exacto.
+            const xOffset = margin; 
             
             fotosArray.forEach((foto, i) => {
-                const indexOnPage = i % 6; 
-                if (i > 0 && indexOnPage === 0) { doc.addPage(); currentY = 32; addHeader(); addFooter(); }
-                const col = indexOnPage % 2; const row = Math.floor(indexOnPage / 2); 
+                const indexOnPage = i % 9; // Ahora son hasta 9 fotos por página
+                if (i > 0 && indexOnPage === 0) { 
+                    doc.addPage(); 
+                    addHeader(); 
+                    addFooter(); 
+                }
+                const col = indexOnPage % 3; // Columnas: 0, 1, 2
+                const row = Math.floor(indexOnPage / 3); // Filas: 0, 1, 2
                 
                 const xPos = xOffset + (col * (squareSize + gap)); 
                 const yPos = currentY + (row * (squareSize + gap));
@@ -466,5 +480,4 @@ function generarPDFReporte() {
         } catch (error) { alert("Error generando el PDF."); console.error(error); } 
         finally { btnPdf.innerText = originalText; btnPdf.style.pointerEvents = "auto"; }
     }, 100);
-    }
-            
+}
