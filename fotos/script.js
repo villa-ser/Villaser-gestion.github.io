@@ -290,24 +290,59 @@ function actualizarContadorLote() {
     document.getElementById('contadorLote').innerText = `${fotosLoteActual}/3 de este lote`;
 }
 
+// --- NUEVA LÓGICA DE GALERÍA AGRUPADA ---
 function actualizarGaleria() {
     const gal = document.getElementById('galeriaFotos');
     gal.innerHTML = '';
     
+    // Agrupar las fotos que comparten exactamente los mismos metadatos
+    const grupos = {};
     fotosArray.forEach(foto => {
-        const txtPared = foto.pared ? ` (${foto.pared})` : '';
+        const key = `${foto.hab}|${foto.boca}|${foto.pared}|${foto.altura}|${foto.distancia}|${foto.obs}`;
+        if (!grupos[key]) {
+            grupos[key] = {
+                datos: foto,
+                fotos: []
+            };
+        }
+        grupos[key].fotos.push(foto);
+    });
+    
+    // Renderizar cada grupo
+    Object.values(grupos).forEach(grupo => {
+        const txtPared = grupo.datos.pared ? ` (${grupo.datos.pared})` : '';
         const div = document.createElement('div');
         div.className = 'foto-item-list';
-        // Ajustamos los colores para que usen las variables del nuevo tema
+        div.style.flexDirection = 'column';
+        div.style.alignItems = 'stretch';
+        div.style.gap = '8px';
+        
+        // Miniaturas (una al lado de la otra con scroll si hay muchas)
+        let thumbsHtml = `<div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px;">`;
+        grupo.fotos.forEach(f => {
+            thumbsHtml += `
+                <div style="position: relative; flex-shrink: 0;">
+                    <img src="${f.src}" class="foto-thumb" alt="Miniatura">
+                    <button onclick="borrarFoto(${f.id})" style="position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.5);" title="Borrar esta foto">✖</button>
+                </div>
+            `;
+        });
+        thumbsHtml += `</div>`;
+        
+        const idsGrupo = grupo.fotos.map(f => f.id).join(',');
+        
+        // Información y botones inferiores del grupo
         div.innerHTML = `
-            <img src="${foto.src}" class="foto-thumb" alt="Miniatura">
-            <div class="foto-info">
-                <strong style="color: var(--text);">${foto.hab}${txtPared}</strong><br>
-                <span style="color: var(--accent);">${foto.boca}</span>
-            </div>
-            <div class="foto-actions">
-                <button class="btn-action-icon btn-edit" onclick="editarFoto(${foto.id})" title="Editar Datos">✏️</button>
-                <button class="btn-action-icon btn-delete" onclick="borrarFoto(${foto.id})" title="Eliminar Foto">🗑️</button>
+            ${thumbsHtml}
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
+                <div class="foto-info">
+                    <strong style="color: var(--text);">${grupo.datos.hab}${txtPared}</strong><br>
+                    <span style="color: var(--accent);">${grupo.datos.boca}</span>
+                </div>
+                <div class="foto-actions" style="flex-direction: row; gap: 8px;">
+                    <button class="btn-action-icon btn-edit" onclick="editarFoto(${grupo.fotos[0].id})" title="Cargar datos en el formulario">✏️</button>
+                    <button class="btn-action-icon btn-delete" onclick="borrarGrupo('${idsGrupo}')" title="Eliminar todo el grupo">🗑️</button>
+                </div>
             </div>
         `;
         gal.appendChild(div);
@@ -332,8 +367,16 @@ function editarFoto(id) {
 }
 
 function borrarFoto(id) {
-    if(confirm("¿Seguro que deseas eliminar esta entrada?")) {
+    if(confirm("¿Seguro que deseas eliminar esta fotografía en particular?")) {
         fotosArray = fotosArray.filter(f => f.id !== id);
+        actualizarGaleria();
+    }
+}
+
+function borrarGrupo(idsString) {
+    if(confirm("¿Seguro que deseas eliminar todas las fotos de este grupo?")) {
+        const idsAEliminar = idsString.split(',').map(Number);
+        fotosArray = fotosArray.filter(f => !idsAEliminar.includes(f.id));
         actualizarGaleria();
     }
 }
@@ -409,7 +452,7 @@ function generarPDFReporte() {
             const doc = new jsPDF('p', 'mm', 'a4');
             const pageWidth = doc.internal.pageSize.getWidth(); 
             const pageHeight = doc.internal.pageSize.getHeight(); 
-            const margin = 10; // Sacrificamos margen lateral a 10mm
+            const margin = 10; 
             let currentY = margin;
 
             function addHeader() {
@@ -418,11 +461,10 @@ function generarPDFReporte() {
                 doc.setFont("helvetica", "bold");
                 doc.text("INFORME FOTOGRÁFICO DE INSTALACIÓN", margin, 20);
                 
-                // Lógica Membrete Proporcional
                 const logoData = getMembreteData();
                 if (logoData) {
-                    const logoWidth = 30; // Ancho fijo deseado (mm)
-                    const logoHeight = logoWidth * logoData.ratio; // Altura auto-calculada
+                    const logoWidth = 30; 
+                    const logoHeight = logoWidth * logoData.ratio; 
                     doc.addImage(logoData.base64, 'PNG', pageWidth - margin - logoWidth, 10, logoWidth, logoHeight);
                 }
                 
@@ -433,11 +475,11 @@ function generarPDFReporte() {
                 doc.text(`Teléfono: ${clienteActual.tel}  |  Fecha: ${clienteActual.fecha}`, margin, currentY + 10);
                 
                 doc.setDrawColor(200, 200, 200); doc.line(margin, currentY + 14, pageWidth - margin, currentY + 14);
-                currentY += 20; // 52 mm donde arrancan las fotos
+                currentY += 20; 
             }
 
             function addFooter() {
-                const footY = pageHeight - 25; // Subimos un poco para dar espacio a la nueva línea
+                const footY = pageHeight - 25; 
                 doc.setDrawColor(0, 136, 170); doc.line(margin, footY - 4, pageWidth - margin, footY - 4);
                 
                 doc.setFontSize(7); doc.setTextColor(150, 150, 150);
@@ -451,23 +493,19 @@ function generarPDFReporte() {
 
             addHeader(); addFooter();
             
-            // Grilla de 3 filas x 3 columnas = 9 imágenes por página
-            const squareSize = 60; // Fotos de 60x60mm
-            const gap = 5; // Separación de 5mm
-            
-            // El ancho usable es pageWidth - (2*margin) = 210 - 20 = 190.
-            // 3 fotos de 60 = 180. 2 gaps de 5 = 10. (180+10 = 190). Entra exacto.
+            const squareSize = 60; 
+            const gap = 5; 
             const xOffset = margin; 
             
             fotosArray.forEach((foto, i) => {
-                const indexOnPage = i % 9; // Ahora son hasta 9 fotos por página
+                const indexOnPage = i % 9; 
                 if (i > 0 && indexOnPage === 0) { 
                     doc.addPage(); 
                     addHeader(); 
                     addFooter(); 
                 }
-                const col = indexOnPage % 3; // Columnas: 0, 1, 2
-                const row = Math.floor(indexOnPage / 3); // Filas: 0, 1, 2
+                const col = indexOnPage % 3; 
+                const row = Math.floor(indexOnPage / 3); 
                 
                 const xPos = xOffset + (col * (squareSize + gap)); 
                 const yPos = currentY + (row * (squareSize + gap));
@@ -481,5 +519,4 @@ function generarPDFReporte() {
         } catch (error) { alert("Error generando el PDF."); console.error(error); } 
         finally { btnPdf.innerText = originalText; btnPdf.style.pointerEvents = "auto"; }
     }, 100);
-                    }
-                       
+}
