@@ -139,6 +139,12 @@ document.getElementById('btnPresupuestoPC').addEventListener('click', function()
     window.location.href = './presupuestoPC/index.html';
 });
 
+// Navegación al módulo de Materiales
+document.getElementById('btnMaterialesPC').addEventListener('click', function() {
+    // Esto redirige a la página index.html dentro de la carpeta presupuesto
+    window.location.href = './materialesPC/index.html';
+});
+
 // Al cargar la página principal, verificar qué tema estaba activo
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('villaser_theme');
