@@ -1,1 +1,452 @@
+:root {
+    --ngc-primary: #00d4ff; 
+    --ngc-success: #28a745; 
+    --ngc-danger: #ff4444;
+    --ngc-warning: #ffc107; 
+    --ngc-info: #007bff;
+    --bg-main: #121212;
+    --text-main: #ffffff; 
+    --text-dim: rgba(255, 255, 255, 0.6);
+    --ngc-glass: rgba(255, 255, 255, 0.03); 
+    --input-bg: rgba(26, 26, 26, 0.95);
+    --ngc-border: 1px solid rgba(255, 255, 255, 0.08);
+    --btn-height: 48px;
+}
 
+body.light-mode {
+    --bg-main: #f0f2f5;
+    --text-main: #1a1a1a;
+    --text-dim: rgba(0, 0, 0, 0.6);
+    --ngc-glass: rgba(0, 0, 0, 0.04);
+    --input-bg: rgba(255, 255, 255, 0.9);
+    --ngc-border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+body { 
+    font-family: 'Segoe UI', system-ui, sans-serif; 
+    background-color: var(--bg-main); 
+    color: var(--text-main); 
+    margin: 0; 
+    padding: 0; 
+    display: flex; 
+    justify-content: center; 
+    width: 100%; 
+    overscroll-behavior-y: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- SISTEMA RESPONSIVO NGC --- */
+.layout-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 500px; /* Base para celulares */
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.preview-panel {
+    display: none; /* Oculto en móviles */
+}
+
+/* --- DETECCIÓN DE PANTALLA PC / HORIZONTAL --- */
+@media (min-width: 992px) {
+    .layout-wrapper {
+        max-width: 1600px; /* Ampliado para aprovechar monitores */
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 40px;
+        padding: 20px;
+    }
+    
+    .container {
+        flex: 0 0 450px; /* ANCHO FIJO estricto para el panel izquierdo */
+        margin: 0;
+        padding: 0;
+    }
+    
+    .preview-panel {
+        display: flex;
+        flex: 1; /* TOMA TODO EL ESPACIO RESTANTE automáticamente */
+        justify-content: center;
+        align-items: flex-start;
+        background: var(--ngc-glass);
+        border: var(--ngc-border);
+        border-radius: 12px;
+        padding: 30px;
+        position: sticky;
+        top: 20px;
+        height: calc(100vh - 40px);
+        overflow-y: auto;
+        
+        /* Estilo de barra de scroll NGC */
+        scrollbar-width: thin;
+        scrollbar-color: var(--ngc-primary) transparent;
+    }
+
+    .preview-panel::-webkit-scrollbar { width: 8px; }
+    .preview-panel::-webkit-scrollbar-track { background: transparent; }
+    .preview-panel::-webkit-scrollbar-thumb { background-color: var(--ngc-primary); border-radius: 10px; }
+
+    #plantilla-pdf {
+        display: block !important; /* Fuerza a verse en PC */
+        transform: scale(0.85); /* Reduce un poco el A4 para que entre mejor en pantalla */
+        transform-origin: top center;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        margin-bottom: -10%; /* Ajuste del espacio inferior sobrante por la escala */
+    }
+}
+
+.container { 
+    width: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+    padding: 15px; 
+    box-sizing: border-box; 
+}
+
+.top-nav { margin-bottom: 5px; }
+
+.btn-back { 
+    background: transparent; 
+    border: 1px solid var(--ngc-primary); 
+    color: var(--text-main); 
+    padding: 10px 18px; 
+    border-radius: 8px; 
+    font-size: 0.85rem; 
+    cursor: pointer; 
+    text-transform: uppercase; 
+    font-weight: bold; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    transition: 0.2s; 
+}
+.btn-back:active { background: rgba(0, 212, 255, 0.1); }
+
+.loading-state {
+    text-align: center;
+    padding: 30px;
+    font-size: 1rem;
+    color: var(--ngc-primary);
+    background: var(--ngc-glass);
+    border: var(--ngc-border);
+    border-radius: 12px;
+}
+
+.ngc-card { 
+    background: var(--ngc-glass); 
+    border: var(--ngc-border); 
+    border-radius: 12px; 
+    padding: 15px; 
+}
+
+h4 { 
+    color: var(--ngc-primary); 
+    font-size: 0.9rem; 
+    text-transform: uppercase; 
+    letter-spacing: 1.5px; 
+    margin: 0 0 15px 0; 
+}
+
+label { 
+    font-size: 0.75rem; 
+    color: var(--text-dim); 
+    text-transform: uppercase; 
+    font-weight: 600; 
+    margin-bottom: 6px; 
+    display: block; 
+}
+
+.sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;
+}
+
+input:not([type="hidden"]), textarea, .native-select { 
+    width: 100%; 
+    background: var(--input-bg); 
+    color: var(--text-main); 
+    border: 1px solid rgba(150, 150, 150, 0.2); 
+    border-radius: 8px; 
+    padding: 12px 10px; 
+    font-size: 1rem; 
+    outline: none; 
+    box-sizing: border-box; 
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+input:focus, textarea:focus, .native-select:focus {
+    border-color: var(--ngc-primary);
+    box-shadow: 0 0 5px rgba(0, 212, 255, 0.2);
+}
+
+.native-select {
+    cursor: pointer;
+    appearance: none; 
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px;
+}
+.native-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.row-group { margin-bottom: 15px; width: 100%; }
+.row-group-stretch { display: flex; gap: 10px; margin-bottom: 10px; align-items: stretch; }
+.flex-1 { flex: 1; } 
+.flex-3 { flex: 3; } 
+.flex-btn-small { flex: 0 0 70px; }
+
+.btn-ngc { 
+    background: rgba(0, 212, 255, 0.05); 
+    border: 1px solid var(--ngc-primary); 
+    color: var(--ngc-primary); 
+    border-radius: 8px; 
+    height: var(--btn-height); 
+    font-size: 0.85rem; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    cursor: pointer; 
+    transition: all 0.2s; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+.btn-ngc:active { background: rgba(0, 212, 255, 0.2); transform: scale(0.98); }
+.btn-adapt { height: 100% !important; width: 100%; min-height: 70px; }
+.btn-ngc.active-success { background: var(--ngc-success); border-color: var(--ngc-success); color: white; }
+
+.stepper { 
+    display: flex; 
+    background: var(--input-bg); 
+    border: 1px solid rgba(150,150,150,0.2); 
+    border-radius: 8px; 
+    overflow: hidden; 
+    height: var(--btn-height); 
+}
+.btn-step { 
+    background: rgba(150,150,150,0.1); 
+    border: none; 
+    color: var(--text-main); 
+    width: 50px; 
+    cursor: pointer; 
+    font-size: 1.4rem; 
+}
+.btn-step:active { background: rgba(150,150,150,0.3); }
+.stepper input { border: none !important; text-align: center; border-radius: 0; padding: 0; }
+
+.obs-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.obs-actions { display: flex; gap: 6px; }
+.btn-obs { 
+    background: rgba(0, 212, 255, 0.1); 
+    border: 1px solid var(--ngc-primary); 
+    color: var(--ngc-primary); 
+    border-radius: 6px; 
+    font-size: 0.75rem; 
+    padding: 8px 12px; 
+    cursor: pointer; 
+    text-transform: uppercase; 
+    font-weight: 600;
+}
+.btn-obs.btn-danger { border-color: var(--ngc-danger); color: var(--ngc-danger); background: rgba(255, 68, 68, 0.1); }
+
+.capture-zone { 
+    background: #1e1e1e; 
+    border: 1px solid #444; 
+    border-radius: 12px; 
+    padding: 15px 10px; 
+    margin-top: 10px; 
+    width: 100%; 
+    box-sizing: border-box; 
+    color: #fff; 
+}
+
+.header-brand { 
+    text-align: center; 
+    margin-bottom: 15px; 
+    border-bottom: 1px solid rgba(0, 212, 255, 0.3); 
+    padding-bottom: 10px; 
+}
+
+table { width: 100%; border-collapse: collapse; }
+td { padding: 12px 5px; border-bottom: 1px solid rgba(0, 212, 255, 0.15); font-size: 0.95rem; }
+
+.total-display { 
+    margin-top: 15px; 
+    background: rgba(0, 212, 255, 0.1); 
+    padding: 12px; 
+    border-radius: 8px; 
+    border: 1px solid var(--ngc-primary); 
+    text-align: right; 
+    font-size: 1.4rem; 
+    font-weight: bold; 
+}
+
+.action-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 15px; 
+    margin-top: 20px; 
+}
+
+.action-grid-footer { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr 2fr; 
+    gap: 15px; 
+    margin-top: 15px; 
+    padding-bottom: 25px; 
+}
+
+.btn-main { height: 50px; font-size: 0.8rem; margin: 0; }
+.btn-wsp { border-color: var(--ngc-success); color: var(--ngc-success); }
+.btn-exp { border-color: var(--ngc-warning); color: var(--ngc-warning); }
+.btn-imp { border-color: var(--ngc-info); color: var(--ngc-info); }
+
+.trash-icon { 
+    color: #ff5555; 
+    background: rgba(255, 85, 85, 0.1); 
+    border: 1px solid #ff5555; 
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer; 
+    font-size: 1rem;
+}
+
+.btn-pdf {
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
+    background: rgba(255, 68, 68, 0.05);
+    height: 55px;
+    font-size: 1rem;
+}
+.btn-pdf:active { background: rgba(255, 68, 68, 0.2); }
+
+/* --- ESTILOS EXCLUSIVOS PARA LA PLANTILLA A4 (PDF) --- */
+#plantilla-pdf {
+    display: none;
+}
+
+.pdf-container {
+    background: #ffffff;
+    color: #000000;
+    width: 210mm;
+    min-height: 295mm;
+    padding: 10mm 12mm 10mm 12mm;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+}
+
+.pdf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #0088aa;
+    padding-bottom: 15px;
+}
+
+.pdf-info-box { width: 60%; }
+.pdf-row { display: grid; grid-template-columns: 120px 1fr; margin-bottom: 5px; font-size: 13px; }
+.pdf-row b { color: #555; }
+.pdf-logo-box { width: 35%; text-align: right; }
+
+.pdf-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+.pdf-table th {
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ccc;
+    font-size: 11px;
+}
+
+.pdf-table td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+    font-size: 10.5px; 
+}
+
+.pdf-table th:nth-child(3), .pdf-table td:nth-child(3) {
+    text-align: right;
+}
+
+.pdf-table th:nth-child(4), .pdf-table td:nth-child(4),
+.pdf-table th:nth-child(5), .pdf-table td:nth-child(5) {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.pdf-body-lower {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.pdf-notas-box {
+    width: 55%;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+}
+.pdf-notas-box h3 { margin: 0 0 10px 0; font-size: 12px; color: #0088aa; text-transform: uppercase; }
+.pdf-notas-content { font-size: 10px; color: #555; line-height: 1.4; white-space: pre-wrap; }
+
+.pdf-totales-box {
+    width: 40%;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+.pdf-total-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.final-total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #333;
+    font-size: 18px;
+    color: #0088aa;
+}
+
+.pdf-footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+.pdf-pagos h4 { margin: 0 0 5px 0; color: #333; font-size: 13px; }
+.pdf-pagos p { margin: 0; font-size: 11px; color: #666; line-height: 1.5; }
+.pdf-right-footer {
+    text-align: right;
+}
+.pdf-slogan {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0088aa;
+    font-style: italic;
+    margin-bottom: 6px; 
+}
+.pdf-contacto {
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+.pdf-contacto span {
+    display: inline-block;
+}
