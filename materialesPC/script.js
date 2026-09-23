@@ -62,9 +62,16 @@ async function init() {
     }
 }
 
+// CORRECCIÓN: Limpieza profunda de espacios y comillas
 function parseCSV(text) {
     return text.split('\n').slice(1).map(line => {
-        const cells = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"\vert{}"$/g, '').trim());
+        const cells = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => {
+            let val = c.trim(); // 1. Quita espacios primero
+            if (val.startsWith('"') && val.endsWith('"')) {
+                val = val.slice(1, -1); // 2. Quita las comillas de los extremos
+            }
+            return val.replace(/""/g, '"').trim(); // 3. Arregla dobles comillas internas y limpia
+        });
         return { c0: cells[0]||"", c1: cells[1]||"", c2: cells[2]||"", c3: cells[3]||"", c4: cells[4]||"", c5: cells[5]||"" };
     }).filter(item => item.c0);
 }
