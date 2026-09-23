@@ -1,0 +1,263 @@
+* { box-sizing: border-box; } 
+
+:root { 
+    --primary: #ffffff; 
+    --text: #ffffff; 
+    --success: #28a745; 
+    --accent: #00d4ff; 
+    --bg-main: #121212;
+    --bg-dark-capture: #1e1e1e; 
+    --input-bg: #1a1a1a; 
+    --border-color: rgba(255, 255, 255, 0.2);
+    --btn-bg: rgba(255, 255, 255, 0.05);
+    --btn-height: 48px;
+}
+
+body.light-mode {
+    --primary: #1a1a1a;
+    --text: #1a1a1a;
+    --bg-main: #f0f2f5;
+    --bg-dark-capture: #ffffff;
+    --input-bg: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(0, 0, 0, 0.15);
+    --btn-bg: rgba(0, 0, 0, 0.03);
+}
+
+body { 
+    font-family: 'Segoe UI', system-ui, sans-serif; 
+    background-color: var(--bg-main); 
+    color: var(--text); 
+    margin: 0; 
+    padding: 0;
+    width: 100%; 
+    overflow-x: hidden; 
+    overscroll-behavior-y: none; 
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* --- SISTEMA RESPONSIVO NGC --- */
+.layout-wrapper {
+    display: flex;
+    width: 100%;
+    max-width: 500px; /* Base para celulares */
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.preview-panel {
+    display: none; /* Oculto en móviles */
+}
+
+/* --- DETECCIÓN DE PANTALLA PC / HORIZONTAL --- */
+@media (min-width: 992px) {
+    .layout-wrapper {
+        max-width: 1600px;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 40px;
+        padding: 20px;
+    }
+    
+    .container {
+        flex: 0 0 450px; /* ANCHO FIJO estricto para el panel izquierdo */
+        margin: 0;
+        padding: 0;
+    }
+    
+    .preview-panel {
+        display: flex;
+        flex: 1; /* TOMA TODO EL ESPACIO RESTANTE automáticamente */
+        justify-content: center;
+        align-items: flex-start;
+        background: var(--bg-dark-capture);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 30px;
+        position: sticky;
+        top: 20px;
+        height: calc(100vh - 40px);
+        overflow-y: auto;
+        
+        /* Estilo de barra de scroll NGC */
+        scrollbar-width: thin;
+        scrollbar-color: var(--accent) transparent;
+    }
+
+    .preview-panel::-webkit-scrollbar { width: 8px; }
+    .preview-panel::-webkit-scrollbar-track { background: transparent; }
+    .preview-panel::-webkit-scrollbar-thumb { background-color: var(--accent); border-radius: 10px; }
+
+    #plantilla-pdf {
+        display: block !important; /* Fuerza a verse en PC */
+        transform: scale(0.85);
+        transform-origin: top center;
+        box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+        margin-bottom: -10%; 
+    }
+}
+
+.container { width: 100%; max-width: 500px; margin: 0 auto; padding: 15px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+.top-nav { width: 100%; display: flex; justify-content: flex-start; margin-bottom: 10px; }
+.btn-back { background: transparent; border: 1px solid var(--border-color); color: var(--text); padding: 10px 15px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; text-transform: uppercase; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+.btn-back:active { background: var(--btn-bg); }
+
+.card { background: transparent; padding: 0px; margin-bottom: 15px; border-radius: 8px; width: 100%; }
+
+.hidden { display: none !important; }
+h4 { margin: 0 0 10px 0; color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px; }
+label { font-weight: 600; display: block; margin: 4px 0 6px 0; font-size: 0.75rem; color: var(--text); opacity: 0.7; text-transform: uppercase; }
+
+input:not([type="hidden"]), textarea, .native-select { 
+    width: 100%; padding: 12px 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; background-color: var(--input-bg) !important; color: var(--text) !important; outline: none; font-family: inherit; appearance: none; transition: border-color 0.2s;
+}
+input:focus, textarea:focus, .native-select:focus { border-color: var(--accent); box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+
+.native-select { cursor: pointer; background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300d4ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; }
+.native-select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#obsGenerales { min-height: var(--btn-height); }
+#observaciones { margin-top: 8px; min-height: 80px; resize: none; }
+input:read-only { background: var(--btn-bg) !important; border-style: dashed; opacity: 0.8; }
+
+.stepper, .unit-toggle { height: var(--btn-height); background: rgba(0,0,0,0.1); border: 1px solid var(--border-color); border-radius: 8px; display: flex; overflow: hidden; }
+.btn-step { background: var(--btn-bg); border: none; color: var(--text); width: 45px; cursor: pointer; font-size: 1.2rem; }
+.btn-step:active { background: rgba(150,150,150,0.2); }
+.stepper input { border: none; text-align: center; width: 100%; padding: 0; font-size: 1rem; background: transparent !important; }
+
+.unit-toggle label { margin: 0; flex: 1; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; transition: 0.2s; cursor: pointer; }
+.unit-toggle input:checked + label { background: var(--accent); color: #000; font-weight: bold; }
+
+.btn-add-custom { background: var(--btn-bg); color: var(--text); border: 1px solid var(--border-color); padding: 0 15px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; transition: 0.2s; height: var(--btn-height); display: flex; align-items: center; justify-content: center; }
+.btn-add-custom:active { transform: scale(0.98); }
+.btn-client { border-color: var(--accent); color: var(--accent); }
+.btn-general { border-color: #fbbc04; color: #fbbc04; } 
+.btn-material { border-color: var(--text); color: var(--text); }
+.btn-success-active { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
+
+.capture-area { background: var(--bg-dark-capture); padding: 12px 8px; border-radius: 10px; border: 1px solid var(--border-color); margin-top: 15px; width: 100%; transition: background-color 0.3s ease; }
+.list-header-title { color: var(--accent); font-size: 0.9rem; font-weight: bold; text-align: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,212,255,0.3); padding-bottom: 8px; text-transform: uppercase; }
+
+.row-item { background: var(--btn-bg); padding: 10px; margin-bottom: 6px; border-left: 3px solid #555; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; width: 100%; line-height: 1.4; }
+.client-header { border-left-color: var(--accent); background: rgba(0, 212, 255, 0.05); }
+
+.btn-grid-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; width: 100%; padding-bottom: 20px; }
+.btn-cap { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
+.btn-copy { border-color: var(--text); color: var(--text); background: var(--btn-bg); }
+.btn-export { border-color: #ff9800; color: #ff9800; background: rgba(255,152,0,0.05); }
+.btn-import { border-color: #e91e63; color: #e91e63; background: rgba(233,30,99,0.05); }
+.btn-full { grid-column: span 2; padding: 14px; border-color: #25d366; color: #25d366; background: rgba(37,211,102,0.05); font-size: 0.9rem; height: 55px; }
+
+#status { color: var(--accent); font-size: 0.8rem; text-align: center; margin-bottom: 10px; font-weight: 600; }
+.btn-delete { background: rgba(255,85,85,0.1); border: 1px solid #ff5555; color: #ff5555; border-radius: 6px; cursor: pointer; font-size: 1.1rem; padding: 6px 12px; margin-left: 8px; }
+
+/* --- ESTILOS PARA EL BOTÓN PDF --- */
+.btn-pdf {
+    border-color: #ff4444 !important;
+    color: #ff4444 !important;
+    background: rgba(255, 68, 68, 0.05);
+}
+.btn-pdf:active { background: rgba(255, 68, 68, 0.2); }
+
+/* --- ESTILOS EXCLUSIVOS PARA LA PLANTILLA A4 (PDF) --- */
+#plantilla-pdf {
+    display: none;
+}
+
+.pdf-container {
+    background: #ffffff;
+    color: #000000;
+    width: 210mm;
+    min-height: 295mm;
+    padding: 10mm 12mm 10mm 12mm;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+}
+
+.pdf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #0088aa;
+    padding-bottom: 15px;
+}
+
+.pdf-info-box { width: 60%; }
+.pdf-row { display: grid; grid-template-columns: 120px 1fr; margin-bottom: 5px; font-size: 13px; }
+.pdf-row b { color: #555; }
+.pdf-logo-box { width: 35%; text-align: right; }
+
+.pdf-aclaracion {
+    font-size: 11px;
+    color: #444;
+    background: #f9f9f9;
+    padding: 10px;
+    border-left: 3px solid #ff9800;
+    margin-bottom: 15px;
+    border-radius: 0 4px 4px 0;
+}
+
+.pdf-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+.pdf-table th {
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 8px 10px;
+    text-align: left;
+    border-bottom: 2px solid #ccc;
+    font-size: 11px;
+}
+.pdf-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    vertical-align: top;
+    font-size: 12px;
+}
+
+.pdf-body-lower {
+    margin-top: 20px;
+}
+.pdf-notas-box {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+}
+.pdf-notas-box h3 { margin: 0 0 10px 0; font-size: 12px; color: #0088aa; text-transform: uppercase; }
+.pdf-notas-content { font-size: 11px; color: #555; line-height: 1.5; white-space: pre-wrap; }
+
+.pdf-footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+.pdf-right-footer {
+    text-align: right;
+}
+.pdf-slogan {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0088aa;
+    font-style: italic;
+    margin-bottom: 6px;
+}
+.pdf-contacto {
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+.pdf-contacto span {
+    display: inline-block;
+}
