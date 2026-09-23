@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+    
+    <title>Villaser - Carga de Potencia</title>
+    
+    <!-- Librerías -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="layout-wrapper">
+        <main class="container">
+            
+            <nav class="top-nav">
+                <button class="btn-back" onclick="window.location.href='../index.html'" aria-label="Volver al menú principal">
+                    <span>⬅</span> Menú
+                </button>
+            </nav>
+
+            <div id="status" class="loading-state" aria-live="polite">
+                📡 SINCRONIZANDO CLIENTES...
+            </div>
+            
+            <!-- SECCIÓN CLIENTE -->
+            <section id="step-cliente" class="ngc-card" style="display: none;">
+                <h4>Identificación de Proyecto</h4>
+                
+                <div class="row-group">
+                    <label for="selCliente">Seleccionar Cliente</label>
+                    <select id="selCliente" class="native-select">
+                        <option value="">-- SELECCIONE CLIENTE --</option>
+                    </select>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                    <div>
+                        <label for="cliTel" class="sr-only">Teléfono</label>
+                        <input type="text" id="cliTel" readonly placeholder="Teléfono">
+                    </div>
+                    <div>
+                        <label for="cliDir" class="sr-only">Dirección</label>
+                        <input type="text" id="cliDir" readonly placeholder="Dirección">
+                    </div>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <button id="btnLoadCli" class="btn-ngc btn-adapt" onclick="cargarCliente()">Cargar Proyecto</button>
+                </div>
+            </section>
+
+            <!-- SECCIÓN PRINCIPAL: CARGA DE AMBIENTES -->
+            <section id="step-trabajo" style="display:none; flex-direction: column; gap: 15px;">
+                
+                <div class="ngc-card">
+                    <h4>Cálculo de Superficies</h4>
+                    
+                    <div class="row-group">
+                        <label for="selAmbiente">Tipo de Ambiente</label>
+                        <select id="selAmbiente" class="native-select">
+                            <option value="">-- Seleccione Ambiente --</option>
+                            <option value="Sala de Estar / Comedor">Sala de Estar / Comedor</option>
+                            <option value="Dormitorio">Dormitorio</option>
+                            <option value="Cocina">Cocina</option>
+                            <option value="Baño">Baño</option>
+                            <option value="Pasillo / Distribuidor">Pasillo / Distribuidor</option>
+                            <option value="Lavadero">Lavadero</option>
+                            <option value="Cochera">Cochera</option>
+                            <option value="Exterior / Semicubierto">Exterior / Semicubierto</option>
+                            <option value="Otro">Otro (Especificar en notas)</option>
+                        </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+                        <div>
+                            <label for="inputAncho">Ancho (mts)</label>
+                            <input type="number" id="inputAncho" placeholder="Ej: 3.50" step="0.01" min="0">
+                        </div>
+                        <div>
+                            <label for="inputLargo">Largo (mts)</label>
+                            <input type="number" id="inputLargo" placeholder="Ej: 4.00" step="0.01" min="0">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 10px;">
+                        <label for="obsAmbiente" class="sr-only">Notas del Ambiente</label>
+                        <input type="text" id="obsAmbiente" placeholder="Notas (Ej: Planta Alta, Dormitorio Principal...)">
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <button id="btnAddAmbiente" class="btn-ngc" style="width: 100%;" onclick="agregarAmbiente()">➕ Agregar Ambiente</button>
+                    </div>
+                </div>
+
+                <!-- ÁREA DE CAPTURA Y RESUMEN -->
+                <div id="zonaCaptura" class="capture-zone">
+                    <header class="header-brand">PLANILLA DE POTENCIA - SUPERFICIES</header>
+                    <table id="tablaMain" style="width: 100%; border-collapse: collapse;">
+                        <tbody id="cuerpoTabla"></tbody>
+                    </table>
+                    <div class="total-display" id="totalDisplay" aria-live="polite">
+                        <span style="font-size: 0.8rem; display: block; color: var(--text-dim); text-transform: uppercase;">Límite de Aplicación</span>
+                        TOTAL: 0.00 m²
+                    </div>
+                </div>
+
+                <div style="margin-top: 5px;">
+                    <button id="btnGenerarPDF" class="btn-ngc btn-pdf" onclick="generarPDF()" style="width: 100%;">📄 Descargar PDF</button>
+                </div>
+
+                <!-- CONTROLES INFERIORES -->
+                <div class="action-grid-footer">
+                    <button class="btn-ngc btn-main btn-exp" onclick="exportarDatos()">💾 Exportar</button>
+                    <button class="btn-ngc btn-main btn-imp" onclick="document.getElementById('fileInput').click()">📂 Importar</button>
+                    <button class="btn-ngc btn-main btn-wsp" onclick="enviarWhatsApp()">🟢 WhatsApp</button>
+                    <input type="file" id="fileInput" accept=".txt" style="display:none" onchange="importarDatos(event)">
+                </div>
+            </section>
+        </main>
+
+        <!-- PANEL DERECHO: VISTA PREVIA PDF -->
+        <aside class="preview-panel">
+            <div id="plantilla-pdf">
+                <div class="pdf-container">
+                    <header class="pdf-header">
+                        <div class="pdf-info-box">
+                            <div class="pdf-row" style="font-size: 16px; margin-bottom: 10px; color:#0088aa;"><b>Planilla de Carga de Potencia</b></div>
+                            <div class="pdf-row"><b>Fecha</b> <span id="pdf-fecha"></span></div>
+                            <div class="pdf-row"><b>Cliente</b> <span id="pdf-cliente"></span></div>
+                            <div class="pdf-row"><b>Dirección</b> <span id="pdf-dir"></span></div>
+                        </div>
+                        <div class="pdf-logo-box">
+                            <img src="membrete.avif" alt="Villaser Electricista" style="max-width: 100%; max-height: 70px; display: block; margin-left: auto;">
+                        </div>
+                    </header>
+
+                    <h3 style="color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; font-size: 14px;">1. Cálculo de Superficie (Límite de Aplicación)</h3>
+                    
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Ambiente</th>
+                                <th style="width: 15%; text-align: center;">Ancho (m)</th>
+                                <th style="width: 15%; text-align: center;">Largo (m)</th>
+                                <th style="width: 15%; text-align: center;">Área (m²)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pdf-tbody">
+                            <!-- Filas generadas por JS -->
+                        </tbody>
+                    </table>
+
+                    <div class="pdf-totales-box" style="width: 100%; display: flex; justify-content: flex-end; margin-top: 10px;">
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; color: #666; text-transform: uppercase;">Superficie Total Calculada</div>
+                            <div id="pdf-total" style="font-size: 20px; font-weight: bold; color: #0088aa;">0.00 m²</div>
+                        </div>
+                    </div>
+
+                    <footer class="pdf-footer">
+                        <div class="pdf-pagos">
+                            <p>Documento preliminar para cálculo de Grado de Electrificación.</p>
+                        </div>
+                        <div class="pdf-right-footer">
+                            <div class="pdf-slogan">¡Electricidad Segura, Hogar Tranquilo!</div>
+                            <div class="pdf-contacto"><span>📞 351 355 9347</span> &nbsp;|&nbsp; <span>🌐 villaser.com.ar</span></div>
+                            <div class="pdf-contacto"><span>🪪 Electricista Habilitado Cat III (ERSeP 29029389 - 14027)</span></div>
+                        </div>
+                    </footer>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+  </html>
+
