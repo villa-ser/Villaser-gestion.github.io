@@ -26,7 +26,8 @@
                     <input type="text" id="cliTel" readonly placeholder="Teléfono">
                     <input type="text" id="cliDir" readonly placeholder="Dirección">
                 </div>
-                <button id="btnLoadCli" class="btn-ngc btn-adapt" style="margin-top: 15px;" onclick="cargarCliente()">Cargar Proyecto</button>
+                <!-- Botón corregido en tamaño -->
+                <button id="btnLoadCli" class="btn-ngc" style="width: 100%; margin-top: 15px;" onclick="cargarCliente()">Cargar Proyecto</button>
             </section>
 
             <section id="step-trabajo" style="display:none; flex-direction: column; gap: 15px;">
@@ -46,8 +47,10 @@
                             <option value="Toilette">Toilette</option>
                             <option value="Pasillo">Pasillo</option>
                             <option value="Lavadero">Lavadero</option>
-                            <option value="Balcón">Balcón</option>
-                            <option value="Galería">Galería</option>
+                            <option value="Balcón (Semi)">Balcón (Semi-cubierto al 50%)</option>
+                            <option value="Galería (Semi)">Galería (Semi-cubierta al 50%)</option>
+                            <option value="Porche (Semi)">Porche (Semi-cubierto al 50%)</option>
+                            <option value="Cochera (Semi)">Cochera (Semi-cubierta al 50%)</option>
                             <option value="Exterior">Exterior</option>
                             <option value="Aire Acondicionado">Aire Acondicionado (Carga)</option>
                             <option value="Motor / Bomba">Motor / Bomba (Carga)</option>
@@ -89,7 +92,7 @@
                         <div><span style="font-size: 0.7rem; color: #aaa;">Grado:</span> <b id="ui-grado" style="color:var(--ngc-warning); display:block;">MÍNIMO</b></div>
                         <div><span style="font-size: 0.7rem; color: #aaa;">DPMS Total:</span> <b id="ui-dpms" style="color:var(--ngc-primary); display:block;">0 VA</b></div>
                         <div>
-                            <span style="font-size: 0.7rem; color: #aaa;">Suministro Instalado:</span>
+                            <span style="font-size: 0.7rem; color: #aaa;">Suministro:</span>
                             <select id="selSuministro" class="native-select" style="font-size:0.75rem; padding: 2px; margin-top:2px;" onchange="renderTabla()">
                                 <option value="MONOFÁSICO">MONOFÁSICO</option>
                                 <option value="TRIFÁSICO">TRIFÁSICO</option>
@@ -99,6 +102,7 @@
                     </div>
                     
                     <div style="overflow-x: auto;">
+                        <!-- Tabla optimizada para incluir CS al final -->
                         <table id="tablaMain" style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center;">
                             <thead id="cabeceraTabla"></thead>
                             <tbody id="cuerpoTabla"></tbody>
@@ -122,7 +126,8 @@
                 <div class="pdf-container">
                     <header class="pdf-header">
                         <div class="pdf-info-box">
-                            <div class="pdf-row" style="font-size: 16px; margin-bottom: 10px; color:#0088aa;"><b>Planilla de Carga y Circuitos</b></div>
+                            <!-- Título centrado en una sola línea -->
+                            <div class="pdf-row" style="text-align: center; font-size: 16px; margin-bottom: 10px; color:#0088aa; width: 100%;"><b>PLANILLA DE CARGA Y CIRCUITOS</b></div>
                             <div class="pdf-row"><b>Cliente:</b> <span id="pdf-cliente"></span></div>
                             <div class="pdf-row"><b>Fecha:</b> <span id="pdf-fecha"></span></div>
                         </div>
