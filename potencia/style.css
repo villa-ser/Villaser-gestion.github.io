@@ -179,3 +179,42 @@ input:focus, textarea:focus, .native-select:focus { border-color: var(--ngc-prim
 .pdf-table tfoot td {
     border-top: 2px solid #666;
 }
+
+/* --- ESTILOS PLANILLA DE CARGA E INPUTS DINAMICOS --- */
+#tablaMain th, #tablaMain td {
+    padding: 6px 2px;
+}
+.circ-input {
+    width: 100%;
+    max-width: 65px;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    color: white;
+    text-align: center;
+    border-radius: 4px;
+    padding: 2px;
+    font-family: inherit;
+    font-size: 0.75rem;
+}
+.circ-input:focus {
+    outline: none;
+    border-color: var(--ngc-primary);
+    box-shadow: 0 0 5px var(--ngc-primary);
+}
+.circ-input option {
+    background: #1a1a2e; /* Color oscuro para el menú desplegable */
+    color: white;
+}
+.pdf-table { 
+    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px;
+}
+.pdf-table th { 
+    background-color: #f0f0f0; color: #333; padding: 4px; border: 1px solid #ccc; 
+}
+.pdf-table td { 
+    padding: 4px; border: 1px solid #ddd;
+}
+.pdf-table tfoot td {
+    border-top: 2px solid #666;
+    background-color: #fafafa;
+}
