@@ -163,3 +163,19 @@ input:focus, textarea:focus, .native-select:focus { border-color: var(--ngc-prim
 .pdf-slogan { font-size: 16px; font-weight: bold; color: #0088aa; font-style: italic; margin-bottom: 6px; }
 .pdf-contacto { font-size: 12px; color: #555; font-weight: 500; }
   
+/* --- ESTILOS PLANILLA DE CARGA --- */
+#tablaMain th, #tablaMain td {
+    padding: 8px 2px;
+}
+.pdf-table { 
+    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px;
+}
+.pdf-table th { 
+    background-color: #f0f0f0; color: #333; padding: 6px; border: 1px solid #ccc; 
+}
+.pdf-table td { 
+    padding: 6px; border: 1px solid #ddd;
+}
+.pdf-table tfoot td {
+    border-top: 2px solid #666;
+}
