@@ -17,7 +17,6 @@
 
             <div id="status" class="loading-state">📡 SINCRONIZANDO CLIENTES...</div>
             
-            <!-- SECCIÓN CLIENTE -->
             <section id="step-cliente" class="ngc-card" style="display: none;">
                 <h4>Identificación de Proyecto</h4>
                 <div class="row-group">
@@ -30,7 +29,6 @@
                 <button id="btnLoadCli" class="btn-ngc btn-adapt" style="margin-top: 15px;" onclick="cargarCliente()">Cargar Proyecto</button>
             </section>
 
-            <!-- SECCIÓN CARGA DE AMBIENTES -->
             <section id="step-trabajo" style="display:none; flex-direction: column; gap: 15px;">
                 <div class="ngc-card">
                     <h4 id="titulo-form-ambiente">Carga de Ambientes y Bocas</h4>
@@ -61,31 +59,21 @@
                         <input type="number" id="inputLargo" placeholder="Largo (m)" step="0.01" min="0">
                     </div>
 
-                    <!-- ASIGNACIÓN DE BOCAS Y CIRCUITOS -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; background: rgba(0,212,255,0.05); padding: 10px; border-radius: 8px;">
-                        <!-- IUG -->
                         <div>
                             <label style="font-size:0.65rem; color:var(--ngc-primary);">Bocas Iluminación</label>
                             <input type="number" id="bocasIUG" placeholder="Cant." min="0" value="0">
-                            <select id="circuitoIUG" class="native-select dynamic-circ-select" style="margin-top:5px; font-size:0.75rem; padding: 5px;">
-                                <option value="">-- Circuito --</option>
-                            </select>
+                            <select id="circuitoIUG" class="native-select dynamic-circ-select" style="margin-top:5px; font-size:0.75rem; padding: 5px;"><option value="">-- Circuito --</option></select>
                         </div>
-                        <!-- TUG -->
                         <div>
                             <label style="font-size:0.65rem; color:var(--ngc-primary);">Bocas Tomas</label>
                             <input type="number" id="bocasTUG" placeholder="Cant." min="0" value="0">
-                            <select id="circuitoTUG" class="native-select dynamic-circ-select" style="margin-top:5px; font-size:0.75rem; padding: 5px;">
-                                <option value="">-- Circuito --</option>
-                            </select>
+                            <select id="circuitoTUG" class="native-select dynamic-circ-select" style="margin-top:5px; font-size:0.75rem; padding: 5px;"><option value="">-- Circuito --</option></select>
                         </div>
-                        <!-- OTROS (ACU/TUE) -->
                         <div>
                             <label style="font-size:0.65rem; color:var(--ngc-primary);">Bocas Específicas</label>
                             <input type="number" id="bocasESP" placeholder="Cant." min="0" value="0">
-                            <select id="circuitoESP" class="native-select dynamic-circ-select" style="margin-top:5px; font-size:0.75rem; padding: 5px;">
-                                <option value="">-- Circuito --</option>
-                            </select>
+                            <select id="circuitoESP" class="native-select dynamic-circ-select" style="margin-top:5px; font-size:0.75rem; padding: 5px;"><option value="">-- Circuito --</option></select>
                             <input type="text" id="descESP" placeholder="Ej: AA" style="margin-top:5px; font-size:0.75rem; padding: 5px;">
                         </div>
                     </div>
@@ -94,33 +82,34 @@
                     <button id="btnCancelarEdicion" class="btn-ngc btn-danger" style="width: 100%; margin-top: 10px; display: none;" onclick="cancelarEdicion()">✕ Cancelar Edición</button>
                 </div>
 
-                <!-- ZONA DE TABLA -->
                 <div id="zonaCaptura" class="capture-zone">
                     <header class="header-brand">PLANILLA DE CARGA Y CIRCUITOS</header>
-                    <div style="display: flex; justify-content: space-between; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px;">
-                        <div><span style="font-size: 0.75rem; color: #aaa;">SLA:</span> <b id="ui-sla" style="color:var(--ngc-primary);">0.00 m²</b></div>
-                        <div><span style="font-size: 0.75rem; color: #aaa;">Grado AEA:</span> <b id="ui-grado" style="color:var(--ngc-warning);">MÍNIMO</b></div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr 1.5fr; gap: 5px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px; align-items: center;">
+                        <div><span style="font-size: 0.7rem; color: #aaa;">SLA:</span> <b id="ui-sla" style="color:var(--ngc-primary); display:block;">0.00 m²</b></div>
+                        <div><span style="font-size: 0.7rem; color: #aaa;">Grado:</span> <b id="ui-grado" style="color:var(--ngc-warning); display:block;">MÍNIMO</b></div>
+                        <div><span style="font-size: 0.7rem; color: #aaa;">DPMS Total:</span> <b id="ui-dpms" style="color:var(--ngc-primary); display:block;">0 VA</b></div>
+                        <div>
+                            <span style="font-size: 0.7rem; color: #aaa;">Suministro Instalado:</span>
+                            <select id="selSuministro" class="native-select" style="font-size:0.75rem; padding: 2px; margin-top:2px;" onchange="renderTabla()">
+                                <option value="MONOFÁSICO">MONOFÁSICO</option>
+                                <option value="TRIFÁSICO">TRIFÁSICO</option>
+                            </select>
+                            <b id="ui-fase-alerta" style="font-size: 0.65rem; display:block; margin-top:2px;"></b>
+                        </div>
                     </div>
                     
                     <div style="overflow-x: auto;">
-                        <table id="tablaMain" style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: center;">
-                            <thead id="cabeceraTabla">
-                                <!-- Generado por JS -->
-                            </thead>
+                        <table id="tablaMain" style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center;">
+                            <thead id="cabeceraTabla"></thead>
                             <tbody id="cuerpoTabla"></tbody>
-                            <tfoot id="pieTabla" style="border-top: 1px solid rgba(255,255,255,0.2); font-weight: bold; color: var(--ngc-warning);"></tfoot>
+                            <tfoot id="pieTabla" style="border-top: 2px solid rgba(255,255,255,0.2);"></tfoot>
                         </table>
                     </div>
                 </div>
 
-                <!-- CONFIGURACIÓN DE CIRCUITOS -->
                 <div class="ngc-card" style="border-color: var(--ngc-warning);">
-                    <h4 style="color: var(--ngc-warning);">Configuración de Circuitos</h4>
-                    <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 10px;">Los circuitos se ajustan automáticamente según el Grado de Electrificación (SLA), pero puedes editarlos manualmente.</p>
-                    
-                    <div id="listaConfigCircuitos" style="display: flex; flex-direction: column; gap: 8px;">
-                        <!-- Generado por JS -->
-                    </div>
+                    <h4 style="color: var(--ngc-warning);">Gestión de Circuitos Extra</h4>
+                    <div id="listaConfigCircuitos" style="display: flex; flex-direction: column; gap: 8px;"></div>
                     <button class="btn-ngc" style="width: 100%; margin-top: 10px; border-color: #888; color: #ccc;" onclick="agregarCircuitoManual()">+ Añadir Circuito Extra</button>
                 </div>
 
@@ -128,7 +117,6 @@
             </section>
         </main>
 
-        <!-- VISTA PREVIA PDF -->
         <aside class="preview-panel">
             <div id="plantilla-pdf">
                 <div class="pdf-container">
@@ -139,17 +127,17 @@
                             <div class="pdf-row"><b>Fecha:</b> <span id="pdf-fecha"></span></div>
                         </div>
                     </header>
-
                     <table class="pdf-table" style="text-align: center;">
                         <thead id="pdf-thead"></thead>
                         <tbody id="pdf-tbody"></tbody>
                         <tfoot id="pdf-tfoot" style="font-weight: bold; background: #f0f0f0;"></tfoot>
                     </table>
-                    
-                    <table class="pdf-table" style="text-align: center; margin-top: 20px; width: 50%;">
+                    <table class="pdf-table" style="text-align: center; margin-top: 20px; width: 60%;">
                         <tbody>
-                            <tr><td style="text-align:left; font-weight:bold;">SLA</td><td id="pdf-sla-val" style="color:#0088aa; font-weight:bold;">0.00</td></tr>
-                            <tr><td style="text-align:left; font-weight:bold;">Grado de Electrificación</td><td id="pdf-grado-val" style="color:#0088aa; font-weight:bold;">MÍNIMO</td></tr>
+                            <tr><td style="text-align:left; font-weight:bold;">SLA</td><td id="pdf-sla-val" style="color:#0088aa; font-weight:bold;">0.00 m²</td></tr>
+                            <tr><td style="text-align:left; font-weight:bold;">Grado AEA</td><td id="pdf-grado-val" style="color:#0088aa; font-weight:bold;">MÍNIMO</td></tr>
+                            <tr><td style="text-align:left; font-weight:bold;">DPMS Total</td><td id="pdf-dpms-val" style="color:#0088aa; font-weight:bold;">0 VA</td></tr>
+                            <tr><td style="text-align:left; font-weight:bold;">Suministro</td><td id="pdf-sum-val" style="color:#0088aa; font-weight:bold;">-</td></tr>
                         </tbody>
                     </table>
                 </div>
