@@ -11,10 +11,13 @@ let clienteActual = null;
 let listaAmbientes = [];
 let editandoId = null;
 
+// Circuitos inician vacíos en selecciones, esperando ingreso del usuario
 let circuitos = [
-    { id: 'C1', tipo: 'IUG', dpms: 0, userEditedDpms: false, tension: 220, seccionLN: 1.5, seccionPE: 2.5, iz: 15, in: 10 },
-    { id: 'C2', tipo: 'TUG', dpms: 2200, userEditedDpms: false, tension: 220, seccionLN: 2.5, seccionPE: 2.5, iz: 21, in: 16 }
+    { id: 'C1', tipo: 'IUG', dpms: 0, userEditedDpms: false, tension: '', seccionLN: '', seccionPE: '', iz: '', in: '' },
+    { id: 'C2', tipo: 'TUG', dpms: 2200, userEditedDpms: false, tension: '', seccionLN: '', seccionPE: '', iz: '', in: '' }
 ];
+// Objeto especial para el Tablero/Circuito Seccional (CS)
+let circuitoCS = { id: 'CS', tipo: 'T.P.', dpms: 0, tension: '', seccionLN: '', seccionPE: '', iz: '', in: '' };
 
 window.onload = init;
 
@@ -86,7 +89,7 @@ function autoAjustarCircuitos(grado) {
         let tipo = (num % 2 === 0) ? 'TUG' : 'IUG'; 
         circuitos.push({ 
             id: `C${num}`, tipo: tipo, dpms: tipo==='TUG'?2200:0, userEditedDpms: false, 
-            tension: 220, seccionLN: tipo==='IUG'?1.5:2.5, seccionPE: 2.5, iz: 15, in: 10 
+            tension: '', seccionLN: '', seccionPE: '', iz: '', in: '' 
         });
     }
     actualizarGestorCircuitos();
@@ -125,7 +128,7 @@ function cambiarTipoCircuito(index, nuevoTipo) {
 
 function agregarCircuitoManual() {
     let num = circuitos.length + 1;
-    circuitos.push({ id: `C${num}`, tipo: 'ACU', dpms: 0, userEditedDpms: false, tension: 220, seccionLN: 2.5, seccionPE: 2.5, iz: 21, in: 16 });
+    circuitos.push({ id: `C${num}`, tipo: 'ACU', dpms: 0, userEditedDpms: false, tension: '', seccionLN: '', seccionPE: '', iz: '', in: '' });
     actualizarGestorCircuitos();
     renderTabla();
 }
@@ -176,10 +179,15 @@ function guardarAmbiente() {
     if (!tipo) return alert("Seleccione el tipo de ambiente o carga.");
     if (!tipo.includes("Acondicionado") && !tipo.includes("Motor") && (ancho <= 0 || largo <= 0)) return alert("Ingrese medidas válidas.");
     
-    const area = (tipo.includes("Exterior") || tipo.includes("Balcón") || tipo.includes("Galería")) ? (ancho * largo) / 2 : (ancho * largo);
+    // Si incluye "(Semi)", la superficie calculada se divide en 2
+    let areaCalculada = ancho * largo;
+    if (tipo.includes("Semi") || tipo.includes("Balcón") || tipo.includes("Exterior")) {
+        areaCalculada = areaCalculada / 2;
+    }
+
     const obj = {
         id: editandoId ? parseInt(editandoId) : Date.now(),
-        tipo, ancho, largo, area, bIUG, circIUG, bTUG, circTUG, bESP, circESP, descESP
+        tipo, ancho, largo, area: areaCalculada, bIUG, circIUG, bTUG, circTUG, bESP, circESP, descESP
     };
 
     if (editandoId) {
@@ -222,14 +230,27 @@ function cancelarEdicion() {
 
 function borrarItem(id) { listaAmbientes = listaAmbientes.filter(i => i.id !== id); calcularGradoYRenderizar(); }
 
-// Actualizador global de datos del circuito desde inputs
+// Actualizador global dinámico
 window.updC = function(id, field, value) {
-    const c = circuitos.find(x => x.id === id);
+    let c = (id === 'CS') ? circuitoCS : circuitos.find(x => x.id === id);
     if(c) {
-        c[field] = parseFloat(value) || value;
-        if(field === 'dpms') c.userEditedDpms = true;
+        c[field] = value === "" ? "" : (parseFloat(value) || value);
+        if(id !== 'CS' && field === 'dpms') c.userEditedDpms = true;
         renderTabla();
     }
+}
+
+// Helper para crear desplegables con validación de color
+function buildSelectHtml(id, field, currentVal, optionsList, validationColor) {
+    let colorStyle = (currentVal !== "") ? `color: ${validationColor}; font-weight:bold;` : `color: white;`;
+    let html = `<select class="circ-input" style="${colorStyle}" onchange="updC('${id}','${field}',this.value)">`;
+    html += `<option value="">-</option>`;
+    optionsList.forEach(opt => {
+        let sel = (currentVal !== "" && currentVal == opt) ? "selected" : "";
+        html += `<option value="${opt}" ${sel}>${opt}</option>`;
+    });
+    html += `</select>`;
+    return html;
 }
 
 function calcularGradoYRenderizar() {
@@ -250,9 +271,16 @@ function renderTabla(areaTotal, gradoActual) {
     const tbody = document.getElementById('cuerpoTabla');
     const tfoot = document.getElementById('pieTabla');
     
+    // Arreglo completo de columnas (Circuitos Normales + CS)
+    let todosLosCircuitos = [...circuitos, circuitoCS];
+
+    // --- ENCABEZADO ---
     let ths = `<tr style="border-bottom: 1px solid var(--ngc-primary); color: var(--ngc-primary);">
                 <th style="text-align:left; padding:5px;">Ambiente</th><th>m²</th>`;
-    circuitos.forEach(c => ths += `<th>${c.id}<br><small>${c.tipo}</small></th>`);
+    todosLosCircuitos.forEach(c => {
+        let name = c.id === 'CS' ? "C.S.<br><small>Tablero</small>" : `${c.id}<br><small>${c.tipo}</small>`;
+        ths += `<th>${name}</th>`;
+    });
     ths += `<th></th><th></th></tr>`;
     thead.innerHTML = ths;
     tbody.innerHTML = '';
@@ -260,6 +288,7 @@ function renderTabla(areaTotal, gradoActual) {
     let totalesBocas = {};
     circuitos.forEach(c => totalesBocas[c.id] = 0);
 
+    // --- CUERPO TABLA (Ambientes) ---
     listaAmbientes.forEach(i => {
         let celdasCircuitos = "";
         circuitos.forEach(c => {
@@ -272,6 +301,10 @@ function renderTabla(areaTotal, gradoActual) {
             if (desc && cant > 0) texto += `<br><small style="color:#888;">${desc}</small>`;
             celdasCircuitos += `<td>${texto}</td>`;
         });
+        
+        // Agregar celda vacía para columna CS en cada fila de ambiente
+        celdasCircuitos += `<td>-</td>`;
+
         tbody.innerHTML += `
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                 <td style="text-align:left; padding:8px 5px;">${i.tipo}</td>
@@ -282,110 +315,118 @@ function renderTabla(areaTotal, gradoActual) {
             </tr>`;
     });
 
-    // Calcular DPMS Auto si no fue editado manualmente
+    // --- CÁLCULOS DPMS PONDERADO (Para Circuito CS) ---
     let dpmsTotal = 0;
     circuitos.forEach(c => {
         if(!c.userEditedDpms && c.tipo === 'IUG') c.dpms = Math.ceil(totalesBocas[c.id] * 150 * 0.66);
         dpmsTotal += c.dpms;
     });
-
-    // Validar Potencia y Fases AEA
     let coef = (gradoActual==='SUPERIOR')?0.7:(gradoActual==='ELEVADO'?0.8:(gradoActual==='MEDIO'?0.9:1));
-    let dpmsPonderado = dpmsTotal * coef;
-    document.getElementById('ui-dpms').innerText = dpmsPonderado.toFixed(2) + ' VA';
+    circuitoCS.dpms = dpmsTotal * coef;
+    document.getElementById('ui-dpms').innerText = circuitoCS.dpms.toFixed(2) + ' VA';
+    
+    // Alerta Monofásico / Trifásico
     const sumElegido = document.getElementById('selSuministro').value;
     const faseAlerta = document.getElementById('ui-fase-alerta');
-    
-    if(dpmsPonderado > 7000 && sumElegido === 'MONOFÁSICO') {
+    if(circuitoCS.dpms > 7000 && sumElegido === 'MONOFÁSICO') {
         faseAlerta.innerText = "⚠️ RECOMENDADO TRIFÁSICO"; faseAlerta.style.color = "red";
-    } else if (dpmsPonderado <= 7000 && sumElegido === 'TRIFÁSICO') {
+    } else if (circuitoCS.dpms <= 7000 && sumElegido === 'TRIFÁSICO') {
         faseAlerta.innerText = "✓ EXCEDE REQ. (VÁLIDO)"; faseAlerta.style.color = "var(--ngc-success)";
     } else {
         faseAlerta.innerText = "✓ CUMPLE AEA"; faseAlerta.style.color = "var(--ngc-warning)";
     }
 
-    // CONSTRUIR TFOOT COMPLEJO (Basado en la imagen)
+    // --- CONSTRUIR TFOOT COMPLEJO (Bocas, DPMS, Cables, In) ---
     let tfootStr = ``;
 
     // 1. BOCAS TOTALES
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;"><b>TOTAL BOCAS</b></td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;"><b>BOCAS T.</b></td>`;
     circuitos.forEach(c => {
         let b = totalesBocas[c.id];
-        let color = b > 15 ? 'red' : 'var(--ngc-warning)';
+        let color = b > 15 ? 'red' : 'var(--ngc-warning)'; // Rojo si pasa 15, Amarillo si OK
         tfootStr += `<td style="color:${color}; font-weight:bold;">${b}</td>`;
     });
-    tfootStr += `<td colspan="2"></td></tr>`;
+    tfootStr += `<td>-</td><td colspan="2"></td></tr>`; // CS no tiene bocas directas
 
     // 2. DPMS (VA)
     tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;"><b>DPMS (VA)</b></td>`;
     circuitos.forEach(c => {
-        let color = c.dpms > 0 ? 'var(--ngc-success)' : 'white';
-        tfootStr += `<td><input type="number" class="circ-input" style="color:${color}" value="${c.dpms}" onchange="updC('${c.id}','dpms',this.value)"></td>`;
+        tfootStr += `<td><input type="number" class="circ-input" style="color:var(--ngc-success)" value="${c.dpms}" onchange="updC('${c.id}','dpms',this.value)"></td>`;
     });
-    tfootStr += `<td colspan="2"></td></tr>`;
+    tfootStr += `<td style="color:var(--ngc-warning); font-weight:bold; font-size:0.75rem;">${circuitoCS.dpms.toFixed(0)}</td><td colspan="2"></td></tr>`; // DPMS Ponderado CS
+
+    // Helper interno para color
+    const evalVerdeRojo = (condicion) => condicion ? 'var(--ngc-success)' : 'red';
 
     // 3. Tensión (V)
     tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Tensión (V)</td>`;
-    circuitos.forEach(c => {
-        tfootStr += `<td><select class="circ-input" onchange="updC('${c.id}','tension',this.value)">
-            <option value="220" ${c.tension==220?'selected':''}>220</option>
-            <option value="380" ${c.tension==380?'selected':''}>380</option>
-        </select></td>`;
+    todosLosCircuitos.forEach(c => {
+        let col = c.tension !== "" ? 'var(--ngc-success)' : 'white';
+        tfootStr += `<td>${buildSelectHtml(c.id, 'tension', c.tension, [220, 380], col)}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
     // 4. Ib (A)
     tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Ib (A)</td>`;
-    circuitos.forEach(c => {
-        let ib = (c.tension == 380) ? (c.dpms / (1.732 * 380)) : (c.dpms / c.tension);
-        tfootStr += `<td style="color:var(--text-dim); font-size:0.7rem;">${ib.toFixed(2)}</td>`;
+    todosLosCircuitos.forEach(c => {
+        let ib = "-";
+        if(c.tension !== "") {
+            let p = parseFloat(c.dpms);
+            ib = (c.tension == 380) ? (p / (1.732 * 380)) : (p / c.tension);
+            c._ibCalc = ib; // Guardamos para validar In
+            ib = ib.toFixed(2);
+        }
+        tfootStr += `<td style="color:var(--text-dim); font-size:0.7rem;">${ib}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
     // 5. Sección Cable L;N
     tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Sección (L;N) mm²</td>`;
-    circuitos.forEach(c => {
-        let minL = (c.tipo === 'IUG' || c.tipo === 'MBTF') ? 1.5 : 2.5;
-        let color = c.seccionLN >= minL ? 'var(--ngc-success)' : 'red';
-        tfootStr += `<td><select class="circ-input" style="color:${color}" onchange="updC('${c.id}','seccionLN',this.value)">
-            ${[1.5, 2.5, 4, 6, 10, 16].map(v => `<option value="${v}" ${c.seccionLN==v?'selected':''}>${v}</option>`).join('')}
-        </select></td>`;
+    todosLosCircuitos.forEach(c => {
+        let minL = (c.tipo === 'IUG' || c.tipo === 'MBTF') ? 1.5 : (c.id === 'CS' ? 4.0 : 2.5);
+        let col = evalVerdeRojo(parseFloat(c.seccionLN) >= minL);
+        tfootStr += `<td>${buildSelectHtml(c.id, 'seccionLN', c.seccionLN, [1.5, 2.5, 4, 6, 10, 16], col)}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
     // 6. Sección Cable PE
     tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Sección PE mm²</td>`;
-    circuitos.forEach(c => {
-        let color = c.seccionPE >= c.seccionLN ? 'var(--ngc-success)' : 'red';
-        tfootStr += `<td><select class="circ-input" style="color:${color}" onchange="updC('${c.id}','seccionPE',this.value)">
-            ${[1.5, 2.5, 4, 6, 10, 16].map(v => `<option value="${v}" ${c.seccionPE==v?'selected':''}>${v}</option>`).join('')}
-        </select></td>`;
+    todosLosCircuitos.forEach(c => {
+        let col = evalVerdeRojo(c.seccionLN !== "" && parseFloat(c.seccionPE) >= parseFloat(c.seccionLN));
+        tfootStr += `<td>${buildSelectHtml(c.id, 'seccionPE', c.seccionPE, [1.5, 2.5, 4, 6, 10, 16], col)}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
     // 7. Iz (A)
     tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Iz (A)</td>`;
-    circuitos.forEach(c => {
-        tfootStr += `<td><input type="number" class="circ-input" value="${c.iz}" onchange="updC('${c.id}','iz',this.value)"></td>`;
+    todosLosCircuitos.forEach(c => {
+        let col = evalVerdeRojo(c._ibCalc && parseFloat(c.iz) >= c._ibCalc);
+        let valStr = c.iz === "" ? "" : c.iz;
+        let style = c.iz !== "" ? `color: ${col}; font-weight:bold;` : 'color: white;';
+        tfootStr += `<td><input type="number" class="circ-input" style="${style}" placeholder="-" value="${valStr}" onchange="updC('${c.id}','iz',this.value)"></td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
     // 8. In (A)
     tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">In (A)</td>`;
-    circuitos.forEach(c => {
-        let ib = (c.tension == 380) ? (c.dpms / (1.732 * 380)) : (c.dpms / c.tension);
-        let color = (c.in >= ib && c.in <= c.iz) ? 'var(--ngc-success)' : 'red';
-        tfootStr += `<td><select class="circ-input" style="color:${color}; font-weight:bold;" onchange="updC('${c.id}','in',this.value)">
-            ${[10, 15, 16, 20, 25, 32, 40, 50, 63].map(v => `<option value="${v}" ${c.in==v?'selected':''}>${v}</option>`).join('')}
-        </select></td>`;
+    todosLosCircuitos.forEach(c => {
+        let ib = c._ibCalc || 0;
+        let iz = parseFloat(c.iz) || 0;
+        let pIn = parseFloat(c.in);
+        // Regla AEA: Ib <= In <= Iz
+        let cumpleIn = (pIn >= ib && pIn <= iz);
+        let col = evalVerdeRojo(cumpleIn);
+        tfootStr += `<td>${buildSelectHtml(c.id, 'in', c.in, [10, 15, 16, 20, 25, 32, 40, 50, 63], col)}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
     tfoot.innerHTML = tfootStr;
-    sincronizarVistaPreviaPDF(areaTotal, gradoActual, dpmsPonderado, sumElegido, totalesBocas);
+    
+    // Vista PDF 
+    sincronizarVistaPreviaPDF(areaTotal, gradoActual, circuitoCS.dpms, sumElegido, totalesBocas, todosLosCircuitos);
 }
 
-function sincronizarVistaPreviaPDF(areaTotal, grado, dpmsPonderado, suministro, totalesBocas) {
+function sincronizarVistaPreviaPDF(areaTotal, grado, dpmsPonderado, suministro, totalesBocas, todosArr) {
     if (!clienteActual) return;
     document.getElementById('pdf-cliente').innerText = clienteActual.nombreCompleto;
     document.getElementById('pdf-fecha').innerText = clienteActual.fecha;
@@ -395,7 +436,7 @@ function sincronizarVistaPreviaPDF(areaTotal, grado, dpmsPonderado, suministro, 
     const tfoot = document.getElementById('pdf-tfoot');
     
     let ths = `<tr><th style="text-align: left;">Ambiente</th><th>m²</th>`;
-    circuitos.forEach(c => ths += `<th>${c.id}${c.tipo}</th>`);
+    todosArr.forEach(c => ths += `<th>${c.id}${c.tipo.substring(0,4)}</th>`);
     ths += `</tr>`;
     thead.innerHTML = ths;
     tbody.innerHTML = '';
@@ -408,32 +449,39 @@ function sincronizarVistaPreviaPDF(areaTotal, grado, dpmsPonderado, suministro, 
             if (i.circTUG === c.id) cant += i.bTUG;
             if (i.circESP === c.id) { cant += i.bESP; desc = i.descESP; }
             let txt = cant > 0 ? cant : "-";
-            if (desc && cant > 0) txt += `<br><span style="font-size:8px;">${desc}</span>`;
+            if (desc && cant > 0) txt += `<br><span style="font-size:7px;">${desc}</span>`;
             celdas += `<td>${txt}</td>`;
         });
+        celdas += `<td>-</td>`; // Celda CS
         tbody.innerHTML += `<tr><td style="text-align: left;">${i.tipo}</td><td>${(i.area > 0 && !i.tipo.includes("Carga")) ? i.area.toFixed(2) : '-'}</td>${celdas}</tr>`;
     });
 
     let tfootStr = ``;
     
-     // Bocas
-    tfootStr += `<tr><td colspan="2" style="text-align: right; padding: 5px;">TOTAL BOCAS</td>`;
-    circuitos.forEach(c => tfootStr += `<td>${totalesBocas[c.id]}</td>`); tfootStr += `</tr>`;
-    // DPMS
+    tfootStr += `<tr><td colspan="2" style="text-align: right; padding: 5px;">BOCAS</td>`;
+    circuitos.forEach(c => tfootStr += `<td>${totalesBocas[c.id]}</td>`); tfootStr += `<td>-</td></tr>`;
+    
     tfootStr += `<tr><td colspan="2" style="text-align: right; padding: 5px;">DPMS (VA)</td>`;
-    circuitos.forEach(c => tfootStr += `<td>${c.dpms}</td>`); tfootStr += `</tr>`;
-    // Tensión
+    todosArr.forEach(c => tfootStr += `<td>${c.id==='CS' ? c.dpms.toFixed(0) : c.dpms}</td>`); tfootStr += `</tr>`;
+    
     tfootStr += `<tr><td colspan="2" style="text-align: right; padding: 5px;">Tensión (V)</td>`;
-    circuitos.forEach(c => tfootStr += `<td>${c.tension}</td>`); tfootStr += `</tr>`;
-    // Ib
+    todosArr.forEach(c => tfootStr += `<td>${c.tension || '-'}</td>`); tfootStr += `</tr>`;
+    
     tfootStr += `<tr><td colspan="2" style="text-align: right; padding: 5px;">Ib (A)</td>`;
-    circuitos.forEach(c => { let ib = (c.tension == 380) ? (c.dpms / (1.732 * 380)) : (c.dpms / c.tension); tfootStr += `<td>${ib.toFixed(2)}</td>`; }); tfootStr += `</tr>`;
-    // Secciones L;N y PE
-    tfootStr += `<tr><td colspan="2" style="text-align: right; padding: 5px;">Secc L;N / PE (mm²)</td>`;
-    circuitos.forEach(c => tfootStr += `<td>${c.seccionLN} / ${c.seccionPE}</td>`); tfootStr += `</tr>`;
-    // Iz / In
+    todosArr.forEach(c => { 
+        let ib = "-";
+        if(c.tension) {
+            ib = (c.tension == 380) ? (c.dpms / (1.732 * 380)) : (c.dpms / c.tension); 
+            ib = ib.toFixed(1);
+        }
+        tfootStr += `<td>${ib}</td>`; 
+    }); tfootStr += `</tr>`;
+    
+    tfootStr += `<tr><td colspan="2" style="text-align: right; padding: 5px;">Secc L;N / PE</td>`;
+    todosArr.forEach(c => tfootStr += `<td>${c.seccionLN || '-'}/${c.seccionPE || '-'}</td>`); tfootStr += `</tr>`;
+    
     tfootStr += `<tr><td colspan="2" style="text-align: right; padding: 5px;">Iz / In (A)</td>`;
-    circuitos.forEach(c => tfootStr += `<td>${c.iz} / ${c.in}</td>`); tfootStr += `</tr>`;
+    todosArr.forEach(c => tfootStr += `<td>${c.iz || '-'}/${c.in || '-'}</td>`); tfootStr += `</tr>`;
 
     tfoot.innerHTML = tfootStr;
     document.getElementById('pdf-sla-val').innerText = `${areaTotal.toFixed(2)} m²`;
@@ -447,12 +495,13 @@ async function generarPDF() {
     const element = document.getElementById('plantilla-pdf');
     element.style.display = 'block';
     
+    // PDF Configurado vertical ('portrait')
     const opt = {
         margin: [5, 5],
         filename: `${clienteActual.nombre}_Planilla_Circuitos.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
     };
     
     await html2pdf().set(opt).from(element).save();
