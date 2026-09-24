@@ -145,48 +145,29 @@ input:focus, textarea:focus, .native-select:focus { border-color: var(--ngc-prim
 .btn-pdf { border-color: #ff4444 !important; color: #ff4444 !important; background: rgba(255, 68, 68, 0.05); height: 55px; font-size: 1rem; }
 .btn-pdf:active { background: rgba(255, 68, 68, 0.2); }
 
-/* --- ESTILOS EXCLUSIVOS PARA LA PLANTILLA A4 (PDF) --- */
+/* --- CONTENEDOR PDF A4 (Orientation Portrait) --- */
 #plantilla-pdf { display: none; }
-.pdf-container { background: #ffffff; color: #000000; width: 210mm; min-height: 295mm; padding: 10mm 12mm 10mm 12mm; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; }
-.pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #0088aa; padding-bottom: 15px; }
-.pdf-info-box { width: 60%; }
+.pdf-container { 
+    background: #ffffff; 
+    color: #000000; 
+    width: 210mm; /* Ancho exacto A4 vertical */
+    min-height: 295mm; 
+    padding: 10mm 12mm; 
+    box-sizing: border-box; 
+    font-family: 'Segoe UI', Arial, sans-serif; 
+}
+.pdf-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 2px solid #0088aa; padding-bottom: 15px; }
+.pdf-info-box { width: 100%; }
 .pdf-row { display: grid; grid-template-columns: 120px 1fr; margin-bottom: 5px; font-size: 13px; }
 .pdf-row b { color: #555; }
-.pdf-logo-box { width: 35%; text-align: right; }
-.pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; margin-top: 10px;}
-.pdf-table th { background-color: #f0f0f0; color: #333; font-weight: bold; text-transform: uppercase; padding: 10px; text-align: left; border-bottom: 2px solid #ccc; font-size: 11px; }
-.pdf-table td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; font-size: 11px; }
-.pdf-totales-box { background: #f9f9f9; padding: 15px; border-radius: 4px; border: 1px solid #ddd; }
-.pdf-footer { margin-top: 40px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 1px solid #ddd; padding-top: 15px; }
-.pdf-pagos p { margin: 0; font-size: 11px; color: #666; font-style: italic; }
-.pdf-right-footer { text-align: right; }
-.pdf-slogan { font-size: 16px; font-weight: bold; color: #0088aa; font-style: italic; margin-bottom: 6px; }
-.pdf-contacto { font-size: 12px; color: #555; font-weight: 500; }
-  
-/* --- ESTILOS PLANILLA DE CARGA --- */
-#tablaMain th, #tablaMain td {
-    padding: 8px 2px;
-}
-.pdf-table { 
-    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px;
-}
-.pdf-table th { 
-    background-color: #f0f0f0; color: #333; padding: 6px; border: 1px solid #ccc; 
-}
-.pdf-table td { 
-    padding: 6px; border: 1px solid #ddd;
-}
-.pdf-table tfoot td {
-    border-top: 2px solid #666;
-}
 
-/* --- ESTILOS PLANILLA DE CARGA E INPUTS DINAMICOS --- */
+/* --- ESTILOS PLANILLA DE CARGA E INPUTS DINÁMICOS --- */
 #tablaMain th, #tablaMain td {
     padding: 6px 2px;
 }
 .circ-input {
     width: 100%;
-    max-width: 65px;
+    max-width: 55px; /* Estrecho para que entren todas las columnas */
     background: rgba(0,0,0,0.3);
     border: 1px solid rgba(0, 212, 255, 0.3);
     color: white;
@@ -202,19 +183,36 @@ input:focus, textarea:focus, .native-select:focus { border-color: var(--ngc-prim
     box-shadow: 0 0 5px var(--ngc-primary);
 }
 .circ-input option {
-    background: #1a1a2e; /* Color oscuro para el menú desplegable */
+    background: #1a1a2e; /* Color oscuro para el menú desplegable en la web */
     color: white;
 }
+
+/* --- TABLA PDF (Optimizada para Vertical) --- */
 .pdf-table { 
-    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px;
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 10px; 
+    margin-bottom: 20px;
+    font-size: 8px; /* Fuente minúscula necesaria para vertical */
 }
 .pdf-table th { 
-    background-color: #f0f0f0; color: #333; padding: 4px; border: 1px solid #ccc; 
+    background-color: #f0f0f0; 
+    color: #333; 
+    font-weight: bold; 
+    text-transform: uppercase; 
+    padding: 4px 2px; 
+    text-align: center; 
+    border: 1px solid #ccc; 
+    word-wrap: break-word; /* Evita rotura de tablas */
 }
 .pdf-table td { 
-    padding: 4px; border: 1px solid #ddd;
+    padding: 4px 2px; 
+    border: 1px solid #ddd; 
+    vertical-align: middle; 
+    text-align: center;
 }
 .pdf-table tfoot td {
     border-top: 2px solid #666;
     background-color: #fafafa;
+    font-weight: bold;
 }
