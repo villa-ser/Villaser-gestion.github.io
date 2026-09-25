@@ -19,18 +19,21 @@
             
             <section id="step-cliente" class="ngc-card" style="display: none;">
                 <h4>Identificación de Proyecto</h4>
-                <div class="row-group">
-                    <select id="selCliente" class="native-select"><option value="">-- SELECCIONE CLIENTE --</option></select>
+                <div class="row-group" style="display: flex; gap: 8px;">
+                    <input type="text" id="buscarCliente" placeholder="Buscar cliente..." oninput="filtrarClientes()" style="flex: 1;">
+                    <select id="selCliente" class="native-select" style="flex: 2;" onchange="fillClientData()"><option value="">-- SELECCIONE CLIENTE --</option></select>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
                     <input type="text" id="cliTel" readonly placeholder="Teléfono">
                     <input type="text" id="cliDir" readonly placeholder="Dirección">
                 </div>
-                <!-- Botón corregido en tamaño -->
                 <button id="btnLoadCli" class="btn-ngc" style="width: 100%; margin-top: 15px;" onclick="cargarCliente()">Cargar Proyecto</button>
             </section>
 
             <section id="step-trabajo" style="display:none; flex-direction: column; gap: 15px;">
+                <!-- Input oculto para abrir archivos de proyecto -->
+                <input type="file" id="fileInput" accept=".txt" style="display: none;" onchange="cargarDesdeTXT(event)">
+
                 <div class="ngc-card">
                     <h4 id="titulo-form-ambiente">Carga de Ambientes y Bocas</h4>
                     <input type="hidden" id="editandoId" value="">
@@ -101,8 +104,7 @@
                         </div>
                     </div>
                     
-                    <div style="overflow-x: auto;">
-                        <!-- Tabla optimizada para incluir CS al final -->
+                    <div class="table-scroll-container">
                         <table id="tablaMain" style="width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: center;">
                             <thead id="cabeceraTabla"></thead>
                             <tbody id="cuerpoTabla"></tbody>
@@ -117,6 +119,11 @@
                     <button class="btn-ngc" style="width: 100%; margin-top: 10px; border-color: #888; color: #ccc;" onclick="agregarCircuitoManual()">+ Añadir Circuito Extra</button>
                 </div>
 
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn-ngc btn-imp" onclick="guardarComoTXT()">💾 Guardar (TXT)</button>
+                    <button class="btn-ngc btn-exp" onclick="document.getElementById('fileInput').click()">📂 Abrir (TXT)</button>
+                </div>
+
                 <button class="btn-ngc btn-pdf" onclick="generarPDF()" style="width: 100%;">📄 Descargar PDF</button>
             </section>
         </main>
@@ -126,7 +133,6 @@
                 <div class="pdf-container">
                     <header class="pdf-header">
                         <div class="pdf-info-box">
-                            <!-- Título centrado en una sola línea -->
                             <div class="pdf-row" style="text-align: center; font-size: 16px; margin-bottom: 10px; color:#0088aa; width: 100%;"><b>PLANILLA DE CARGA Y CIRCUITOS</b></div>
                             <div class="pdf-row"><b>Cliente:</b> <span id="pdf-cliente"></span></div>
                             <div class="pdf-row"><b>Fecha:</b> <span id="pdf-fecha"></span></div>
