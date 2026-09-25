@@ -59,7 +59,6 @@ function poblarSelectorClientes(lista) {
     selCliente.innerHTML = '<option value="">-- SELECCIONE CLIENTE --</option>';
     lista.forEach((c, idx) => { 
         const opt = document.createElement('option');
-        // Usamos el índice original si dataCli es filtrado para no perder la referencia real
         opt.value = dataCli.indexOf(c); 
         opt.textContent = c.c0;
         selCliente.appendChild(opt);
@@ -428,7 +427,6 @@ function renderTabla(areaTotal, gradoActual) {
         let pIn = parseFloat(c.in);
         let cumpleIn = (pIn >= ib && pIn <= iz);
         let col = evalVerdeRojo(cumpleIn);
-        // ARRAY ACTUALIZADO PARA INCLUIR VALORES MENORES A 10 (Ej: 2, 4, 6)
         tfootStr += `<td>${buildSelectHtml(c.id, 'in', c.in, [2, 4, 6, 10, 15, 16, 20, 25, 32, 40, 50, 63], col)}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
@@ -529,11 +527,9 @@ function guardarComoJSON() {
         circuitoCS
     };
     
-    // El tipo cambia a application/json
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    // La extensión de salida es .json
     a.download = `VillaSer_${clienteActual.nombre}_Planilla.json`;
     a.style.display = "none";
     document.body.appendChild(a);
@@ -548,7 +544,6 @@ function cargarDesdeJSON(event) {
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            // Lee e interpreta la estructura JSON
             const data = JSON.parse(e.target.result);
             
             if(!data.clienteActual) throw new Error("Formato inválido");
@@ -570,5 +565,5 @@ function cargarDesdeJSON(event) {
         }
     };
     reader.readAsText(file);
-    event.target.value = ''; // Limpia el input para permitir recargar el mismo archivo
+    event.target.value = ''; 
 }
