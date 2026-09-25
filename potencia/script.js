@@ -6,6 +6,16 @@ document.addEventListener('DOMContentLoaded', () => {
 const SHEET_ID = '1XfQoCkNMXy5WLhQciVrRoc1Pz6yeKKiAZljR_KYpohM'; 
 const URL_CLI = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=NombresClientes`;
 
+// MAPEADO DIRECTO AEA 90364-7-770 (Tabla 770.12.I - Embutido B1, 2x cargados + PE a 40°C)
+const MAPA_IZ = { 
+    "1.5": 15, 
+    "2.5": 21, 
+    "4": 28, 
+    "6": 36, 
+    "10": 50, 
+    "16": 66 
+};
+
 let dataCli = [];
 let clienteActual = null;
 let listaAmbientes = [];
@@ -27,13 +37,7 @@ async function init() {
         dataCli = parseCSV(await resCli.text());
         document.getElementById('status').style.display = "none";
         document.getElementById('step-cliente').style.display = "block";
-        const selCliente = document.getElementById('selCliente');
-        dataCli.forEach((c, idx) => { 
-            const opt = document.createElement('option');
-            opt.value = idx; opt.textContent = c.c0;
-            selCliente.appendChild(opt);
-        });
-        selCliente.addEventListener('change', fillClientData);
+        poblarSelectorClientes(dataCli);
     } catch (e) { 
         document.getElementById('status').innerText = "⚠️ Error de conexión."; 
     }
@@ -48,6 +52,24 @@ function parseCSV(text) {
         });
         return { c0: cells[0]||"", c1: cells[1]||"", c2: cells[2]||"", c3: cells[3]||"" };
     }).filter(item => item.c0);
+}
+
+function poblarSelectorClientes(lista) {
+    const selCliente = document.getElementById('selCliente');
+    selCliente.innerHTML = '<option value="">-- SELECCIONE CLIENTE --</option>';
+    lista.forEach((c, idx) => { 
+        const opt = document.createElement('option');
+        // Usamos el índice original si dataCli es filtrado para no perder la referencia real
+        opt.value = dataCli.indexOf(c); 
+        opt.textContent = c.c0;
+        selCliente.appendChild(opt);
+    });
+}
+
+function filtrarClientes() {
+    const textoBuscado = document.getElementById('buscarCliente').value.toLowerCase();
+    const listaFiltrada = dataCli.filter(c => c.c0.toLowerCase().includes(textoBuscado));
+    poblarSelectorClientes(listaFiltrada);
 }
 
 function fillClientData() {
@@ -179,7 +201,6 @@ function guardarAmbiente() {
     if (!tipo) return alert("Seleccione el tipo de ambiente o carga.");
     if (!tipo.includes("Acondicionado") && !tipo.includes("Motor") && (ancho <= 0 || largo <= 0)) return alert("Ingrese medidas válidas.");
     
-    // Si incluye "(Semi)", la superficie calculada se divide en 2
     let areaCalculada = ancho * largo;
     if (tipo.includes("Semi") || tipo.includes("Balcón") || tipo.includes("Exterior")) {
         areaCalculada = areaCalculada / 2;
@@ -236,6 +257,14 @@ window.updC = function(id, field, value) {
     if(c) {
         c[field] = value === "" ? "" : (parseFloat(value) || value);
         if(id !== 'CS' && field === 'dpms') c.userEditedDpms = true;
+        
+        // AUTO-CALCULO DE IZ SEGÚN AEA 90364-7-770 (Tabla 770.12.I)
+        if (field === 'seccionLN') {
+            if (MAPA_IZ[value]) {
+                c['iz'] = MAPA_IZ[value];
+            }
+        }
+        
         renderTabla();
     }
 }
@@ -271,12 +300,10 @@ function renderTabla(areaTotal, gradoActual) {
     const tbody = document.getElementById('cuerpoTabla');
     const tfoot = document.getElementById('pieTabla');
     
-    // Arreglo completo de columnas (Circuitos Normales + CS)
     let todosLosCircuitos = [...circuitos, circuitoCS];
 
-    // --- ENCABEZADO ---
     let ths = `<tr style="border-bottom: 1px solid var(--ngc-primary); color: var(--ngc-primary);">
-                <th style="text-align:left; padding:5px;">Ambiente</th><th>m²</th>`;
+                <th style="text-align:left; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:2;">Ambiente</th><th>m²</th>`;
     todosLosCircuitos.forEach(c => {
         let name = c.id === 'CS' ? "C.S.<br><small>Tablero</small>" : `${c.id}<br><small>${c.tipo}</small>`;
         ths += `<th>${name}</th>`;
@@ -288,7 +315,6 @@ function renderTabla(areaTotal, gradoActual) {
     let totalesBocas = {};
     circuitos.forEach(c => totalesBocas[c.id] = 0);
 
-    // --- CUERPO TABLA (Ambientes) ---
     listaAmbientes.forEach(i => {
         let celdasCircuitos = "";
         circuitos.forEach(c => {
@@ -302,12 +328,11 @@ function renderTabla(areaTotal, gradoActual) {
             celdasCircuitos += `<td>${texto}</td>`;
         });
         
-        // Agregar celda vacía para columna CS en cada fila de ambiente
         celdasCircuitos += `<td>-</td>`;
 
         tbody.innerHTML += `
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                <td style="text-align:left; padding:8px 5px;">${i.tipo}</td>
+                <td style="text-align:left; padding:8px 5px; position: sticky; left:0; background:#1e1e1e; z-index:1;">${i.tipo}</td>
                 <td>${(i.area > 0 && !i.tipo.includes("Carga")) ? i.area.toFixed(2) : '-'}</td>
                 ${celdasCircuitos}
                 <td><button onclick="editarAmbiente(${i.id})" style="background:transparent; border:none; color:var(--ngc-primary); cursor:pointer;">✏️</button></td>
@@ -315,7 +340,6 @@ function renderTabla(areaTotal, gradoActual) {
             </tr>`;
     });
 
-    // --- CÁLCULOS DPMS PONDERADO (Para Circuito CS) ---
     let dpmsTotal = 0;
     circuitos.forEach(c => {
         if(!c.userEditedDpms && c.tipo === 'IUG') c.dpms = Math.ceil(totalesBocas[c.id] * 150 * 0.66);
@@ -325,7 +349,6 @@ function renderTabla(areaTotal, gradoActual) {
     circuitoCS.dpms = dpmsTotal * coef;
     document.getElementById('ui-dpms').innerText = circuitoCS.dpms.toFixed(2) + ' VA';
     
-    // Alerta Monofásico / Trifásico
     const sumElegido = document.getElementById('selSuministro').value;
     const faseAlerta = document.getElementById('ui-fase-alerta');
     if(circuitoCS.dpms > 7000 && sumElegido === 'MONOFÁSICO') {
@@ -336,52 +359,45 @@ function renderTabla(areaTotal, gradoActual) {
         faseAlerta.innerText = "✓ CUMPLE AEA"; faseAlerta.style.color = "var(--ngc-warning)";
     }
 
-    // --- CONSTRUIR TFOOT COMPLEJO (Bocas, DPMS, Cables, In) ---
     let tfootStr = ``;
 
-    // 1. BOCAS TOTALES
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;"><b>BOCAS T.</b></td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:1;"><b>BOCAS T.</b></td>`;
     circuitos.forEach(c => {
         let b = totalesBocas[c.id];
-        let color = b > 15 ? 'red' : 'var(--ngc-warning)'; // Rojo si pasa 15, Amarillo si OK
+        let color = b > 15 ? 'red' : 'var(--ngc-warning)';
         tfootStr += `<td style="color:${color}; font-weight:bold;">${b}</td>`;
     });
-    tfootStr += `<td>-</td><td colspan="2"></td></tr>`; // CS no tiene bocas directas
+    tfootStr += `<td>-</td><td colspan="2"></td></tr>`;
 
-    // 2. DPMS (VA)
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;"><b>DPMS (VA)</b></td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:1;"><b>DPMS (VA)</b></td>`;
     circuitos.forEach(c => {
         tfootStr += `<td><input type="number" class="circ-input" style="color:var(--ngc-success)" value="${c.dpms}" onchange="updC('${c.id}','dpms',this.value)"></td>`;
     });
-    tfootStr += `<td style="color:var(--ngc-warning); font-weight:bold; font-size:0.75rem;">${circuitoCS.dpms.toFixed(0)}</td><td colspan="2"></td></tr>`; // DPMS Ponderado CS
+    tfootStr += `<td style="color:var(--ngc-warning); font-weight:bold; font-size:0.75rem;">${circuitoCS.dpms.toFixed(0)}</td><td colspan="2"></td></tr>`;
 
-    // Helper interno para color
     const evalVerdeRojo = (condicion) => condicion ? 'var(--ngc-success)' : 'red';
 
-    // 3. Tensión (V)
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Tensión (V)</td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:1;">Tensión (V)</td>`;
     todosLosCircuitos.forEach(c => {
         let col = c.tension !== "" ? 'var(--ngc-success)' : 'white';
         tfootStr += `<td>${buildSelectHtml(c.id, 'tension', c.tension, [220, 380], col)}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
-    // 4. Ib (A)
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Ib (A)</td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:1;">Ib (A)</td>`;
     todosLosCircuitos.forEach(c => {
         let ib = "-";
         if(c.tension !== "") {
             let p = parseFloat(c.dpms);
             ib = (c.tension == 380) ? (p / (1.732 * 380)) : (p / c.tension);
-            c._ibCalc = ib; // Guardamos para validar In
+            c._ibCalc = ib; 
             ib = ib.toFixed(2);
         }
         tfootStr += `<td style="color:var(--text-dim); font-size:0.7rem;">${ib}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
-    // 5. Sección Cable L;N
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Sección (L;N) mm²</td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:1;">Sección (L;N) mm²</td>`;
     todosLosCircuitos.forEach(c => {
         let minL = (c.tipo === 'IUG' || c.tipo === 'MBTF') ? 1.5 : (c.id === 'CS' ? 4.0 : 2.5);
         let col = evalVerdeRojo(parseFloat(c.seccionLN) >= minL);
@@ -389,16 +405,14 @@ function renderTabla(areaTotal, gradoActual) {
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
-    // 6. Sección Cable PE
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Sección PE mm²</td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:1;">Sección PE mm²</td>`;
     todosLosCircuitos.forEach(c => {
         let col = evalVerdeRojo(c.seccionLN !== "" && parseFloat(c.seccionPE) >= parseFloat(c.seccionLN));
         tfootStr += `<td>${buildSelectHtml(c.id, 'seccionPE', c.seccionPE, [1.5, 2.5, 4, 6, 10, 16], col)}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
-    // 7. Iz (A)
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">Iz (A)</td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:1;">Iz (A)</td>`;
     todosLosCircuitos.forEach(c => {
         let col = evalVerdeRojo(c._ibCalc && parseFloat(c.iz) >= c._ibCalc);
         let valStr = c.iz === "" ? "" : c.iz;
@@ -407,22 +421,20 @@ function renderTabla(areaTotal, gradoActual) {
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
-    // 8. In (A)
-    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px;">In (A)</td>`;
+    tfootStr += `<tr><td colspan="2" style="text-align:right; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:1;">In (A)</td>`;
     todosLosCircuitos.forEach(c => {
         let ib = c._ibCalc || 0;
         let iz = parseFloat(c.iz) || 0;
         let pIn = parseFloat(c.in);
-        // Regla AEA: Ib <= In <= Iz
         let cumpleIn = (pIn >= ib && pIn <= iz);
         let col = evalVerdeRojo(cumpleIn);
-        tfootStr += `<td>${buildSelectHtml(c.id, 'in', c.in, [10, 15, 16, 20, 25, 32, 40, 50, 63], col)}</td>`;
+        // ARRAY ACTUALIZADO PARA INCLUIR VALORES MENORES A 10 (Ej: 2, 4, 6)
+        tfootStr += `<td>${buildSelectHtml(c.id, 'in', c.in, [2, 4, 6, 10, 15, 16, 20, 25, 32, 40, 50, 63], col)}</td>`;
     });
     tfootStr += `<td colspan="2"></td></tr>`;
 
     tfoot.innerHTML = tfootStr;
     
-    // Vista PDF 
     sincronizarVistaPreviaPDF(areaTotal, gradoActual, circuitoCS.dpms, sumElegido, totalesBocas, todosLosCircuitos);
 }
 
@@ -452,7 +464,7 @@ function sincronizarVistaPreviaPDF(areaTotal, grado, dpmsPonderado, suministro, 
             if (desc && cant > 0) txt += `<br><span style="font-size:7px;">${desc}</span>`;
             celdas += `<td>${txt}</td>`;
         });
-        celdas += `<td>-</td>`; // Celda CS
+        celdas += `<td>-</td>`; 
         tbody.innerHTML += `<tr><td style="text-align: left;">${i.tipo}</td><td>${(i.area > 0 && !i.tipo.includes("Carga")) ? i.area.toFixed(2) : '-'}</td>${celdas}</tr>`;
     });
 
@@ -495,7 +507,6 @@ async function generarPDF() {
     const element = document.getElementById('plantilla-pdf');
     element.style.display = 'block';
     
-    // PDF Configurado vertical ('portrait')
     const opt = {
         margin: [5, 5],
         filename: `${clienteActual.nombre}_Planilla_Circuitos.pdf`,
@@ -506,4 +517,58 @@ async function generarPDF() {
     
     await html2pdf().set(opt).from(element).save();
     if (window.innerWidth < 992) element.style.display = 'none';
+}
+
+// --- SISTEMA DE GUARDADO / APERTURA EN JSON ---
+function guardarComoJSON() {
+    if (!clienteActual) return alert("Debe cargar un proyecto o cliente primero.");
+    const payload = {
+        clienteActual,
+        listaAmbientes,
+        circuitos,
+        circuitoCS
+    };
+    
+    // El tipo cambia a application/json
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    // La extensión de salida es .json
+    a.download = `VillaSer_${clienteActual.nombre}_Planilla.json`;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
+function cargarDesdeJSON(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            // Lee e interpreta la estructura JSON
+            const data = JSON.parse(e.target.result);
+            
+            if(!data.clienteActual) throw new Error("Formato inválido");
+            
+            clienteActual = data.clienteActual;
+            listaAmbientes = data.listaAmbientes || [];
+            circuitos = data.circuitos || [];
+            circuitoCS = data.circuitoCS || { id: 'CS', tipo: 'T.P.', dpms: 0, tension: '', seccionLN: '', seccionPE: '', iz: '', in: '' };
+            
+            document.getElementById('step-cliente').style.display = 'none';
+            document.getElementById('step-trabajo').style.display = 'flex';
+            
+            actualizarGestorCircuitos();
+            calcularGradoYRenderizar();
+            
+            alert("✅ Proyecto cargado exitosamente.");
+        } catch (err) {
+            alert("⚠️ Error al leer el archivo. Asegúrese de que sea un archivo JSON válido exportado desde VillaSer.");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Limpia el input para permitir recargar el mismo archivo
 }
