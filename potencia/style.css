@@ -182,15 +182,16 @@ input:focus, textarea:focus, .native-select:focus { border-color: var(--ngc-prim
 }
 .circ-input {
     width: 100%;
-    min-width: 65px; /* Evita que el input colapse y los números queden cortados */
+    min-width: 48px; /* Permite que entren al menos 2 circuitos */
+    max-width: 55px; /* Evita que se estiren desproporcionadamente */
     background: rgba(0,0,0,0.3);
     border: 1px solid rgba(0, 212, 255, 0.3);
     color: white;
     text-align: center;
     border-radius: 4px;
-    padding: 4px 2px;
+    padding: 4px 1px;
     font-family: inherit;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
 }
 .circ-input:focus {
     outline: none;
