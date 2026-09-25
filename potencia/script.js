@@ -301,13 +301,15 @@ function renderTabla(areaTotal, gradoActual) {
     
     let todosLosCircuitos = [...circuitos, circuitoCS];
 
+    // Se establece un min-width estructurado para garantizar que los circuitos no se estiren demasiado ni se achiquen
     let ths = `<tr style="border-bottom: 1px solid var(--ngc-primary); color: var(--ngc-primary);">
-                <th style="text-align:left; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:2;">Ambiente</th><th>m²</th>`;
+                <th style="text-align:left; padding:5px; position: sticky; left:0; background:#1e1e1e; z-index:2; min-width: 80px;">Ambiente</th>
+                <th style="min-width: 35px;">m²</th>`;
     todosLosCircuitos.forEach(c => {
         let name = c.id === 'CS' ? "C.S.<br><small>Tablero</small>" : `${c.id}<br><small>${c.tipo}</small>`;
-        ths += `<th>${name}</th>`;
+        ths += `<th style="min-width: 52px;">${name}</th>`;
     });
-    ths += `<th></th><th></th></tr>`;
+    ths += `<th style="min-width: 25px;"></th><th style="min-width: 25px;"></th></tr>`;
     thead.innerHTML = ths;
     tbody.innerHTML = '';
     
