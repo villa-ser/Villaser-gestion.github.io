@@ -41,14 +41,8 @@ async function init() {
         
         document.getElementById('status').style.display = "none";
         
-        // Cargar Clientes
-        selCliente.innerHTML = '<option value="">-- SELECCIONE CLIENTE --</option>';
-        dataCli.forEach((c, idx) => { 
-            const opt = document.createElement('option');
-            opt.value = idx;
-            opt.textContent = c.c0;
-            selCliente.appendChild(opt);
-        });
+        // Cargar Clientes inicial
+        poblarClientes(dataCli);
 
         // Cargar primera categoría de materiales
         fillSelect(0, [...new Set(dataMat.map(item => item.c0))].filter(v => v));
@@ -84,6 +78,24 @@ function setupEventListeners() {
             updateDropdown(index + 1);
         });
     });
+}
+
+function poblarClientes(lista) {
+    selCliente.innerHTML = '<option value="">-- SELECCIONE CLIENTE --</option>';
+    lista.forEach(c => { 
+        const opt = document.createElement('option');
+        // Se mantiene el índice original de dataCli para no perder la referencia real
+        opt.value = dataCli.indexOf(c);
+        opt.textContent = c.c0;
+        selCliente.appendChild(opt);
+    });
+}
+
+function filtrarClientes() {
+    const textoBuscado = document.getElementById('buscarCliente').value.toLowerCase();
+    const listaFiltrada = dataCli.filter(c => c.c0.toLowerCase().includes(textoBuscado));
+    poblarClientes(listaFiltrada);
+    fillClientData();
 }
 
 function fillClientData() {
@@ -488,3 +500,4 @@ function sendWSP() {
 }
 
 init();
+        
