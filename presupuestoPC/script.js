@@ -73,14 +73,21 @@ function step(id, val) {
     el.value = Math.max(el.min ? parseInt(el.min) : 0, newValue); 
 }
 
-function poblarClientes() { 
+function poblarClientes(lista = dbClientes) { 
     selCliente.innerHTML = '<option value="">-- SELECCIONE CLIENTE --</option>';
-    dbClientes.forEach(c => { 
+    lista.forEach(c => { 
         const opt = document.createElement('option');
         opt.value = c.nombre;
         opt.textContent = c.nombre;
         selCliente.appendChild(opt);
     }); 
+}
+
+function filtrarClientes() {
+    const textoBuscado = document.getElementById('buscarCliente').value.toLowerCase();
+    const listaFiltrada = dbClientes.filter(c => c.nombre.toLowerCase().includes(textoBuscado));
+    poblarClientes(listaFiltrada);
+    actualizarCamposCliente();
 }
 
 function poblarTemas() { 
@@ -491,4 +498,4 @@ function animarBoton(id) {
         b.classList.remove('active-success'); 
         b.innerText = originalText;
     }, 1000); 
-}
+        }
