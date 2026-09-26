@@ -36,9 +36,9 @@
             <section id="step-cliente" class="ngc-card">
                 <h4>Identificación Cliente</h4>
                 
-                <div class="row-group">
-                    <label for="selCliente">Seleccionar Cliente</label>
-                    <select id="selCliente" class="native-select" aria-label="Lista de clientes">
+                <div class="row-group" style="display: flex; gap: 8px;">
+                    <input type="text" id="buscarCliente" placeholder="Buscar cliente..." oninput="filtrarClientes()" style="flex: 1;">
+                    <select id="selCliente" class="native-select" aria-label="Lista de clientes" style="flex: 2;">
                         <option value="">-- SELECCIONE CLIENTE --</option>
                     </select>
                 </div>
