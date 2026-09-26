@@ -33,10 +33,12 @@
             <section id="section-client" class="card">
                 <h4>Cliente</h4>
                 
-                <label for="selCliente" class="sr-only">Seleccionar Cliente</label>
-                <select id="selCliente" class="native-select">
-                    <option value="">Cargando...</option>
-                </select>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="buscarCliente" placeholder="Buscar cliente..." oninput="filtrarClientes()" style="flex: 1;">
+                    <select id="selCliente" class="native-select" style="flex: 2;">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
                     <div>
