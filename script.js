@@ -151,6 +151,11 @@ document.getElementById('btnPotenciaPC').addEventListener('click', function() {
     window.location.href = './potencia/index.html';
 });
 
+// Navegación al módulo de Presupuestos
+document.getElementById('btnPresupuestoPC2').addEventListener('click', function() {
+    window.location.href = './presupuestoPC/index.html';
+});
+
 // Al cargar la página principal, verificar qué tema estaba activo
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('villaser_theme');
