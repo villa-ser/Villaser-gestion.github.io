@@ -1,0 +1,41 @@
+/* --- ESTILOS PARA EL BUSCADOR Y AUTOCOMPLETADO --- */
+.suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--ngc-primary);
+    border-radius: 0 0 8px 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+.suggestions-dropdown.oculto {
+    display: none;
+}
+.suggestions-dropdown li {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.suggestions-dropdown li:hover {
+    background: rgba(0, 212, 255, 0.15);
+}
+.suggestions-dropdown li:last-child {
+    border-bottom: none;
+}
+
+body.light-mode .suggestions-dropdown li {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+body.light-mode .suggestions-dropdown li:hover {
+    background: rgba(0, 212, 255, 0.1);
+}
