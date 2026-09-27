@@ -153,7 +153,7 @@ document.getElementById('btnPotenciaPC').addEventListener('click', function() {
 
 // Navegación al módulo de Presupuestos
 document.getElementById('btnPresupuestoPC2').addEventListener('click', function() {
-    window.location.href = './presupuestoPC/index.html';
+    window.location.href = './presupuestoPC2/index.html';
 });
 
 // Al cargar la página principal, verificar qué tema estaba activo
