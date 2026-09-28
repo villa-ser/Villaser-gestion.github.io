@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Examen de Electricidad | Ley 10281 & Normas AEA</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>⚡ Banco de Examen: Electricidad & Reglamentaciones</h1>
+        <p class="subtitle">Ley Provincial N° 10.281 (Córdoba) | Normas AEA 90364 / 95705 | ERSeP</p>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span>Total en Base de Datos:</span>
+                <span class="stat-value" id="total-questions-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Respondidas esta sesión:</span>
+                <span class="stat-value" id="answered-count">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Disponibles sin repetir:</span>
+                <span class="stat-value" id="remaining-count">0</span>
+            </div>
+        </div>
+    </header>
+
+    <div id="score-banner" class="score-banner">
+        <h2>Resultado del Examen</h2>
+        <div class="score-number" id="score-text">0 / 10</div>
+        <p class="score-feedback" id="score-feedback">¡Completa la revisión de tus respuestas abajo!</p>
+    </div>
+
+    <form id="quiz-form">
+        <div id="questions-container"></div>
+
+        <div class="actions">
+            <button type="button" id="btn-submit" class="btn btn-primary" onclick="evaluateQuiz()">
+                📊 Ver Resultados
+            </button>
+            <button type="button" id="btn-next" class="btn btn-secondary" onclick="nextRound()" style="display: none;">
+                🔄 Siguiente Tanda de 10 Preguntas
+            </button>
+            <button type="button" class="btn btn-reset" onclick="resetHistory()">
+                🧹 Reiniciar Historial
+            </button>
+        </div>
+    </form>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
