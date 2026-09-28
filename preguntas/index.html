@@ -3,55 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Examen de Electricidad | Ley 10281 & Normas AEA</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+    
+    <title>Villaser - Banco de Examen</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <main class="container">
+        
+        <!-- BOTÓN VOLVER AL MENÚ -->
+        <nav class="top-nav">
+            <button class="btn-back" onclick="window.location.href='../index.html'" aria-label="Volver al menú principal">
+                <span>⬅</span> Menú
+            </button>
+        </nav>
 
-<div class="container">
-    <header>
-        <h1>⚡ Banco de Examen: Electricidad & Reglamentaciones</h1>
-        <p class="subtitle">Ley Provincial N° 10.281 (Córdoba) | Normas AEA 90364 / 95705 | ERSeP</p>
+        <div id="status" aria-live="polite">⚡ SIMULADOR DE EXAMEN</div>
+        
+        <!-- SECCIÓN ESTADÍSTICAS -->
+        <section id="section-stats" class="card">
+            <h4>Ley 10281 & Normas AEA</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;">
+                <div>
+                    <label for="total-questions-count">Base Total</label>
+                    <input type="text" id="total-questions-count" readonly value="0" style="text-align: center; color: var(--accent); font-weight: bold;">
+                </div>
+                <div>
+                    <label for="remaining-count">Restantes</label>
+                    <input type="text" id="remaining-count" readonly value="0" style="text-align: center; color: var(--success); font-weight: bold;">
+                </div>
+            </div>
+        </section>
 
-        <div class="stats-bar">
-            <div class="stat-item">
-                <span>Total en Base de Datos:</span>
-                <span class="stat-value" id="total-questions-count">0</span>
-            </div>
-            <div class="stat-item">
-                <span>Respondidas esta sesión:</span>
-                <span class="stat-value" id="answered-count">0</span>
-            </div>
-            <div class="stat-item">
-                <span>Disponibles sin repetir:</span>
-                <span class="stat-value" id="remaining-count">0</span>
-            </div>
+        <!-- SECCIÓN RESULTADOS (Oculta por defecto) -->
+        <div id="score-banner" class="capture-area hidden" style="margin-bottom: 15px; text-align: center;">
+            <header class="list-header-title">RESULTADO DE LA TANDA</header>
+            <div id="score-text" style="font-size: 2.5rem; font-weight: bold; color: var(--accent); margin: 10px 0;">0 / 10</div>
+            <div id="score-feedback" style="font-size: 0.9rem; line-height: 1.4; color: var(--text); opacity: 0.9;"></div>
         </div>
-    </header>
 
-    <div id="score-banner" class="score-banner">
-        <h2>Resultado del Examen</h2>
-        <div class="score-number" id="score-text">0 / 10</div>
-        <p class="score-feedback" id="score-feedback">¡Completa la revisión de tus respuestas abajo!</p>
-    </div>
-
-    <form id="quiz-form">
-        <div id="questions-container"></div>
-
-        <div class="actions">
-            <button type="button" id="btn-submit" class="btn btn-primary" onclick="evaluateQuiz()">
-                📊 Ver Resultados
-            </button>
-            <button type="button" id="btn-next" class="btn btn-secondary" onclick="nextRound()" style="display: none;">
-                🔄 Siguiente Tanda de 10 Preguntas
-            </button>
-            <button type="button" class="btn btn-reset" onclick="resetHistory()">
-                🧹 Reiniciar Historial
-            </button>
-        </div>
-    </form>
-</div>
-
-<script src="script.js"></script>
+        <!-- SECCIÓN PRINCIPAL (CUESTIONARIO) -->
+        <section id="main-content">
+            <form id="quiz-form">
+                <div id="questions-container"></div>
+                
+                <!-- CONTROLES INFERIORES -->
+                <div class="btn-grid-actions-footer" style="margin-top: 20px;">
+                    <button type="button" id="btn-submit" class="btn-add-custom btn-full btn-wsp" onclick="evaluateQuiz()">📊 EVALUAR RESPUESTAS</button>
+                    <button type="button" id="btn-next" class="btn-add-custom btn-full btn-cap hidden" onclick="nextRound()">🔄 SIGUIENTE TANDA DE 10</button>
+                    <button type="button" class="btn-add-custom btn-full btn-export" onclick="resetHistory()" style="margin-top: -10px;">🧹 REINICIAR HISTORIAL</button>
+                </div>
+            </form>
+        </section>
+        
+    </main>
+    <script src="script.js"></script>
 </body>
 </html>
