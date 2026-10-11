@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#121212">
+    
+    <title>Villaser - Buscar Proveedores</title>
+    
+    <!-- Vincula tu misma hoja de estilos general -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="container">
+    
+    <nav class="top-nav">
+        <!-- Ajustá la ruta del index.html según cómo tengas armada tu carpeta -->
+        <button class="btn-back" onclick="window.location.href='index.html'" aria-label="Volver al menú principal">
+            <span>⬅</span> Menú
+        </button>
+    </nav>
+
+    <!-- Indicador de carga -->
+    <div id="loading" aria-live="polite" class="loading-state">
+        📡 SINCRONIZANDO PROVEEDORES...
+    </div>
+    
+    <div id="app" style="display:none;">
+        
+        <!-- Buscador Universal -->
+        <section class="ngc-card" style="position: sticky; top: 10px; z-index: 10; border-color: var(--ngc-info);">
+            <h4 style="color: var(--ngc-info);">Buscador de Casas de Electricidad</h4>
+            
+            <div class="row-group" style="margin-bottom: 0;">
+                <label for="searchInput">Escribí Barrio, Calle o Nombre</label>
+                <input type="text" id="searchInput" placeholder="Ej: General Paz, San Martín, o Electro..." onkeyup="filtrarCasas()" autocomplete="off">
+            </div>
+        </section>
+
+        <!-- Contenedor de Resultados -->
+        <section id="resultadosContainer" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
+            <!-- Las tarjetas se generan acá con JS -->
+        </section>
+
+    </div>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
