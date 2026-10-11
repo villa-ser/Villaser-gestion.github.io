@@ -161,6 +161,11 @@ document.getElementById('btnPreguntas').addEventListener('click', function() {
     window.location.href = './preguntas/index.html';
 });
 
+// Navegación al módulo de Presupuestos
+document.getElementById('btnProveedores').addEventListener('click', function() {
+    window.location.href = './proveedores/index.html';
+});
+
 // Al cargar la página principal, verificar qué tema estaba activo
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('villaser_theme');
