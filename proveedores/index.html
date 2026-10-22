@@ -33,20 +33,25 @@
         <section class="ngc-card" style="position: sticky; top: 10px; z-index: 10; border-color: var(--ngc-info);">
             <h4 style="color: var(--ngc-info);">Buscador de Casas de Electricidad</h4>
             
-            <div class="row-group" style="margin-bottom: 0;">
+            <div class="row-group" style="margin-bottom: 10px;">
                 <label for="searchInput">Escribí Barrio, Calle o Nombre</label>
                 <input type="text" id="searchInput" placeholder="Ej: General Paz, San Martín, o Electro..." onkeyup="filtrarCasas()" autocomplete="off">
             </div>
+            
+            <!-- Botón para ver listado completo -->
+            <button id="btnVerTodos" class="btn-ngc" style="width: 100%; border-color: var(--ngc-warning); color: var(--ngc-warning);" onclick="mostrarListadoAgrupado()">
+                📋 Ver Listado Completo por Barrios
+            </button>
         </section>
 
-        <!-- Contenedor de Resultados -->
-        <section id="resultadosContainer" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
-            <!-- Las tarjetas se generan acá con JS -->
+        <!-- Contenedor de Resultados (Oculto por defecto) -->
+        <section id="resultadosContainer" style="display: none; flex-direction: column; gap: 15px; margin-top: 15px;">
+            <!-- Las tarjetas o grupos se generan acá con JS -->
         </section>
 
     </div>
 </main>
 
-<script src="script.js"></script>
+<script src="proveedores.js"></script>
 </body>
 </html>
