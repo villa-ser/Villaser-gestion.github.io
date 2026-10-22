@@ -10,6 +10,7 @@ const SHEET_ID_CASAS = '1jFvMWkTBPlqpIWJ_kjVy1vSw3gA_q9Jxvar0LajaDnM';
 const URL_CASAS = `https://docs.google.com/spreadsheets/d/${SHEET_ID_CASAS}/gviz/tq?tqx=out:json&sheet=Hoja1`;
 
 let dbCasas = [];
+let modoListadoCompleto = false; // Variable para controlar si estamos viendo el listado completo
 
 window.onload = fetchCasas;
 
@@ -25,7 +26,8 @@ async function fetchCasas() {
         const jsonStr = txt.substring(txt.indexOf("{"), txt.lastIndexOf("}") + 1);
         const data = JSON.parse(jsonStr);
 
-        // MODIFICACIÓN 1: Mapear las nuevas columnas F(5)=Latitud y G(6)=Longitud
+        // Mapeo actualizado incluyendo columna H(7) para el Barrio
+        // A(0)=Nombre, B(1)=Dirección, C(2)=Teléfono, D(3)=Horario, E(4)=Comentarios, F(5)=Latitud, G(6)=Longitud, H(7)=Barrio
         dbCasas = data.table.rows.map(r => ({
             nombre: r.c[0]?.v || '',
             direccion: r.c[1]?.v || '',
@@ -33,13 +35,15 @@ async function fetchCasas() {
             horario: r.c[3]?.v || '',
             comentarios: r.c[4]?.v || '',
             latitud: r.c[5]?.v || '',
-            longitud: r.c[6]?.v || ''
+            longitud: r.c[6]?.v || '',
+            barrio: r.c[7]?.v || 'Sin Barrio Especificado'
         })).filter(c => c.nombre && c.nombre.toLowerCase() !== "nombre");
 
         document.getElementById('loading').style.display = 'none';
         document.getElementById('app').style.display = 'block';
 
-        renderCasas(dbCasas);
+        // NO renderizamos la lista al inicio, queda la pantalla limpia esperando que el usuario escriba o apriete el botón.
+
     } catch (e) {
         clearTimeout(timeoutId);
         const loadingDiv = document.getElementById('loading');
@@ -48,31 +52,18 @@ async function fetchCasas() {
     }
 }
 
-function renderCasas(lista) {
-    const contenedor = document.getElementById('resultadosContainer');
-    contenedor.innerHTML = '';
+// Función principal para generar el HTML de una tarjeta individual
+function generarHtmlTarjeta(casa) {
+    const telLimpio = String(casa.telefono).replace(/\D/g, '');
+    const btnAccionSecundaria = telLimpio.length >= 7 
+        ? `<button class="btn-obs" style="border-color: var(--ngc-success); color: var(--ngc-success); flex: 1; justify-content: center; display: flex; align-items: center; min-height: 40px; font-size:0.85rem;" onclick="window.open('https://wa.me/549${telLimpio}', '_blank')">🟢 WhatsApp</button>` 
+        : ``;
 
-    if (lista.length === 0) {
-        contenedor.innerHTML = `
-            <div class="ngc-card" style="text-align: center; color: var(--text-dim);">
-                No se encontraron proveedores con esa búsqueda.
-            </div>`;
-        return;
-    }
-
-    lista.forEach(casa => {
-        const card = document.createElement('div');
-        card.className = 'ngc-card';
-        
-        const telLimpio = String(casa.telefono).replace(/\D/g, '');
-        const btnAccionSecundaria = telLimpio.length >= 7 
-            ? `<button class="btn-obs" style="border-color: var(--ngc-success); color: var(--ngc-success); flex: 1; justify-content: center; display: flex; align-items: center; min-height: 40px; font-size:0.85rem;" onclick="window.open('https://wa.me/549${telLimpio}', '_blank')">🟢 WhatsApp</button>` 
-            : ``;
-
-        // MODIFICACIÓN 2: Enviar latitud y longitud a la función abrirMaps
-        card.innerHTML = `
+    return `
+        <div class="ngc-card">
             <h4 style="margin-bottom: 8px; color: var(--text-main); font-size: 1.1rem; text-transform: none;">${casa.nombre}</h4>
-            <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: var(--ngc-primary);">📍 ${casa.direccion}</p>
+            <p style="margin: 0 0 4px 0; font-size: 0.9rem; color: var(--ngc-primary);">📍 ${casa.direccion}</p>
+            <p style="margin: 0 0 10px 0; font-size: 0.85rem; color: var(--ngc-info); font-weight: bold;">🏙️ Barrio: ${casa.barrio}</p>
             
             <div style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5;">
                 ${casa.horario ? `<div style="margin-bottom:4px;"><b>🕒 Horario:</b> ${casa.horario}</div>` : ''}
@@ -84,35 +75,135 @@ function renderCasas(lista) {
                 <button class="btn-ngc btn-adapt" style="flex: 2; min-height: 40px;" onclick="abrirMaps('${escapeHtml(casa.nombre)}', '${escapeHtml(casa.direccion)}', '${casa.latitud}', '${casa.longitud}')">🗺️ IR EN MAPS</button>
                 ${btnAccionSecundaria}
             </div>
-        `;
-        contenedor.appendChild(card);
+        </div>
+    `;
+}
+
+// Función para renderizar resultados de búsqueda normal
+function renderCasas(lista) {
+    const contenedor = document.getElementById('resultadosContainer');
+    contenedor.innerHTML = '';
+    
+    if (lista.length === 0) {
+        contenedor.innerHTML = `
+            <div class="ngc-card" style="text-align: center; color: var(--text-dim);">
+                No se encontraron proveedores con esa búsqueda.
+            </div>`;
+        return;
+    }
+
+    lista.forEach(casa => {
+        contenedor.innerHTML += generarHtmlTarjeta(casa);
     });
 }
 
+// Filtro en tiempo real (ahora también busca por barrio)
 function filtrarCasas() {
     const query = document.getElementById('searchInput').value.toLowerCase();
-    
+    const contenedor = document.getElementById('resultadosContainer');
+    const btnVerTodos = document.getElementById('btnVerTodos');
+
+    // Restaurar el botón si veníamos del modo listado completo
+    if (modoListadoCompleto) {
+        btnVerTodos.innerHTML = "📋 Ver Listado Completo por Barrios";
+        btnVerTodos.style.borderColor = "var(--ngc-warning)";
+        btnVerTodos.style.color = "var(--ngc-warning)";
+        modoListadoCompleto = false;
+    }
+
+    // Si el buscador está vacío, ocultamos el contenedor
+    if (query.trim() === '') {
+        contenedor.style.display = 'none';
+        return;
+    }
+
+    // Si hay texto, mostramos el contenedor y filtramos
+    contenedor.style.display = 'flex';
+
     const filtradas = dbCasas.filter(c => 
         c.nombre.toLowerCase().includes(query) || 
         c.direccion.toLowerCase().includes(query) ||
-        c.comentarios.toLowerCase().includes(query)
+        c.comentarios.toLowerCase().includes(query) ||
+        c.barrio.toLowerCase().includes(query)
     );
     
     renderCasas(filtradas);
 }
 
-// MODIFICACIÓN 3: Lógica inteligente para usar coordenadas si existen
+// Función para mostrar el listado completo agrupado por barrios
+function mostrarListadoAgrupado() {
+    const contenedor = document.getElementById('resultadosContainer');
+    const inputSearch = document.getElementById('searchInput');
+    const btnVerTodos = document.getElementById('btnVerTodos');
+
+    // Lógica para alternar el botón (Abrir/Cerrar listado)
+    if (modoListadoCompleto) {
+        // Cerrar listado
+        contenedor.style.display = 'none';
+        btnVerTodos.innerHTML = "📋 Ver Listado Completo por Barrios";
+        btnVerTodos.style.borderColor = "var(--ngc-warning)";
+        btnVerTodos.style.color = "var(--ngc-warning)";
+        modoListadoCompleto = false;
+        return;
+    }
+
+    // Limpiar buscador y activar modo listado
+    inputSearch.value = '';
+    modoListadoCompleto = true;
+    btnVerTodos.innerHTML = "❌ Cerrar Listado Completo";
+    btnVerTodos.style.borderColor = "var(--ngc-danger)";
+    btnVerTodos.style.color = "var(--ngc-danger)";
+    contenedor.style.display = 'flex';
+    contenedor.innerHTML = ''; // Limpiar contenedor
+
+    // Agrupar casas por barrio
+    const casasPorBarrio = dbCasas.reduce((acc, casa) => {
+        const barrioKey = casa.barrio.trim() || 'Sin Barrio Especificado';
+        if (!acc[barrioKey]) {
+            acc[barrioKey] = [];
+        }
+        acc[barrioKey].push(casa);
+        return acc;
+    }, {});
+
+    // Ordenar los barrios alfabéticamente
+    const barriosOrdenados = Object.keys(casasPorBarrio).sort();
+
+    // Generar el HTML agrupado
+    barriosOrdenados.forEach(barrio => {
+        // Ordenar los locales dentro del barrio alfabéticamente por nombre
+        const localesDelBarrio = casasPorBarrio[barrio].sort((a, b) => a.nombre.localeCompare(b.nombre));
+        
+        // Crear un contenedor visual para el grupo del barrio
+        let grupoHtml = `
+            <div style="margin-bottom: 20px;">
+                <h3 style="color: var(--ngc-warning); border-bottom: 1px solid var(--ngc-warning); padding-bottom: 5px; margin-bottom: 15px; text-transform: uppercase; font-size: 1rem;">
+                    🏙️ Barrio: ${barrio}
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+        `;
+        
+        localesDelBarrio.forEach(casa => {
+            grupoHtml += generarHtmlTarjeta(casa);
+        });
+
+        grupoHtml += `</div></div>`;
+        contenedor.innerHTML += grupoHtml;
+    });
+
+    // Scrollear suavemente hacia los resultados
+    contenedor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Lógica inteligente para usar coordenadas si existen
 function abrirMaps(nombre, direccion, lat, lng) {
     let query = '';
     
-    // Si la planilla tiene datos en latitud y longitud, usamos coordenadas puras
     if (lat && lng && lat.toString().trim() !== '' && lng.toString().trim() !== '') {
-        // Aseguramos que se use punto para decimales (por si en Excel pusiste coma: -31,41)
         const cleanLat = String(lat).replace(',', '.').trim();
         const cleanLng = String(lng).replace(',', '.').trim();
         query = `${cleanLat},${cleanLng}`;
     } else {
-        // MODO RESPALDO: Si un local todavía no tiene coordenadas cargadas en el Excel, busca por texto
         query = encodeURIComponent(`${nombre}, ${direccion}, Córdoba, Argentina`);
     }
     
@@ -121,4 +212,4 @@ function abrirMaps(nombre, direccion, lat, lng) {
 
 function escapeHtml(unsafe) {
     return unsafe.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-              }
+}
